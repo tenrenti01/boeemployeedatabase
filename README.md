@@ -6,7 +6,7 @@ It has three parts:
 
 | Part | Where it runs | What it is |
 |---|---|---|
-| **boerecords.online** | GitHub Pages (this repo) | The front page. It only holds links, never employee data. |
+| **boerecords.online** | GitHub Pages (this repo) | Shows the Employee Database app full-screen. It holds no employee data itself. |
 | **Employee Database** (`edms/`) | Google Apps Script | The admin app. Sign-in with Google; only people in the `Users` tab get in. |
 | **Complete your record** (`photoapp/`) | Google Apps Script | The page employees open (QR link) to add their photo, TIN, education and past assignments. |
 
@@ -17,9 +17,9 @@ All records stay in the BOE Google Sheet. Both apps read and write it from insid
 ## Repo layout
 
 ```
-index.html            Front page of boerecords.online
+index.html            boerecords.online: shows the app full-screen (falls back to the Google link if a browser blocks it)
 config.js             ⚙️ The two app links (paste your /exec links here)
-app/                  boerecords.online/app    → opens the Employee Database
+app/                  boerecords.online/app    → opens the Employee Database at its Google address
 record/               boerecords.online/record → opens "Complete your record" (good for QR codes)
 demo/                 boerecords.online/demo   → the app with MADE-UP people, for presentations
 assets/               Logos and icons
@@ -51,7 +51,9 @@ window.EDMS_URL   = 'https://script.google.com/macros/s/AKfyc.../exec';
 window.RECORD_URL = 'https://script.google.com/macros/s/AKfyc.../exec';
 ```
 
-Keep the quote marks. Until a link is set, its button says "Link not set yet".
+Keep the quote marks. Until the link is set, boerecords.online says so.
+
+**How the home page works:** it shows the app inside the page, so the address stays boerecords.online. If the browser can't show it there (not signed in to Google yet, first-time permission, or Safari on iPhone), it opens the app at its Google address after a moment instead. This needs the line `.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)` in `doGet` (already in `edms/App.gs`).
 
 ## 2. Turn on GitHub Pages
 

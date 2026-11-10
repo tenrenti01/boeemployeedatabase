@@ -870,6 +870,7 @@ html.classic .statusbar:empty{display:none}
 @media print{html.classic body{background:#fff}}
 </style>
 <script>try{if(localStorage.getItem('boe.theme')!=='modern')document.documentElement.classList.add('classic')}catch(e){document.documentElement.classList.add('classic')}</script>
+<script>try{window.top.postMessage({boe:'edms',state:'loaded'},'*')}catch(e){}</script>
 </head>
 <body>
 <div style="background:#FFF1D6;color:#8F5400;font:600 13px/1.4 system-ui,sans-serif;text-align:center;padding:8px 16px">DEMO — made-up people, no real data. Anything you “save” stays in this page and disappears on reload.</div>

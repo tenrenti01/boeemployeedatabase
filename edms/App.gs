@@ -83,7 +83,9 @@ function doGet() {
   t.meJson = JSON.stringify(email || 'public').replace(/</g, '\\u003c');   // 'public' = a test-link visitor
   return t.evaluate()
     .setTitle(APP.NAME)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    // Lets boerecords.online show the app inside its page (Google sign-in still applies)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 function include(name) {
   try { return HtmlService.createHtmlOutputFromFile(name).getContent(); }
