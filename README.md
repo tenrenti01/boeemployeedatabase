@@ -23,7 +23,6 @@ app/                  boerecords.online/app    → opens the Employee Database
 record/               boerecords.online/record → opens "Complete your record" (good for QR codes)
 demo/                 boerecords.online/demo   → the app with MADE-UP people, for presentations
 assets/               Logos and icons
-CNAME                 Tells GitHub Pages the domain is boerecords.online
 
 edms/                 Employee Database, Apps Script project
   App.gs                Backend (all server functions)
@@ -60,7 +59,8 @@ GitHub Pages is free only for **public** repositories. This repo has no password
 
 1. **Settings ▸ Pages**
 2. **Source:** Deploy from a branch · **Branch:** `main` · folder `/ (root)` ▸ **Save**
-3. **Custom domain:** `boerecords.online` ▸ **Save** (the `CNAME` file already says this)
+3. Wait 1–2 minutes, then check the site at **https://tenrenti01.github.io/boeemployeedatabase/** (Actions shows a "pages build and deployment" run).
+4. When the GoDaddy steps below are done: **Custom domain:** `boerecords.online` ▸ **Save** (GitHub adds a `CNAME` file to the repo for you)
 
 ## 3. Point boerecords.online to GitHub (GoDaddy)
 
