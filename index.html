@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BOE Employee Database</title>
+<meta name="description" content="Bureau of Equipment, DPWH: employee records, service history and certificates.">
+<meta name="theme-color" content="#F0F0F0">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<script src="config.js"></script>
+<style>
+  :root {
+    --ground: #F0F0F0; --win: #FFFFFF; --ink: #1B1B1B; --muted: #5C5C5C; --faint: #8A8A8A;
+    --frame: #A0A0A0; --rule: #D0D0D0; --blue: #3C7FB1; --navy: #0B3A75; --orange: #D9601A;
+    --btn-top: #FDFDFD; --btn-bot: #E1E1E1; --btn-line: #8E8F8F;
+    --hov-top: #EAF6FD; --hov-bot: #D9F0FC;
+    --note-bg: #FFFFE1; --note-line: #C9C28A;
+    --ok-bg: #F2FFF0; --ok-line: #6BA368; --ok-ink: #1B6E1B;
+    --font: Tahoma, "Segoe UI", Verdana, Geneva, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--ground); color: var(--ink); font: 13px/1.45 var(--font);
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+  }
+  main {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding-block: 28px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  /* the "program window" */
+  .win { width: 100%; max-width: 720px; background: var(--win); border: 1px solid var(--frame); box-shadow: 0 1px 0 #fff inset, 0 4px 14px rgba(0,0,0,.08); }
+  .title {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    background: linear-gradient(#FFFFFF, #E9E9E9); border-bottom: 1px solid var(--frame);
+    font-weight: bold; color: #333; user-select: none;
+  }
+  .title img { width: 16px; height: 16px; }
+  .title .addr { margin-left: auto; font-weight: normal; color: var(--faint); font-size: 12px; }
+
+  .masthead { display: grid; grid-template-columns: 76px 1fr 76px; align-items: center; gap: 14px; padding: 20px 22px 16px; border-bottom: 1px solid var(--rule); }
+  .masthead img { width: 76px; height: 76px; object-fit: contain; }
+  .masthead .gov { text-align: center; }
+  .gov small { display: block; font-size: 11px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  .gov .dept { font-weight: bold; font-size: 13px; letter-spacing: .02em; text-transform: uppercase; }
+  .gov .bureau { font-weight: bold; font-size: 18px; color: var(--navy); letter-spacing: .04em; text-transform: uppercase; margin-top: 2px; }
+
+  .body { padding: 18px 22px 20px; display: grid; gap: 14px; }
+  h1 { margin: 0; font-size: 20px; color: var(--navy); text-wrap: balance; }
+  .lead { margin: 2px 0 0; color: var(--muted); max-width: 62ch; }
+
+  fieldset { margin: 0; border: 1px solid var(--rule); padding: 12px 12px 12px; display: grid; gap: 10px; min-width: 0; }
+  legend { padding: 0 6px; color: var(--muted); }
+
+  /* command-link buttons */
+  .go {
+    display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px;
+    padding: 12px 14px; text-decoration: none; color: var(--ink);
+    background: linear-gradient(var(--btn-top), var(--btn-bot)); border: 1px solid var(--btn-line); border-radius: 3px;
+    transition: background-color .12s, border-color .12s;
+  }
+  .go:hover, .go:focus-visible { background: linear-gradient(var(--hov-top), var(--hov-bot)); border-color: var(--blue); outline: none; }
+  .go:active { background: linear-gradient(var(--hov-bot), var(--hov-top)); }
+  .go .ico { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid var(--rule); background: #fff; color: var(--navy); }
+  .go .ico svg { width: 22px; height: 22px; }
+  .go b { display: block; font-size: 15px; color: var(--navy); }
+  .go span.d { display: block; color: var(--muted); margin-top: 1px; }
+  .go .who { display: inline-block; margin-top: 5px; font-size: 11px; padding: 1px 6px; border: 1px solid var(--rule); background: #F7F7F7; color: var(--muted); }
+  .go .arrow { color: var(--blue); font-size: 18px; }
+  .go[aria-disabled="true"] { opacity: .6; cursor: not-allowed; }
+  .go[aria-disabled="true"] .arrow { display: none; }
+  .missing { display: none; font-size: 11px; color: #8A4A00; margin-top: 5px; }
+  .go[aria-disabled="true"] .missing { display: block; }
+
+  .note { background: var(--note-bg); border: 1px solid var(--note-line); padding: 8px 10px; display: flex; gap: 8px; }
+  .note b { white-space: nowrap; }
+  .more { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; color: var(--muted); }
+  .more a { color: var(--blue); }
+
+  /* status bar, like the app's */
+  .status {
+    display: flex; flex-wrap: wrap; gap: 0; border-top: 1px solid var(--frame); background: #F0F0F0; font-size: 12px; color: #333;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .status span { padding: 4px 10px; border-right: 1px solid var(--rule); }
+  .status span:last-child { border-right: 0; margin-left: auto; color: var(--faint); }
+  .status .ok { background: var(--ok-bg); color: var(--ok-ink); border-left: 1px solid var(--ok-line); }
+
+  @media (max-width: 560px) {
+    .masthead { grid-template-columns: 52px 1fr 52px; gap: 8px; padding: 14px 12px 12px; }
+    .masthead img { width: 52px; height: 52px; }
+    .gov .bureau { font-size: 15px; }
+    .gov .dept { font-size: 11px; }
+    .body { padding: 14px 12px 16px; }
+    .go { grid-template-columns: 34px 1fr; padding: 11px 12px; }
+    .go .ico { width: 34px; height: 34px; }
+    .go .arrow { display: none; }
+    .title .addr { display: none; }
+    .status span:last-child { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="win" role="main">
+    <div class="title"><img src="assets/favicon.png" alt=""> BOE Employee Database <span class="addr">boerecords.online</span></div>
+
+    <div class="masthead">
+      <img src="assets/dpwh-logo.png" alt="DPWH logo">
+      <div class="gov">
+        <small>Republic of the Philippines</small>
+        <div class="dept">Department of Public Works and Highways</div>
+        <div class="bureau">Bureau of Equipment</div>
+      </div>
+      <img src="assets/bagong-pilipinas.png" alt="Bagong Pilipinas logo">
+    </div>
+
+    <div class="body">
+      <div>
+        <h1>Employee Database</h1>
+        <p class="lead">Employee records of the Bureau of Equipment: profiles, plantilla, service history, PRC licenses and certificates of employment.</p>
+      </div>
+
+      <fieldset>
+        <legend>Choose what you need</legend>
+
+        <a class="go" id="goApp" href="app/">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M8 13h4M8 16h7"/></svg></span>
+          <span>
+            <b>Open the Employee Database</b>
+            <span class="d">Dashboard, profiles, service records and certificates.</span>
+            <span class="who">For HR and authorized staff · sign in with Google</span>
+            <span class="missing">Link not set yet. Paste it in config.js.</span>
+          </span>
+          <span class="arrow" aria-hidden="true">›</span>
+        </a>
+
+        <a class="go" id="goRecord" href="record/">
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></svg></span>
+          <span>
+            <b>Complete your record</b>
+            <span class="d">Add your photo, TIN, education and past assignments.</span>
+            <span class="who">For every BOE employee · no Google account needed</span>
+            <span class="missing">Link not set yet. Paste it in config.js.</span>
+          </span>
+          <span class="arrow" aria-hidden="true">›</span>
+        </a>
+      </fieldset>
+
+      <div class="note"><b>No access?</b><span>The Employee Database only opens for people listed by the BOE administrator. Ask them to add your Google account.</span></div>
+
+      <div class="more">
+        <a href="demo/">See a demo with made-up people</a>
+        <span>Short links: <a href="app/">boerecords.online/app</a> · <a href="record/">boerecords.online/record</a></span>
+      </div>
+    </div>
+
+    <div class="status">
+      <span class="ok">Records are kept in the BOE Google Sheet</span>
+      <span>Bureau of Equipment, DPWH</span>
+      <span id="yr">2026</span>
+    </div>
+  </div>
+</main>
+<script>
+  (function () {
+    var ok = function (u) { return typeof u === 'string' && /^https:\/\/script\.google\.com\/.+\/exec\/?$/.test(u.trim()); };
+    [['goApp', window.EDMS_URL], ['goRecord', window.RECORD_URL]].forEach(function (p) {
+      var a = document.getElementById(p[0]);
+      if (ok(p[1])) a.href = p[1].trim();
+      else { a.setAttribute('aria-disabled', 'true'); a.removeAttribute('href'); a.setAttribute('role', 'link'); }
+    });
+    document.getElementById('yr').textContent = '© ' + new Date().getFullYear();
+  })();
+</script>
+</body>
+</html>

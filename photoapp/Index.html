@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOE Employee Photo Upload</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Same look as the BOE Employee System: navy gradients, orange accent, condensed uppercase headings. Built for phones first. */
+:root{
+  --orange:#FF7A33; --orange-2:#F26522; --navy-0:#061E45; --navy-1:#08295F; --navy-2:#0D47A1;
+  --grad:linear-gradient(100deg,#061E45 0%,#08295F 40%,#0D47A1 75%,#1658C2 100%);
+  --grad-o:linear-gradient(100deg,#D9531A 0%,#F26522 45%,#FF8A47 100%);
+  --bg:#EEF2F8; --card:#fff; --soft:#F3F5F9; --ink:#1d1d1f; --head:#08295F; --muted:#626a78; --line:#E5E7EC; --line-2:#D3DAE5;
+  --ok:#1d7a45; --ok-soft:#E1F3E8; --bad:#B42318; --bad-soft:#FDE8E6;
+  --shadow:0 12px 32px rgba(6,30,69,.24); --shadow-card:0 8px 22px rgba(6,30,69,.08);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --cond:"Barlow Condensed","Arial Narrow",sans-serif; --body:"Inter",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:hidden}
+body{background:var(--bg) radial-gradient(rgba(6,30,69,.055) 1.3px,transparent 1.6px) 0 0/26px 26px;color:var(--ink);font:15px/1.5 var(--body);-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+
+.top{background:#fff;border-bottom:2px solid var(--line);position:relative}
+.top::after{content:"";position:absolute;left:18px;bottom:-2px;width:110px;height:2px;background:var(--orange)}
+.topIn{max-width:600px;margin:0 auto;padding:12px 18px;display:flex;gap:12px;align-items:center}
+.seal{width:42px;height:42px;border-radius:12px;background:var(--grad);color:#fff;display:grid;place-items:center;font:700 .9rem var(--cond);letter-spacing:.06em;flex:none}
+.seal.img{background:none;border-radius:0;filter:drop-shadow(0 4px 8px rgba(6,30,69,.25))}
+.seal img{width:100%;height:100%;object-fit:contain}
+.brand b{display:block;font:700 1.12rem/1.05 var(--cond);text-transform:uppercase;letter-spacing:.02em;color:var(--head)}
+.brand b em{font-style:normal;color:var(--orange)}
+.brand span{font-size:.74rem;color:var(--muted)}
+
+main{max-width:600px;margin:0 auto;padding:16px 16px 60px;display:grid;gap:14px}
+.hero{background:var(--grad);color:#fff;border-radius:18px;padding:20px 20px 22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero > *{position:relative;z-index:1}
+.hero .eb{font:600 .78rem var(--cond);letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.9}
+.hero h1{font:800 1.9rem/1 var(--cond);text-transform:uppercase;margin:6px 0 8px;letter-spacing:.01em}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero p{margin:0;font-size:.9rem;color:#fff}
+.waves{position:absolute;left:0;right:0;bottom:0;height:60%;width:100%;opacity:.14;pointer-events:none;z-index:0}
+.waves path{fill:none;stroke:#fff;stroke-width:1.4}
+.waves g{animation:drift 26s linear infinite}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-card);padding:16px;display:grid;gap:10px;transition:opacity .3s,transform .3s var(--ease)}
+.step.locked{opacity:.45;pointer-events:none}
+.step h2{margin:0;display:flex;align-items:center;gap:10px;font:700 1.08rem var(--cond);text-transform:uppercase;letter-spacing:.05em;color:var(--head)}
+.num{width:28px;height:28px;border-radius:9px;background:var(--grad-o);color:#fff;display:grid;place-items:center;font:800 .95rem var(--cond);flex:none;box-shadow:0 4px 10px rgba(242,101,34,.32)}
+.step.complete .num{background:var(--ok)}
+.hint{font-size:.8rem;color:var(--muted);margin:0}
+select,input[type=text],input[type=date]{width:100%;border:1px solid var(--line-2);background:#fff;padding:11px 12px;border-radius:11px;min-width:0;font-size:16px}
+select:focus,input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,122,51,.22)}
+.find{position:relative}
+.find svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted)}
+.find input{padding-left:36px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-2);background:#fff;color:var(--head);padding:11px 16px;border-radius:12px;font-weight:600;cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+.btn:hover{transform:translateY(-1px);border-color:var(--orange)}
+.btn.primary{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(6,30,69,.22)}
+.btn.orange{background:var(--grad-o);border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(242,101,34,.3)}
+.btn.big{width:100%;padding:15px;font:700 1.15rem var(--cond);letter-spacing:.08em;text-transform:uppercase}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn svg{width:18px;height:18px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.crop{display:grid;gap:12px;justify-items:center}
+.cropBox{position:relative;width:min(280px,78vw);aspect-ratio:1;border-radius:20px;overflow:hidden;background:var(--soft);box-shadow:0 14px 30px rgba(6,30,69,.2)}
+.cropBox canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.cropBox::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:20px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.9);
+  background:linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35)) 33.33% 0/1px 100% no-repeat,linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35)) 66.66% 0/1px 100% no-repeat,
+  linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35)) 0 33.33%/100% 1px no-repeat,linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35)) 0 66.66%/100% 1px no-repeat}
+.cropTools{width:100%;display:grid;gap:10px}
+.zoom{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--muted)}
+.zoom input{flex:1;accent-color:var(--orange)}
+.tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tools .btn{padding:8px 12px;font-size:.85rem}
+.tips{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:0;padding:0;list-style:none;font-size:.8rem;color:var(--muted)}
+.check2{display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted)}
+.check2 input{width:18px;height:18px;accent-color:var(--orange)}
+.opt{font:600 .62rem var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--soft,#eef1f6);border:1px solid var(--line-2);border-radius:999px;padding:2px 8px;margin-left:auto}
+.okNote{background:#e7f6ee;border:1px solid #9bd8b4;color:#17603a;border-radius:12px;padding:11px 14px;font-size:.92rem}
+.subRows{display:grid;gap:8px}
+.subRow{display:grid;gap:6px;border:1px solid var(--line-2);border-radius:11px;padding:8px;position:relative}
+.subRow.edu{grid-template-columns:1fr 1fr 70px}
+.subRow.rep{grid-template-columns:1fr 1fr}
+.subRow input{border:1px solid var(--line-2);background:#fff;padding:9px 10px;border-radius:9px;min-width:0;font-size:16px}
+.subRow .rowX{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line-2);background:#fff;color:var(--bad);cursor:pointer;font-size:.8rem;line-height:1;display:grid;place-items:center}
+@media (max-width:420px){.subRow.edu,.subRow.rep{grid-template-columns:1fr}}
+.onfile{font-size:.82rem;color:var(--muted)}
+.onfile summary{cursor:pointer;font-weight:600}
+.onfile .list{display:grid;gap:4px;margin-top:6px}
+.onfile .li{padding:4px 0;border-bottom:1px solid var(--line)}
+input[type=email]{width:100%;border:1px solid var(--line-2);background:#fff;padding:11px 12px;border-radius:11px;min-width:0;font-size:16px}
+input[type=email]:disabled{background:var(--soft);color:var(--muted)}
+.tips li::before{content:"✓ ";color:var(--ok);font-weight:700}
+
+.err{background:var(--bad-soft);color:var(--bad);padding:11px 14px;border-radius:12px;font-weight:600;font-size:.9rem}
+.center{display:grid;place-items:center;text-align:center;gap:12px;padding:40px 10px}
+.spin{width:42px;height:42px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--orange);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.label{font:600 .8rem var(--cond);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.thanks{background:var(--card);border-radius:18px;box-shadow:var(--shadow-card);border:1px solid var(--line);padding:26px 18px;display:grid;justify-items:center;gap:12px;text-align:center;animation:rise .5s var(--ease)}
+.thanks img{width:150px;height:150px;border-radius:24px;object-fit:cover;box-shadow:0 14px 30px rgba(6,30,69,.25);border:4px solid #fff}
+.thanks h2{margin:0;font:800 1.7rem var(--cond);text-transform:uppercase;color:var(--head)}
+.thanks h2 em{font-style:normal;color:var(--orange)}
+.check{width:46px;height:46px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:1.5rem;margin-top:-34px;border:4px solid #fff}
+.foot{text-align:center;font-size:.74rem;color:var(--muted);padding:6px 10px}
+#steps > *{animation:rise .5s var(--ease) backwards}
+#steps > *:nth-child(2){animation-delay:.05s} #steps > *:nth-child(3){animation-delay:.1s} #steps > *:nth-child(4){animation-delay:.15s} #steps > *:nth-child(5){animation-delay:.2s}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* Calendar picker (from the reference kit, recoloured to the BOE theme) */
+.dtIn{cursor:pointer;background:var(--card) no-repeat right 10px center;background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23626a78' stroke-width='2' stroke-linecap='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3 10h18'/%3E%3C/svg%3E");background-size:16px 16px;padding-right:34px}
+.dtIn:hover{border-color:var(--orange)}
+.cal{
+  --cp:#0D47A1; --ca:#F26522; --cmut:#94a3b8; --cout:#cbd5e1; --cink:#0f172a;
+  --cline:#eef1f6; --csoft:#eef3fb; --csoft2:#e3ecf9; --cease:cubic-bezier(.32,.72,0,1); --ch:300px;
+  --cfont:"Inter",-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --ccond:"Barlow Condensed","Arial Narrow",sans-serif;
+  position:fixed; z-index:75; background:#fff; border-radius:14px; padding:14px 16px 12px;
+  box-shadow:0 18px 48px rgba(16,32,60,.26),0 2px 6px rgba(16,32,60,.14);
+  font-family:var(--cfont); color:var(--cink); width:max-content; max-width:calc(100vw - 16px);
+  opacity:0; transform:translateY(-6px) scale(.98); pointer-events:none;
+  transition:opacity .18s var(--cease), transform .18s var(--cease);
+}
+.cal.show{opacity:1; transform:none; pointer-events:auto}
+.cal:focus{outline:none}
+.cal-head{text-align:center; margin-bottom:11px}
+.cal-head small{display:block; font:600 10px var(--ccond); letter-spacing:.16em; text-transform:uppercase; color:var(--cmut); margin-bottom:3px}
+.cal-pk{font:700 1.4rem/1.05 var(--ccond); text-transform:uppercase; letter-spacing:.02em; color:var(--cp); white-space:nowrap}
+.cal-pk .wd{color:var(--ca)}
+.cal-pk.empty{color:var(--cmut); font-size:1.05rem; letter-spacing:.01em}
+
+.cal-steps{display:none; gap:6px; margin-bottom:11px}
+.cal-steps button{flex:1; min-width:0; border:0; background:var(--csoft); color:var(--cmut); border-radius:9px; padding:6px 4px 7px; cursor:pointer; text-align:center;
+  font:600 8.5px var(--ccond); letter-spacing:.12em; text-transform:uppercase; transition:background-color .16s var(--cease), color .16s var(--cease)}
+.cal-steps button .v{display:block; font:700 13px var(--cfont); letter-spacing:0; text-transform:none; margin-top:2px; color:var(--cink)}
+.cal-steps button.on{background:var(--cp); color:#cfe0f7}
+.cal-steps button.on .v{color:#fff}
+
+.cal-body{display:flex; align-items:stretch; gap:0}
+.cal-sect{display:flex; flex-direction:column; gap:9px; padding:0 15px; min-width:0}
+.cal-sect:first-child{padding-left:0}
+.cal-sect:last-child{padding-right:0}
+.cal-sect + .cal-sect{border-left:1px solid var(--cline)}
+.cal-sect h4{margin:0; height:12px; font:600 10px/12px var(--ccond); letter-spacing:.16em; text-transform:uppercase; color:var(--cmut); white-space:nowrap}
+.cal-box{height:var(--ch)}
+.cal-yg{height:100%; display:grid; grid-auto-flow:column; grid-template-rows:repeat(10,1fr); gap:5px 12px}
+.cal-mg{height:100%; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(4,1fr); gap:6px}
+.cal-dbox{height:var(--ch); display:grid; grid-template-rows:auto 1fr; gap:5px}
+.cal-dow{display:grid; grid-template-columns:repeat(7,1fr); gap:3px}
+.cal-dow span{text-align:center; font:600 10.5px/1 var(--cfont); letter-spacing:.04em; color:var(--cmut)}
+.cal-dg{display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(6,1fr); gap:3px}
+
+.cal-y,.cal-m,.cal-d{border:0; background-color:transparent; cursor:pointer; color:var(--cmut); font-family:var(--cfont); font-variant-numeric:tabular-nums;
+  transition:background-color .17s var(--cease), color .17s var(--cease), transform .17s var(--cease), box-shadow .17s var(--cease)}
+.cal-y{font-size:11.5px; font-weight:400; border-radius:7px; padding:0 12px; min-width:50px; display:grid; place-items:center}
+.cal-m{font-size:11.5px; font-weight:400; border-radius:7px; min-width:52px; display:grid; place-items:center}
+.cal-d{font-size:12.5px; font-weight:400; border-radius:9px; min-width:30px}
+.cal-y:hover,.cal-m:hover,.cal-d:hover{background-color:var(--csoft); color:var(--cp)}
+.cal-d:hover{transform:scale(1.08)}
+.cal-d.out{color:var(--cout)}
+.cal-y[disabled],.cal-m[disabled],.cal-d[disabled]{opacity:.3; cursor:not-allowed; pointer-events:none; color:var(--cmut)}
+.cal-d.today{color:var(--ca)}
+.cal-y.on,.cal-m.on{background-color:var(--cp); color:#fff; font-weight:700}
+.cal-d.on{background-color:var(--ca); color:#fff; font-weight:700; transform:none}
+.cal-yhide{visibility:hidden; pointer-events:none}
+
+.cal-foot{display:flex; gap:6px; margin-top:11px; padding-top:10px; border-top:1px solid var(--cline)}
+.cal-foot button{flex:1; font:500 11.5px var(--cfont); white-space:nowrap; color:var(--cp); background-color:var(--csoft); border:0; border-radius:8px; padding:7px 4px; cursor:pointer;
+  transition:background-color .15s var(--cease), transform .15s var(--cease)}
+.cal-foot button:hover{background-color:var(--csoft2); transform:translateY(-1px)}
+
+@media (max-width:560px){
+  .cal{width:300px}
+  .cal-steps{display:flex}
+  .cal-sect{padding:0 !important; border-left:0 !important; display:none}
+  .cal-sect h4{display:none}
+  .cal-box,.cal-yg{overflow-x:auto}
+  .cal.step-year .cal-sect[data-p="year"],
+  .cal.step-month .cal-sect[data-p="month"],
+  .cal.step-day .cal-sect[data-p="day"]{display:flex}
+}
+@media (prefers-reduced-motion:reduce){.cal,.cal *{transition-duration:.01ms!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media (max-width:360px){.row2,.tips{grid-template-columns:1fr}.hero h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topIn">
+  <div class="seal" id="seal">BOE</div>
+  <div class="brand"><b id="agency">Bureau of <em>Equipment</em></b><span>Employee photo upload · DPWH</span></div>
+</div></header>
+
+<main id="app">
+  <div class="center"><div class="spin"></div><span class="label">Loading…</span></div>
+</main>
+
+<script>
+const MON3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const pad2 = n => (n < 10 ? '0' : '') + n;
+const isoDate = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+const showDate = s => { const p = String(s).split('-').map(Number); return MON3[p[1] - 1] + ' ' + p[2] + ', ' + p[0]; };
+const CAL = (function () {
+  const MONL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEK = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const pad2 = n => (n<10?'0':'')+n;
+  const isoL = d => d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+  const dispL = s => { const p=String(s).split('-').map(Number); return MON3[p[1]-1]+' '+p[2]+', '+p[0]; };
+  // write ISO to data-iso always; use the host app's own display formatter when present
+  const toISO = d => (typeof isoDate==='function')?isoDate(d):((typeof iso==='function')?iso(d):isoL(d));
+  const toDisp = s => (typeof showDate==='function')?showDate(s):((typeof fmtDate==='function')?fmtDate(s):dispL(s));
+  const addD = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+  const same = (a,b) => !!(a && b && a.getTime()===b.getTime());
+  const parse = s => { const m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(String(s||'').trim()); return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3])):null; };
+  const midnight = () => { const t=new Date(); t.setHours(0,0,0,0); return t; };
+  const clampDay = (y,m,day) => Math.min(day, new Date(y,m+1,0).getDate());
+  const isPhone = () => window.matchMedia('(max-width:560px)').matches;
+
+  let box=null, field=null, lo=null, hi=null, picked=null, vy=2000, vm=0, step='year', cells=[];
+  const isOpen = () => !!box && box.classList.contains('show');
+  const barred = d => !!d && ((lo && d<lo) || (hi && d>hi));
+  // a month has at least one selectable day?
+  const monthOpen = (y,m) => { const first=new Date(y,m,1), last=new Date(y,m+1,0); return !((hi && first>hi) || (lo && last<lo)); };
+  const yearOpen = y => { const first=new Date(y,0,1), last=new Date(y,11,31); return !((hi && first>hi) || (lo && last<lo)); };
+
+  function build() {
+    if (box) return;
+    box = document.createElement('div');
+    box.className='cal'; box.tabIndex=-1;
+    box.setAttribute('role','dialog'); box.setAttribute('aria-label','Choose a date');
+    box.innerHTML =
+      '<div class="cal-head"><small id="cHd">Choose a date</small><div class="cal-pk empty" id="cPk">—</div></div>' +
+      '<div class="cal-steps" id="cSteps">' +
+        '<button type="button" data-step="year">Year<span class="v" id="cvY">—</span></button>' +
+        '<button type="button" data-step="month">Month<span class="v" id="cvM">—</span></button>' +
+        '<button type="button" data-step="day">Day<span class="v" id="cvD">—</span></button>' +
+      '</div>' +
+      '<div class="cal-body">' +
+        '<div class="cal-sect" data-p="year"><h4>Year</h4><div class="cal-box"><div class="cal-yg" id="cYG"></div></div></div>' +
+        '<div class="cal-sect" data-p="month"><h4>Month</h4><div class="cal-box"><div class="cal-mg" id="cMG"></div></div></div>' +
+        '<div class="cal-sect" data-p="day"><h4 id="cDT">Day</h4><div class="cal-dbox"><div class="cal-dow" id="cDOW"></div><div class="cal-dg" id="cDG"></div></div></div>' +
+      '</div>' +
+      '<div class="cal-foot"><button type="button" data-cact="today">Today</button><button type="button" data-cact="clear">Clear</button></div>';
+    document.body.appendChild(box);
+    box.querySelector('#cDOW').innerHTML = DOW.map(d=>'<span>'+d+'</span>').join('');
+
+    box.addEventListener('pointerdown', ev => { if (ev.target.closest('button')) ev.preventDefault(); });
+    box.addEventListener('click', ev => {
+      const st = ev.target.closest('[data-step]');
+      if (st) { setStep(st.dataset.step); return; }
+      const y = ev.target.closest('[data-y]');
+      if (y) return onYear(Number(y.dataset.y));
+      const m = ev.target.closest('[data-m]');
+      if (m) return onMonth(Number(m.dataset.m));
+      const d = ev.target.closest('[data-d]');
+      if (d) return onDay(cells[Number(d.dataset.d)]);
+      const act = ev.target.closest('[data-cact]');
+      if (act) {
+        if (act.dataset.cact==='clear') return pick(null);
+        const t=midnight(); if (barred(t)) return;
+        vy=t.getFullYear(); vm=t.getMonth(); pick(t);
+      }
+    });
+    box.addEventListener('keydown', ev => { if (ev.key==='Escape'){ ev.stopPropagation(); close(); } });
+    document.addEventListener('pointerdown', ev => { if (isOpen() && !ev.target.closest('.cal') && !ev.target.closest('[data-cal]')) close(); }, true);
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+  }
+
+  function onYear(y){ vy=y; if (picked) picked=new Date(y,vm,clampDay(y,vm,picked.getDate())); if (isPhone()) setStep('month'); else renderAll(); if(!isPhone()) {} }
+  function onMonth(m){ vm=m; if (picked) picked=new Date(vy,m,clampDay(vy,m,picked.getDate())); if (isPhone()) setStep('day'); else renderAll(); }
+  function onDay(d){ if (!d || barred(d)) return; pick(d); }
+
+  function setStep(s){ step=s; box.classList.remove('step-year','step-month','step-day'); box.classList.add('step-'+s); renderAll(); }
+
+  function renderYears(){
+    const g=box.querySelector('#cYG'); let h='';
+    const minY=lo?lo.getFullYear():1900, maxY=hi?hi.getFullYear():2100;
+    const start=Math.floor(minY/10)*10, end=Math.ceil((maxY+1)/10)*10-1;
+    for (let y=start;y<=end;y++){
+      const hide=(y<minY||y>maxY), dis=!hide && !yearOpen(y);
+      h+='<button type="button" class="cal-y'+(y===vy?' on':'')+(hide?' cal-yhide':'')+'" data-y="'+y+'"'+((hide||dis)?' disabled':'')+(hide?' tabindex="-1"':'')+'>'+y+'</button>';
+    }
+    g.innerHTML=h;
+  }
+  function renderMonths(){
+    const g=box.querySelector('#cMG');
+    g.innerHTML = MON3.map((name,m)=>'<button type="button" class="cal-m'+(m===vm?' on':'')+'" data-m="'+m+'"'+(monthOpen(vy,m)?'':' disabled')+'>'+name+'</button>').join('');
+  }
+  function renderDays(){
+    box.querySelector('#cDT').textContent = MON3[vm].toUpperCase()+' '+vy;
+    const g=box.querySelector('#cDG'); const today=midnight();
+    const startDow=new Date(vy,vm,1).getDay(), gridStart=new Date(vy,vm,1-startDow);
+    let h=''; cells=[];
+    for (let i=0;i<42;i++){
+      const d=new Date(gridStart.getFullYear(),gridStart.getMonth(),gridStart.getDate()+i);
+      const out=d.getMonth()!==vm, off=barred(d);
+      h+='<button type="button" class="cal-d'+(out?' out':'')+(same(d,today)&&!off?' today':'')+(same(d,picked)?' on':'')+'" data-d="'+i+'"'+(off?' disabled':'')+'>'+d.getDate()+'</button>';
+      cells.push(d);
+    }
+    g.innerHTML=h;
+  }
+  function renderHead(){
+    const hd=box.querySelector('#cHd'), pk=box.querySelector('#cPk');
+    if (picked){ hd.textContent='Picked'; pk.className='cal-pk';
+      pk.innerHTML='<span class="wd">'+WEEK[picked.getDay()]+', </span>'+MONL[picked.getMonth()]+' '+picked.getDate()+', '+picked.getFullYear();
+    } else { hd.textContent='Choose a date'; pk.className='cal-pk empty'; pk.textContent='—'; }
+    box.querySelector('#cvY').textContent=vy;
+    box.querySelector('#cvM').textContent=MON3[vm];
+    box.querySelector('#cvD').textContent=picked?picked.getDate():'—';
+    box.querySelectorAll('.cal-steps button').forEach(b=>b.classList.toggle('on', b.dataset.step===step));
+  }
+  function renderAll(){ renderYears(); renderMonths(); renderDays(); renderHead();
+    const tBtn=box.querySelector('[data-cact="today"]'); if (tBtn) tBtn.style.display = barred(midnight())?'none':''; place(); }
+
+  function pick(d){
+    if (barred(d)) return;
+    picked=d;
+    if (field){
+      field.value = d?toDisp(toISO(d)):'';
+      field.dataset.iso = d?toISO(d):'';
+      field.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    if (d) close(); else renderAll();
+  }
+  function place(){
+    if (!isOpen() || !field) return;
+    const r=field.getBoundingClientRect(), w=box.offsetWidth, h=box.offsetHeight, vw=innerWidth, vh=innerHeight;
+    let left=Math.max(8, Math.min(r.left, vw-w-8));
+    let top=r.bottom+6;
+    if (top+h>vh-8){ const up=r.top-h-6; top=up>=8?up:Math.max(8, vh-h-8); }
+    box.style.left=Math.round(left)+'px'; box.style.top=Math.round(top)+'px';
+  }
+  function close(){
+    if (box){ box.classList.remove('show'); }
+    const f=field; field=null;
+    if (f && document.contains(f)){ try{ f.focus({preventScroll:true}); }catch(e){ f.focus(); } }
+  }
+  function openOn(input){
+    build();
+    field=input;
+    lo=parse(input.dataset.min); hi=parse(input.dataset.max);
+    picked=parse(input.dataset.iso);
+    let base = picked || midnight();
+    if (barred(base)) base = lo && midnight()<lo ? lo : (hi || midnight());
+    vy=base.getFullYear(); vm=base.getMonth();
+    step='year'; box.classList.remove('step-month','step-day'); box.classList.add('step-year');
+    renderAll();
+    box.classList.add('show'); place(); box.focus({preventScroll:true});
+  }
+  return {
+    attach: function(input){
+      build();
+      input.addEventListener('pointerdown', ev => { ev.preventDefault(); if (field===input && isOpen()) return close(); openOn(input); });
+      input.addEventListener('keydown', ev => { if (ev.key==='Enter'||ev.key===' '||ev.key==='ArrowDown'){ ev.preventDefault(); openOn(input); } });
+    },
+    close: function(){ if (isOpen()) close(); }
+  };
+})();
+function wireDates(root) {
+  (root || document).querySelectorAll('[data-cal]').forEach(el => {
+    if (el.dataset.calOn) return;
+    el.dataset.calOn = '1';
+    CAL.attach(el);
+  });
+}
+const $ = s => document.querySelector(s);
+const esc = v => String(v === undefined || v === null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const WAVES = '<svg class="waves" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true"><g><path d="M0 60 Q150 20 300 60 T600 60 T900 60 T1200 60 T1500 60 T1800 60 T2100 60 T2400 60"/><path d="M0 85 Q150 45 300 85 T600 85 T900 85 T1200 85 T1500 85 T1800 85 T2100 85 T2400 85"/></g></svg>';
+let DIR = null, ST = null, ME = null, BDAY = '';
+function call(fn, arg) {
+  return new Promise((resolve, reject) => {
+    if (!(window.google && google.script && google.script.run)) return reject(new Error('Open this page from its web app link.'));
+    google.script.run.withSuccessHandler(resolve).withFailureHandler(e => reject(new Error((e && e.message) || String(e))))[fn](arg);
+  });
+}
+
+async function boot() {
+  try { DIR = await call('getDirectory'); }
+  catch (e) { $('#app').innerHTML = '<div class="center"><span class="label">Couldn\'t open the page</span><p class="err">' + esc(e.message) + '</p><button class="btn" onclick="location.reload()">Try again</button></div>'; return; }
+  const words = String(DIR.agency || 'Bureau of Equipment').split(' ');
+  $('#agency').innerHTML = esc(words.slice(0, -1).join(' ')) + ' <em>' + esc(words[words.length - 1]) + '</em>';
+  if (DIR.logo) { $('#seal').className = 'seal img'; $('#seal').innerHTML = '<img src="' + esc(DIR.logo) + '" alt="Logo">'; }
+  if (DIR.closed) { $('#app').innerHTML = '<div class="center"><span class="label">Photo upload</span><h2 style="font-family:var(--cond);text-transform:uppercase;margin:0;color:var(--head)">The page is closed right now</h2><p class="hint">Please ask HR when it will open again.</p></div>'; return; }
+  form();
+}
+
+function form() {
+  ME = null; BDAY = ''; ST = null;
+  $('#app').innerHTML = `
+  <section class="hero">${WAVES}<span class="eb">For the employee records</span><h1>Complete your <em>record</em></h1>
+    <p>Pick your office and name, confirm your birthday to prove it's you, then add your photo and anything that's missing. About a minute.</p></section>
+  <div id="steps" style="display:grid;gap:14px">
+    <section class="step" id="s1"><h2><span class="num">1</span>Division / office</h2>
+      <select id="office" aria-label="Division or office"><option value="">Choose your division or office</option>${DIR.offices.map((o, i) => `<option value="${i}">${esc(o.code ? o.code + ' · ' + o.name : o.name)}</option>`).join('')}</select></section>
+    <section class="step locked" id="s2"><h2><span class="num">2</span>Your name</h2>
+      <div class="find"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" id="find" placeholder="Type to find your name" autocomplete="off" aria-label="Find your name"></div>
+      <select id="person" aria-label="Your name"><option value="">Choose your name</option></select>
+      <p class="hint">Listed as Last name, First name. Not on the list? Ask HR.</p></section>
+    <section class="step locked" id="s3"><h2><span class="num">3</span>Confirm it's you</h2>
+      <label class="hint" for="bday">Your birthday</label><input type="text" class="dtIn" id="bday" data-cal="1" data-iso="" data-min="1960-01-01" data-max="2009-12-31" placeholder="Tap to pick your birthday" autocomplete="off" readonly>
+      <p class="hint">Used to check it's really you before you can change anything. It must match the HR records.</p>
+      <span class="err" id="verifyErr" hidden></span>
+      <button type="button" class="btn primary" id="verifyBtn" disabled>Continue</button></section>
+    <div id="after" style="display:grid;gap:14px"></div>
+  </div>`;
+  wire();
+}
+/* Built only after the birthday is confirmed: the photo, email and whatever is missing. */
+function buildAfter() {
+  const ask = ME.ask || {}, eduList = ME.education || [], histList = ME.history || [];
+  let n = 3;
+  const tinStep = (ask.tin && !ME.tinOnFile) ? `
+    <section class="step" id="sTin"><h2><span class="num">${++n}</span>Your TIN <span class="opt">optional</span></h2>
+      <input type="text" id="tin" inputmode="numeric" placeholder="123-456-789" autocomplete="off" aria-label="TIN">
+      <p class="hint">Only asked because it's blank in your record. Leave it empty if you'd rather not.</p>
+      <span class="err" id="tinErr" hidden></span></section>` : '';
+  const eduStep = ask.education ? `
+    <section class="step" id="sEdu"><h2><span class="num">${++n}</span>Education <span class="opt">optional</span></h2>
+      ${eduList.length ? `<p class="hint">Already on file: ${eduList.map(x => esc([x.degree, x.school, x.year].filter(Boolean).join(' · '))).join(' • ')}</p>` : '<p class="hint">Nothing on file yet. Add your degree(s) if you like.</p>'}
+      <div id="eduRows" class="subRows"></div>
+      <button type="button" class="btn small" id="eduAdd">＋ Add a degree</button></section>` : '';
+  const histStep = ask.history ? `
+    <section class="step" id="sHist"><h2><span class="num">${++n}</span>Past reassignments & promotions <span class="opt">optional</span></h2>
+      <p class="hint">Help us rebuild your history. What you add here goes to HR to <b>check against the order</b> before it becomes official — it does not change your records by itself.</p>
+      ${histList.length ? `<details class="onfile"><summary>What HR already has (${histList.length})</summary><div class="list">${histList.map(h => `<div class="li"><b>${esc(h.date || '—')}</b> · ${esc(h.type || '')}${h.position ? ' · ' + esc(h.position) : ''}${h.office ? ' · ' + esc(h.office) : ''}</div>`).join('')}</div></details>` : ''}
+      <div id="repRows" class="subRows"></div>
+      <button type="button" class="btn small" id="repAdd">＋ Add an assignment / promotion</button></section>` : '';
+  const emailStep = `
+    <section class="step" id="s5"><h2><span class="num">${++n}</span>Your active email <span class="opt">optional</span></h2>
+      <input type="email" id="email" placeholder="name@example.com" autocomplete="email" inputmode="email" aria-label="Your active email">
+      <label class="check2"><input type="checkbox" id="noEmail"> I don't have an email</label>
+      <p class="hint">The email you use and check now. HR will use it to reach you.</p><span class="hint" id="emailErr" style="color:var(--bad);font-weight:600" hidden>That email doesn't look right.</span></section>`;
+  const photoStep = `
+    <section class="step" id="s4"><h2><span class="num">${++n}</span>Your photo <span class="opt">optional</span></h2>
+      <div class="row2">
+        <label class="btn orange" for="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Take a photo</label>
+        <label class="btn" for="gal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>Choose a picture</label>
+      </div>
+      <input type="file" id="cam" accept="image/jpeg,image/png" capture="user" hidden>
+      <input type="file" id="gal" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp" hidden>
+      <div class="crop" id="crop" hidden>
+        <div class="cropBox"><canvas id="cv" width="560" height="560" aria-label="Drag to move your photo"></canvas></div>
+        <div class="cropTools">
+          <div class="zoom"><span>Zoom</span><input type="range" id="zoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom"></div>
+          <div class="tools"><button type="button" class="btn" id="rotL">⟲ Turn left</button><button type="button" class="btn" id="rotR">⟳ Turn right</button><button type="button" class="btn" id="reset">Reset</button></div>
+          <p class="hint" style="text-align:center">Drag the photo to move it. Only what's inside the square is saved.</p>
+        </div>
+      </div>
+      <ul class="tips"><li>Face centered, looking at the camera</li><li>Plain, light background</li><li>Good light, no shadows</li><li>No sunglasses or hats</li></ul>
+    </section>`;
+  $('#after').innerHTML = `
+    <div class="okNote">✓ Thanks, <b>${esc((ME.first || '').split(' ')[0] || 'confirmed')}</b> — it's you. Fill in what you can below, then save.</div>
+    ${tinStep}${eduStep}${histStep}${emailStep}${photoStep}
+    <div class="err" id="err" hidden></div>
+    <button type="button" class="btn primary big" id="save" disabled>Save</button>
+    <button type="button" class="btn" id="startOver">Not you? Start over</button>
+    <p class="foot">Your details are used only in the ${esc(DIR.agency || 'Bureau of Equipment')} employee records.</p>`;
+  wireAfter();
+  $('#after').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function people() { const o = DIR.offices[Number($('#office').value)]; return o ? o.people : []; }
+function fillNames() {
+  const q = $('#find').value.trim().toLowerCase(), keep = $('#person').value;
+  const list = people().filter(p => !q || p.name.toLowerCase().includes(q));
+  $('#person').innerHTML = '<option value="">' + (list.length ? 'Choose your name (' + list.length + ')' : 'No match. Check the spelling or the office') + '</option>' +
+    list.map(p => `<option value="${esc(p.id)}" ${p.id === keep ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
+  if (list.length === 1) $('#person').value = list[0].id;
+}
+const emailOk = () => { if (!$('#email') || $('#noEmail').checked) return true; const v = $('#email').value.trim(); return v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); };
+/* ── identity steps (office, name, birthday) and the Continue button ── */
+function headGate() {
+  const has1 = $('#office').value !== '', has2 = has1 && $('#person').value !== '', has3 = has2 && $('#bday').dataset.iso !== '';
+  $('#s1').classList.toggle('complete', has1);
+  $('#s2').classList.toggle('locked', !has1); $('#s2').classList.toggle('complete', has2);
+  $('#s3').classList.toggle('locked', !has2);
+  const b = $('#verifyBtn'); if (b) b.disabled = !has3;
+}
+function wire() {
+  $('#office').addEventListener('change', () => { $('#find').value = ''; fillNames(); headGate(); });
+  $('#find').addEventListener('input', () => { fillNames(); headGate(); });
+  $('#person').addEventListener('change', headGate);
+  $('#bday').addEventListener('change', () => { $('#verifyErr').hidden = true; headGate(); });
+  wireDates();
+  $('#verifyBtn').addEventListener('click', verify);
+  headGate();
+}
+async function verify() {
+  const btn = $('#verifyBtn'), err = $('#verifyErr'); err.hidden = true;
+  btn.disabled = true; btn.textContent = 'Checking…';
+  try {
+    ME = await call('verifyEmployee', { employeeId: $('#person').value, birthday: $('#bday').dataset.iso });
+    BDAY = $('#bday').dataset.iso;
+    ['#s1', '#s2', '#s3'].forEach(s => { $(s).classList.add('locked'); $(s).classList.add('complete'); });
+    buildAfter();
+  } catch (e) { err.textContent = e.message; err.hidden = false; btn.disabled = false; btn.textContent = 'Continue'; }
+}
+/* ── the fields shown after the birthday is confirmed ── */
+function subRow(kind) {
+  const d = document.createElement('div'); d.className = 'subRow ' + kind;
+  if (kind === 'edu') d.innerHTML = `<input type="text" class="eDeg" placeholder="Degree or course" aria-label="Degree or course"><input type="text" class="eSch" placeholder="School" aria-label="School"><input type="text" class="eYr" inputmode="numeric" maxlength="4" placeholder="Year" aria-label="Year">`;
+  else d.innerHTML = `<input type="text" class="rType" placeholder="e.g. Promotion / Reassignment" aria-label="Type"><input type="text" class="rDet" placeholder="New position and/or office" aria-label="Details"><input type="text" class="rWhen" placeholder="When (year or date)" aria-label="When"><input type="text" class="rOrd" placeholder="Order no. (if known)" aria-label="Order reference">`;
+  const x = document.createElement('button'); x.type = 'button'; x.className = 'rowX'; x.setAttribute('aria-label', 'Remove this row'); x.textContent = '✕';
+  x.addEventListener('click', () => { d.remove(); afterGate(); });
+  d.appendChild(x);
+  d.querySelectorAll('input').forEach(i => i.addEventListener('input', afterGate));
+  return d;
+}
+function readEdu() {
+  return [...document.querySelectorAll('#eduRows .subRow')].map(r => ({ degree: r.querySelector('.eDeg').value.trim(), school: r.querySelector('.eSch').value.trim(), year: r.querySelector('.eYr').value.trim() })).filter(x => x.degree || x.school);
+}
+function readRep() {
+  return [...document.querySelectorAll('#repRows .subRow')].map(r => ({ type: r.querySelector('.rType').value.trim(), details: r.querySelector('.rDet').value.trim(), date: r.querySelector('.rWhen').value.trim(), order: r.querySelector('.rOrd').value.trim() })).filter(x => x.type || x.details);
+}
+function afterGate() {
+  if ($('#email')) { $('#s5').classList.toggle('complete', !$('#noEmail').checked && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('#email').value.trim())); }
+  if ($('#s4')) $('#s4').classList.toggle('complete', !!ST);
+  const hasEmail = $('#email') && !$('#noEmail').checked && $('#email').value.trim() !== '' && emailOk();
+  const hasTin = $('#tin') && $('#tin').value.trim() !== '';
+  const anything = !!ST || hasEmail || hasTin || readEdu().length > 0 || readRep().length > 0;
+  const okForm = emailOk() && (!$('#tin') || $('#tin').value.trim() === '' || /^\d{3}-\d{3}-\d{3}(-\d{3,5})?$/.test($('#tin').value.trim()));
+  $('#save').disabled = !(anything && okForm);
+}
+function wireAfter() {
+  ['#cam', '#gal'].forEach(s => $(s).addEventListener('change', ev => { const f = ev.target.files[0]; ev.target.value = ''; if (f) pick(f); }));
+  const cv = $('#cv'), ctx = cv.getContext('2d');
+  const redraw = () => { if (!ST) return; clamp(ST); draw(ST, ctx, 560); $('#zoom').value = ST.zoom; };
+  let drag = null;
+  cv.addEventListener('pointerdown', ev => { if (!ST) return; drag = { x: ev.clientX, y: ev.clientY, ox: ST.ox, oy: ST.oy }; cv.setPointerCapture(ev.pointerId); });
+  cv.addEventListener('pointermove', ev => { if (!drag) return; const k = VIEW / cv.getBoundingClientRect().width; ST.ox = drag.ox + (ev.clientX - drag.x) * k; ST.oy = drag.oy + (ev.clientY - drag.y) * k; redraw(); });
+  const stop = () => { drag = null; };
+  cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+  cv.addEventListener('wheel', ev => { if (!ST) return; ev.preventDefault(); ST.zoom = Math.max(1, Math.min(4, ST.zoom * (ev.deltaY < 0 ? 1.08 : 1 / 1.08))); redraw(); }, { passive: false });
+  $('#zoom').addEventListener('input', ev => { if (!ST) return; ST.zoom = Number(ev.target.value); redraw(); });
+  $('#rotL').addEventListener('click', () => { ST.rot = (ST.rot + 270) % 360; redraw(); });
+  $('#rotR').addEventListener('click', () => { ST.rot = (ST.rot + 90) % 360; redraw(); });
+  $('#reset').addEventListener('click', () => { Object.assign(ST, { rot: 0, zoom: 1, ox: 0, oy: 0 }); redraw(); });
+  window.__redraw = redraw;
+  if ($('#tin')) $('#tin').addEventListener('input', () => { $('#tinErr').hidden = true; afterGate(); });
+  if ($('#eduAdd')) $('#eduAdd').addEventListener('click', () => { $('#eduRows').appendChild(subRow('edu')); afterGate(); });
+  if ($('#repAdd')) $('#repAdd').addEventListener('click', () => { $('#repRows').appendChild(subRow('rep')); afterGate(); });
+  $('#email').addEventListener('input', () => { $('#emailErr').hidden = true; afterGate(); });
+  $('#email').addEventListener('blur', () => { const v = $('#email').value.trim(); $('#emailErr').hidden = !v || emailOk(); });
+  $('#noEmail').addEventListener('change', () => { $('#email').disabled = $('#noEmail').checked; if ($('#noEmail').checked) $('#email').value = ''; $('#emailErr').hidden = true; afterGate(); });
+  $('#save').addEventListener('click', save);
+  $('#startOver').addEventListener('click', () => form());
+  afterGate();
+}
+
+/* photo crop: a square view, drag to move, zoom, turn */
+const VIEW = 280;
+function geom(st) {
+  const turned = st.rot % 180 !== 0, iw = turned ? st.img.height : st.img.width, ih = turned ? st.img.width : st.img.height;
+  const sc = VIEW / Math.min(iw, ih) * st.zoom;
+  return { sc: sc, maxX: Math.max(0, (iw * sc - VIEW) / 2), maxY: Math.max(0, (ih * sc - VIEW) / 2) };
+}
+function clamp(st) { const g = geom(st); st.ox = Math.max(-g.maxX, Math.min(g.maxX, st.ox)); st.oy = Math.max(-g.maxY, Math.min(g.maxY, st.oy)); }
+function draw(st, ctx, size) {
+  const k = size / VIEW, g = geom(st);
+  ctx.save(); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+  ctx.translate(size / 2 + st.ox * k, size / 2 + st.oy * k); ctx.rotate(st.rot * Math.PI / 180); ctx.scale(g.sc * k, g.sc * k);
+  ctx.imageSmoothingQuality = 'high'; ctx.drawImage(st.img, -st.img.width / 2, -st.img.height / 2); ctx.restore();
+}
+function jpeg(st, size, maxLen) {
+  for (let px = size; px >= 96; px -= 40) {
+    const c = document.createElement('canvas'); c.width = c.height = px; draw(st, c.getContext('2d'), px);
+    for (let q = 0.88; q >= 0.5; q -= 0.08) { const d = c.toDataURL('image/jpeg', q); if (d.length <= maxLen) return d; }
+  }
+  throw new Error('That picture is too detailed to store. Please try another one.');
+}
+function pick(file) {
+  showErr('');
+  const r = new FileReader();
+  r.onload = () => {
+    const img = new Image();
+    img.onload = () => { ST = { img: img, rot: 0, zoom: 1, ox: 0, oy: 0 }; $('#crop').hidden = false; window.__redraw(); afterGate(); $('#crop').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+    img.onerror = () => showErr('That file isn\'t a picture this phone can read. Try a JPG or PNG.');
+    img.src = r.result;
+  };
+  r.onerror = () => showErr('Couldn\'t read that file. Please try again.');
+  r.readAsDataURL(file);
+}
+function showErr(msg) { const e = $('#err'); if (!e) return; e.textContent = msg; e.hidden = !msg; if (msg) e.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+async function save() {
+  const btn = $('#save'); showErr('');
+  if ($('#tin') && $('#tin').value.trim() && !/^\d{3}-\d{3}-\d{3}(-\d{3,5})?$/.test($('#tin').value.trim())) {
+    $('#tinErr').textContent = 'TIN should look like 123-456-789.'; $('#tinErr').hidden = false; return showErr('Please fix the TIN, or clear it.');
+  }
+  let photo = '', thumb = '';
+  if (ST) { try { photo = jpeg(ST, 320, 45000); thumb = jpeg(ST, 96, 9000); } catch (e) { return showErr(e.message); } }
+  const payload = {
+    employeeId: $('#person').value, birthday: BDAY,
+    email: $('#email') && !$('#noEmail').checked ? $('#email').value.trim() : '',
+    photo: photo, thumb: thumb,
+    tin: $('#tin') ? $('#tin').value.trim() : '',
+    education: readEdu(), reported: readRep()
+  };
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const res = await call('submitRecord', payload);
+    const saved = res.saved || [];
+    $('#app').innerHTML = `<div class="thanks">${photo ? `<img src="${photo}" alt="Your new photo">` : '<div class="check" style="margin:0 auto">✓</div>'}${photo ? '<div class="check">✓</div>' : ''}
+      <h2>Thank you${res.first ? ', <em>' + esc(res.first.split(' ')[0]) + '</em>' : ''}!</h2>
+      <p class="hint" style="font-size:.92rem">${saved.length ? 'Saved: ' + esc(saved.join(', ')) + '. ' : ''}It's now with the ${esc(DIR.agency || 'Bureau of Equipment')} employee records.${saved.some(s => /reported history/.test(s)) ? ' HR will verify the reassignments/promotions you reported.' : ''} You can close this page.</p>
+      <button class="btn" id="again">Submit for someone else</button></div>`;
+    $('#again').addEventListener('click', () => { ST = null; form(); });
+    window.scrollTo(0, 0);
+  } catch (e) { showErr(e.message); btn.disabled = false; btn.textContent = 'Save'; }
+}
+
+boot();
+</script>
+</body>
+</html>

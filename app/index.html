@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opening the Employee Database…</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<script src="../config.js"></script>
+<style>body{margin:0;background:#F0F0F0;color:#1B1B1B;font:13px/1.5 Tahoma,"Segoe UI",Verdana,sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px;box-sizing:border-box;text-align:center}a{color:#3C7FB1}</style>
+</head>
+<body>
+<p id="msg">Opening the BOE Employee Database…</p>
+<script>
+  var u = (window.EDMS_URL || '').trim();
+  if (/^https:\/\/script\.google\.com\/.+\/exec\/?$/.test(u)) location.replace(u);
+  else document.getElementById('msg').innerHTML = 'The Employee Database link is not set yet (config.js).<br><a href="../">Back to boerecords.online</a>';
+</script>
+</body>
+</html>
