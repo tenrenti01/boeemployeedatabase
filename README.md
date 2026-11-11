@@ -9,7 +9,7 @@ Employee records of the **Bureau of Equipment (DPWH)**: profiles, plantilla, ser
 | **The data** | The BOE Google Sheet | All records. Nothing is stored on GitHub. |
 | **Complete your record** (`photoapp/`) | Google Apps Script | The page employees open (QR link) to add their photo, TIN, education and past assignments. |
 
-People sign in with a **username and password** from the **Accounts** tab of the Google Sheet. No Google account is needed.
+People sign in with their **DPWH email**: they get a 6-digit code by email and type it in. No passwords, and no Google account needed. Who may sign in is the **Accounts** tab of the Google Sheet.
 
 ---
 
@@ -41,18 +41,18 @@ tools/
 
 ## Accounts (the Accounts tab)
 
-| Username | Password | Name | Role | Active | Notes |
-|---|---|---|---|---|---|
-| jdelacruz | (typed by the admin) | Juan Dela Cruz | Editor | Yes | |
+| Email | Name | Role | Active | Notes |
+|---|---|---|---|---|
+| juan.delacruz@dpwh.gov.ph | Juan Dela Cruz | Editor | Yes | |
 
-- **Role:** `Admin` = everything · `Editor` = can save changes · `Viewer` = can only look.
-- **Active:** `No` switches someone off. They are signed out at once.
-- A blank password means that person can't sign in.
-- Changing someone's password or role signs them out on every device.
-- 5 wrong passwords lock that username for 15 minutes.
-- A sign-in lasts 7 days on a device, or until **Sign out** (top right).
+- **Email:** the person's DPWH email. Their sign-in code is sent there.
+- **Role:** `Admin` = everything · `Editor` = can save changes · `Viewer` = can only look. Changing someone's role signs them out.
+- **Active:** `No` switches someone off. They are signed out at once and can't get a code.
+- A code works for **10 minutes**, once. 5 wrong tries and they need a new code. At most one code a minute and 5 an hour per email.
+- A sign-in lasts **7 days** on a device, or until **Sign out** (top right).
+- Codes are emailed from the Google account that owns the Apps Script (Gmail allows about 100 a day on a personal account). If a code doesn't arrive, check **Spam**.
 
-The tab is created automatically the first time the server runs, filled with the people from the old `Users` tab (username = the part of their email before `@`). Keep the sheet **unshared**: the server runs as you, so staff never need access to the sheet itself, and only you can see the passwords.
+The tab is created automatically the first time the server runs, filled with the people from the old `Users` tab. Change their emails to their DPWH emails. Keep the sheet **unshared**: the server runs as you, so staff never need access to the sheet itself.
 
 ---
 
@@ -60,8 +60,8 @@ The tab is created automatically the first time the server runs, filled with the
 
 1. **Server:** in the Employee Database's Apps Script project, replace `App.gs` with `edms/App.gs` and save.
 2. **Deploy:** **Deploy ▸ Manage deployments ▸ ✏️ Edit**. Set **Execute as: Me** and **Who has access: Anyone**, **Version: New version**, then **Deploy**. (If those two settings can't be changed there, use **New deployment ▸ Web app** with the same settings.) Copy the **Web app URL** (ends in `/exec`).
-3. **Check it:** open that URL in a browser. It should say *"The BOE Employee Database server is running"*. This also creates the **Accounts** tab.
-4. **Passwords:** in the sheet's **Accounts** tab, type a password for each person who may sign in.
+3. **Allow email:** in the Apps Script editor pick **checkApp** ▸ ▶ Run and click **Allow** when Google asks (the server needs permission to send the sign-in codes). This also creates the **Accounts** tab.
+4. **Accounts:** in the sheet's **Accounts** tab, put each person's DPWH email, name and role.
 5. **Link:** on GitHub, open `config.js` ▸ ✏️ Edit, paste the URL between the quotes on the `EDMS_API` line, then **Commit changes**.
 6. Open the site and sign in.
 
@@ -85,5 +85,5 @@ The tab is created automatically the first time the server runs, filled with the
 
 - **Time zone.** The Sheet (File ▸ Settings) and both Apps Script projects (Project Settings ⚙) must all be **Asia/Manila**, or saved dates can shift by a day.
 - **Master password** (for editing or deleting history entries) lives in Script Properties (`MASTER_PASSWORD`). If it was never changed, it is still the starting value. Change it on the app's **Admin** page.
-- **Sign-in secret.** The server signs each sign-in with a secret it keeps in Script Properties (`SIGNIN_SECRET`). Deleting that property signs everyone out.
+- **Sign-in secret.** The server signs each sign-in (and each emailed code) with a secret it keeps in Script Properties (`SIGNIN_SECRET`). Deleting that property signs everyone out.
 - **Employee Number** is 4 digits stored as text (`0001`).

@@ -660,6 +660,13 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
 .siNote{color:var(--warn);background:var(--warn-soft);border-radius:var(--r-sm);padding:8px 10px;font-size:.88rem}
 .siGo{width:100%;justify-content:center;padding-top:10px;padding-bottom:10px}
 .siHelp{margin:2px 0 0;color:var(--muted);font-size:.8rem;text-align:center}
+.siStep{display:grid;gap:12px}
+.siSent{margin:0;font-size:.88rem;color:var(--ink);line-height:1.45}
+.siCodeIn{font-size:1.5rem!important;letter-spacing:.45em;text-align:center;font-variant-numeric:tabular-nums}
+.siRow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.siLink{background:none;border:0;padding:2px 0;color:var(--navy-2);font:inherit;font-size:.85rem;cursor:pointer;text-decoration:underline}
+.siLink:disabled{color:var(--muted);text-decoration:none;cursor:default}
+html.classic .siLink{color:#3C7FB1}
 html.classic .signin{min-height:calc(100vh - 20px)}
 html.classic .siBox{border:1px solid #707070;border-radius:0;box-shadow:0 4px 14px rgba(0,0,0,.12);background:#fff}
 html.classic .siTitle{background:linear-gradient(#FFFFFF,#E9E9E9);color:#222;border-bottom:1px solid #A0A0A0;font:bold 12px Tahoma,"Segoe UI",Verdana,sans-serif;letter-spacing:0;text-transform:none;padding:6px 10px}
@@ -1030,37 +1037,79 @@ function showSignIn(note) {
   window.__booted = true;                                   // the "still loading" safety net must not fire behind this screen
   $('#top').hidden = true; closeModal();
   const sb = $('#statusbar'); if (sb) sb.innerHTML = '';
-  $('#view').innerHTML = `<div class="signin"><form class="siBox" id="siForm" novalidate autocomplete="on">
+  let last = ''; try { last = localStorage.getItem('boe.lastEmail') || ''; } catch (e) { /* ignore */ }
+  $('#view').innerHTML = `<div class="signin"><div class="siBox">
     <div class="siTitle">BOE Employee Database</div>
     <div class="siBody">
       <div class="siHead"><img class="siLogo" src="assets/dpwh-logo.png" alt="DPWH" onerror="this.outerHTML='<div class=&quot;seal&quot;>BOE</div>'"><div><b>Sign in</b><span>Bureau of Equipment · DPWH</span></div></div>
       ${note ? `<div class="siNote">${esc(note)}</div>` : ''}
-      <label class="siField"><span>Username</span><input id="siUser" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-      <label class="siField"><span>Password</span><input id="siPass" name="password" type="password" autocomplete="current-password" required></label>
-      <div class="siErr" id="siErr" role="alert" hidden></div>
-      <button class="btn primary siGo" id="siGo" type="submit">Sign in</button>
-      <p class="siHelp">No account, or forgot your password? Ask the BOE administrator.</p>
-    </div></form></div>`;
-  let u = ''; try { u = localStorage.getItem('boe.lastUser') || ''; } catch (e) { /* ignore */ }
-  $('#siUser').value = u;
-  if (!matchMedia('(pointer: coarse)').matches) (u ? $('#siPass') : $('#siUser')).focus();
-  $('#siForm').addEventListener('submit', async ev => {
-    ev.preventDefault();
-    const err = $('#siErr'), go = $('#siGo'), user = $('#siUser').value.trim(), pass = $('#siPass').value;
-    err.hidden = true;
-    if (!user || !pass) { err.textContent = 'Type your username and password.'; err.hidden = false; return; }
-    go.disabled = true; go.textContent = 'Signing in…';
+      <form id="siEmailForm" class="siStep" novalidate>
+        <label class="siField"><span>DPWH email</span><input id="siEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="name@dpwh.gov.ph"></label>
+        <div class="siErr" id="siErr1" role="alert" hidden></div>
+        <button class="btn primary siGo" id="siSend" type="submit">Send me a code</button>
+      </form>
+      <form id="siCodeForm" class="siStep" novalidate hidden>
+        <p class="siSent" id="siSent"></p>
+        <label class="siField"><span>6-digit code</span><input id="siCode" class="siCodeIn" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*"></label>
+        <div class="siErr" id="siErr2" role="alert" hidden></div>
+        <button class="btn primary siGo" id="siVerify" type="submit">Sign in</button>
+        <div class="siRow"><button type="button" class="siLink" id="siResend" disabled>Send a new code</button><button type="button" class="siLink" id="siBack">Use a different email</button></div>
+      </form>
+      <p class="siHelp">No account? Ask the BOE administrator to add your DPWH email.</p>
+    </div></div></div>`;
+  const touch = matchMedia('(pointer: coarse)').matches;
+  let email = '', timer = null;
+  const err = (id, m) => { const e = $(id); e.textContent = m || ''; e.hidden = !m; };
+  const busy = (btn, on, label) => { btn.disabled = on; btn.textContent = label; };
+  const countdown = secs => {
+    const r = $('#siResend'); clearInterval(timer);
+    let left = secs;
+    const tick = () => { if (!document.body.contains(r)) return clearInterval(timer); r.disabled = left > 0; r.textContent = left > 0 ? 'Send a new code (' + left + ')' : 'Send a new code'; if (left-- <= 0) clearInterval(timer); };
+    tick(); timer = setInterval(tick, 1000);
+  };
+  const send = async (btn, idleLabel) => {
+    busy(btn, true, 'Sending…'); err('#siErr1'); err('#siErr2');
     try {
-      const r = await api('signIn', { username: user, password: pass });
-      writeSession({ token: r.token, user: r.me.username, name: r.me.name, role: r.me.role, exp: Date.now() + r.days * 86400000 - 60000 });
-      try { localStorage.setItem('boe.lastUser', r.me.username); } catch (e) { /* ignore */ }
-      window.__ME = r.me.username; window.__booted = false;
+      const r = await api('sendCode', { email: email });
+      try { localStorage.setItem('boe.lastEmail', email); } catch (e) { /* ignore */ }
+      $('#siEmailForm').hidden = true; $('#siCodeForm').hidden = false;
+      $('#siSent').innerHTML = 'We emailed a 6-digit code to <b>' + esc(r.email) + '</b>. It works for ' + r.minutes + ' minutes. Not there? Check Spam.';
+      $('#siCode').value = ''; if (!touch) $('#siCode').focus();
+      countdown(r.resend || 60);
+    } catch (e) {
+      err($('#siCodeForm').hidden ? '#siErr1' : '#siErr2', e.message);
+    } finally { if (btn.id === 'siSend') busy(btn, false, idleLabel); else if (btn.textContent.indexOf('Sending') === 0) busy(btn, false, 'Send a new code'); }
+  };
+  $('#siEmail').value = last;
+  if (!touch) $('#siEmail').focus();
+  $('#siEmailForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    email = $('#siEmail').value.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('#siErr1', 'Type your DPWH email address.');
+    send($('#siSend'), 'Send me a code');
+  });
+  $('#siResend').addEventListener('click', () => send($('#siResend'), 'Send a new code'));
+  $('#siBack').addEventListener('click', () => { clearInterval(timer); $('#siCodeForm').hidden = true; $('#siEmailForm').hidden = false; err('#siErr1'); if (!touch) $('#siEmail').select(); });
+  $('#siCode').addEventListener('input', ev => {
+    const v = ev.target.value.replace(/\D/g, '').slice(0, 6);
+    if (v !== ev.target.value) ev.target.value = v;
+    if (v.length === 6 && !$('#siVerify').disabled) $('#siCodeForm').requestSubmit();
+  });
+  $('#siCodeForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const code = $('#siCode').value.replace(/\D/g, ''), go = $('#siVerify');
+    if (code.length !== 6) return err('#siErr2', 'Type the 6-digit code from the email.');
+    busy(go, true, 'Signing in…'); err('#siErr2');
+    try {
+      const r = await api('verifyCode', { email: email, code: code });
+      clearInterval(timer);
+      writeSession({ token: r.token, user: r.me.email, name: r.me.name, role: r.me.role, exp: Date.now() + r.days * 86400000 - 60000 });
+      window.__ME = r.me.email; window.__booted = false;
       $('#view').innerHTML = '<div class="loading"><div class="spin"></div><span class="label">Loading the masterlist…</span></div>';
       boot();
     } catch (e) {
-      err.textContent = e.message; err.hidden = false;
-      go.disabled = false; go.textContent = 'Sign in';
-      $('#siPass').select();
+      err('#siErr2', e.message); busy(go, false, 'Sign in');
+      if (/new one/.test(e.message)) $('#siCode').value = ''; else $('#siCode').select();
     }
   });
 }
@@ -1072,8 +1121,8 @@ function signOut(note) {
 function formAccount() {
   if (!SESSION) return;
   openModal(`<header><div><span class="label">Signed in</span><h2>${esc(SESSION.name || SESSION.user)}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
-    <div class="body"><dl class="kv"><dt>Username</dt><dd class="mono">${esc(SESSION.user)}</dd><dt>Role</dt><dd>${esc((D && D.me.role) || SESSION.role)}</dd></dl>
-      <p class="muted" style="font-size:.9rem;margin:10px 0 0">To change your password, ask the BOE administrator. Signing out also clears the copy of the records kept on this device.</p></div>
+    <div class="body"><dl class="kv"><dt>Email</dt><dd class="mono">${esc(SESSION.user)}</dd><dt>Role</dt><dd>${esc((D && D.me.role) || SESSION.role)}</dd></dl>
+      <p class="muted" style="font-size:.9rem;margin:10px 0 0">Signing out also clears the copy of the records kept on this device. Next time, sign in with a new code from your email.</p></div>
     <footer><span></span><div class="actions"><button type="button" class="btn" data-act="close">Close</button><button type="button" class="btn danger" data-act="signOutNow">Sign out</button></div></footer>`);
 }
 
@@ -3704,14 +3753,14 @@ function formCOE(id) {
 function accountsPanel(list) {
   return `<section class="panel">
     <div class="panelHead"><h3>${hi('key')}Accounts</h3><span class="label">sign-in</span></div>
-    <p class="muted" style="font-size:.9rem;max-width:84ch">Who can sign in. Add people, set passwords, change roles or switch someone off in the <b>Accounts</b> tab of the Google Sheet.
-      Changing a person's password or role there signs them out everywhere. <b>Admin</b> = everything · <b>Editor</b> = can save changes · <b>Viewer</b> = can only look.</p>
+    <p class="muted" style="font-size:.9rem;max-width:84ch">Who can sign in. Add people by their <b>DPWH email</b>, change roles or switch someone off in the <b>Accounts</b> tab of the Google Sheet.
+      They sign in with a 6-digit code emailed to them. Changing someone's role, or setting Active to No, signs them out.
+      <b>Admin</b> = everything · <b>Editor</b> = can save changes · <b>Viewer</b> = can only look.</p>
     <div class="tableWrap"><table>
-      <thead><tr>${sortTh('users', 'username', 'Username')}${sortTh('users', 'name', 'Name')}${sortTh('users', 'role', 'Role')}${sortTh('users', 'active', 'Active')}<th>Password</th></tr></thead>
+      <thead><tr>${sortTh('users', 'email', 'Email')}${sortTh('users', 'name', 'Name')}${sortTh('users', 'role', 'Role')}${sortTh('users', 'active', 'Active')}</tr></thead>
       <tbody>${list.map(u => `
-        <tr><td class="mono" style="font-size:.88rem">${esc(u.username || u.email)}${(u.username || u.email) === D.me.email ? ' <span class="pill filled">you</span>' : ''}</td><td>${esc(u.name || '—')}</td>
-          <td>${esc(u.role)}</td><td>${u.active === 'Yes' ? '<span class="pill filled">Active</span>' : '<span class="pill sep">Switched off</span>'}</td>
-          <td>${u.hasPassword ? '<span class="muted">set</span>' : '<span class="pill warn">none yet</span>'}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">No accounts yet.</td></tr>'}
+        <tr><td class="mono" style="font-size:.88rem">${esc(u.email)}${u.email === D.me.email ? ' <span class="pill filled">you</span>' : ''}${/@dpwh\.gov\.ph$/i.test(u.email) ? '' : ' <span class="pill warn">not DPWH</span>'}</td><td>${esc(u.name || '—')}</td>
+          <td>${esc(u.role)}</td><td>${u.active === 'Yes' ? '<span class="pill filled">Active</span>' : '<span class="pill sep">Switched off</span>'}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">No accounts yet.</td></tr>'}
       </tbody></table></div>
   </section>`;
 }

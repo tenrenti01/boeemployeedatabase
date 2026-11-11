@@ -77,21 +77,24 @@ const APP = {
 /* ───────────────────────── web API for boerecords.online ─────────────────────────
    The page lives on GitHub Pages (boerecords.online) and talks to this script through doPost.
    Deploy as a Web app with  Execute as: Me  ·  Who has access: Anyone.
-   People sign in with a username and password from the "Accounts" tab; no Google account is needed. */
+   Sign-in: type your DPWH email, get a 6-digit code by email, type it in. Who may sign in is the
+   "Accounts" tab (Email, Name, Role, Active, Notes). No passwords and no Google account needed. */
 
 var APP_WEB_ = false;   // true while answering a web request
-var APP_ME_ = null;     // the signed-in account for this request, set by doPost after the token checks out
+var APP_ME_ = null;     // the signed-in account for this request, set by doPost after the pass checks out
 
 const APP_ACC = {
   TAB: 'Accounts',
-  HEADERS: ['Username', 'Password', 'Name', 'Role', 'Active', 'Notes'],
+  HEADERS: ['Email', 'Name', 'Role', 'Active', 'Notes'],
   ROLES: ['Admin', 'Editor', 'Viewer'],
   DAYS: 7,              // a sign-in lasts this long on a device (Sign out ends it sooner)
-  TRIES: 5,             // wrong passwords allowed per username…
-  LOCK_MIN: 15          // …before waiting this many minutes
+  CODE_MIN: 10,         // an emailed code works this many minutes
+  CODE_TRIES: 5,        // wrong codes allowed before a new code is needed
+  RESEND_SEC: 60,       // wait between codes to the same email
+  CODES_PER_HOUR: 5     // codes per email per hour
 };
 
-/* What the page may ask for. Anything not listed here can't be called from outside. */
+/* What the page may ask for once signed in. Anything not listed here can't be called from outside. */
 const APP_API_ = {
   getBootstrap: () => getBootstrap(), getPhoto: a => getPhoto(a),
   saveNewHire: a => saveNewHire(a), saveJobChange: a => saveJobChange(a), saveNameChange: a => saveNameChange(a),
@@ -118,7 +121,8 @@ function doPost(e) {
   catch (x) { return app_out_({ ok: false, error: 'The server could not read that request.' }); }
   const fn = app_s_(req.fn);
   try {
-    if (fn === 'signIn') return app_out_({ ok: true, result: app_signIn_(req.arg || {}) });
+    if (fn === 'sendCode') return app_out_({ ok: true, result: app_sendCode_(req.arg || {}) });
+    if (fn === 'verifyCode') return app_out_({ ok: true, result: app_verifyCode_(req.arg || {}) });
     APP_ME_ = app_checkToken_(req.token);
     if (fn === 'whoAmI') return app_out_({ ok: true, result: APP_ME_ });
     if (!Object.prototype.hasOwnProperty.call(APP_API_, fn)) throw new Error('Unknown request "' + fn + '".');
@@ -133,85 +137,152 @@ function app_out_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 
-/* The Accounts tab. Made the first time it's needed, filled with the people already in the Users tab
-   (usernames from their emails, passwords blank: type one for each person who may sign in). */
+/* ── the Accounts tab ── */
+const APP_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function app_accounts_(ss) {
-  if (!ss.getSheetByName(APP_ACC.TAB)) {
+  const sh = ss.getSheetByName(APP_ACC.TAB);
+  const head = sh && sh.getLastColumn() ? sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => app_s_(h)) : [];
+  if (!sh || head.indexOf('Email') < 0) {
     const lock = LockService.getScriptLock();
     lock.waitLock(20000);
-    try { if (!ss.getSheetByName(APP_ACC.TAB)) app_makeAccounts_(ss); }
-    finally { lock.releaseLock(); }
+    try {
+      const again = ss.getSheetByName(APP_ACC.TAB);
+      if (!again) app_makeAccounts_(ss);
+      else app_migrateAccounts_(again);
+    } finally { lock.releaseLock(); }
   }
   return app_read_(ss, APP_ACC.TAB);
 }
+/* Made the first time it's needed, filled with the people from the Users tab. Replace their emails with their DPWH emails. */
 function app_makeAccounts_(ss) {
   const sh = ss.insertSheet(APP_ACC.TAB);
-  const H = APP_ACC.HEADERS;
-  const rows = [], taken = {};
+  const H = APP_ACC.HEADERS, rows = [], seen = {};
   let users = [];
   try { users = app_read_(ss, APP.T.users).rows; } catch (e) { users = []; }
   users.forEach(u => {
     const email = app_s_(u['Email']).toLowerCase();
-    if (!email) return;
-    let base = email.split('@')[0].replace(/[^a-z0-9._-]/g, '') || 'user', name = base, n = 2;
-    while (taken[name]) name = base + (n++);
-    taken[name] = true;
+    if (!APP_EMAIL_RE.test(email) || seen[email]) return;
+    seen[email] = true;
     const role = APP_ACC.ROLES.indexOf(app_s_(u['Role'])) >= 0 ? app_s_(u['Role']) : 'Viewer';
-    rows.push([name, '', app_s_(u['Name']), role, /^(no|n|false|inactive)$/i.test(app_s_(u['Active'])) ? 'No' : 'Yes', 'From the Users tab (' + email + ')']);
+    rows.push([email, app_s_(u['Name']), role, /^(no|n|false|inactive)$/i.test(app_s_(u['Active'])) ? 'No' : 'Yes', 'From the Users tab. Change it to their DPWH email.']);
   });
-  if (!rows.some(r => r[3] === 'Admin')) rows.unshift(['admin', '', 'Administrator', 'Admin', 'Yes', 'Type a password, then sign in with it']);
+  if (!rows.length) {
+    let owner = ''; try { owner = String(Session.getEffectiveUser().getEmail() || '').toLowerCase(); } catch (e) { owner = ''; }
+    rows.push([owner || 'yourname@dpwh.gov.ph', 'Administrator', 'Admin', 'Yes', 'Change to your DPWH email if needed']);
+  }
   const body = Math.max(rows.length + 200, 300);
   if (sh.getMaxRows() < body + 1) sh.insertRowsAfter(sh.getMaxRows(), body + 1 - sh.getMaxRows());
   sh.getRange(1, 1, 1, H.length).setValues([H]).setFontWeight('bold').setBackground('#1F3A5F').setFontColor('#FFFFFF');
-  sh.getRange(2, 1, body, 2).setNumberFormat('@');                        // usernames and passwords stay exactly as typed
-  sh.getRange(1, 2).setNote('Type each person\'s password here. Blank = that person can\'t sign in.\nChanging a password signs that person out everywhere.');
-  sh.getRange(1, 4).setNote('Admin = everything · Editor = can save changes · Viewer = can only look');
-  sh.getRange(1, 5).setNote('No = switched off (they are signed out at once)');
-  sh.getRange(2, 4, body, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(APP_ACC.ROLES, true).setAllowInvalid(false).build());
-  sh.getRange(2, 5, body, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['Yes', 'No'], true).setAllowInvalid(false).build());
+  app_accFormat_(sh, body);
   if (rows.length) sh.getRange(2, 1, rows.length, H.length).setValues(rows);
   sh.setFrozenRows(1);
-  sh.setColumnWidths(1, 2, 150); sh.setColumnWidth(3, 220); sh.setColumnWidths(4, 2, 90); sh.setColumnWidth(6, 320);
+  sh.setColumnWidth(1, 260); sh.setColumnWidth(2, 220); sh.setColumnWidths(3, 2, 90); sh.setColumnWidth(5, 320);
   return sh;
 }
+function app_accFormat_(sh, body) {
+  sh.getRange(2, 1, body, 1).setNumberFormat('@');
+  sh.getRange(1, 1).setNote('Each person\'s DPWH email (e.g. juan.delacruz@dpwh.gov.ph). They sign in with a 6-digit code sent to it.');
+  sh.getRange(1, 3).setNote('Admin = everything · Editor = can save changes · Viewer = can only look.\nChanging someone\'s role signs them out.');
+  sh.getRange(1, 4).setNote('No = switched off (signed out at once, can\'t get a code)');
+  sh.getRange(2, 3, body, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(APP_ACC.ROLES, true).setAllowInvalid(false).build());
+  sh.getRange(2, 4, body, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['Yes', 'No'], true).setAllowInvalid(false).build());
+}
+/* An Accounts tab from the short-lived username + password version: Username → Email (restored from Notes
+   where it was made from the Users tab), and the Password column is removed. */
+function app_migrateAccounts_(sh) {
+  const v = sh.getRange(1, 1, Math.max(sh.getLastRow(), 1), sh.getLastColumn()).getValues();
+  const head = v[0].map(h => app_s_(h));
+  const cu = head.indexOf('Username'), cn = head.indexOf('Notes');
+  if (cu < 0) throw new Error('The Accounts tab needs an "Email" column. Rename its first column to Email.');
+  sh.getRange(1, cu + 1).setValue('Email');
+  for (let i = 1; i < v.length; i++) {
+    const u = app_s_(v[i][cu]); if (!u || APP_EMAIL_RE.test(u)) continue;
+    const m = cn >= 0 ? app_s_(v[i][cn]).match(/\(([^()\s]+@[^()\s]+)\)/) : null;
+    if (m) sh.getRange(i + 1, cu + 1).setValue(m[1].toLowerCase());
+  }
+  const cp = head.indexOf('Password');
+  if (cp >= 0) sh.deleteColumn(cp + 1);
+  sh.getRange(1, cu + 1).setNote('Each person\'s DPWH email (e.g. juan.delacruz@dpwh.gov.ph). They sign in with a 6-digit code sent to it.');
+}
+function app_accEmail_(a) { return app_s_(a['Email']).toLowerCase(); }
 function app_accRole_(a) {
   const r = app_s_(a['Role']).toLowerCase();
   return APP_ACC.ROLES.find(x => x.toLowerCase() === r) || 'Viewer';
 }
 function app_accOff_(a) { return /^(no|n|false|inactive|off)$/i.test(app_s_(a['Active'])); }
 function app_accMe_(a) {
-  const u = app_s_(a['Username']).toLowerCase();
-  return { email: u, username: u, name: app_s_(a['Name']) || u, role: app_accRole_(a) };
+  const e = app_accEmail_(a);
+  return { email: e, username: e, name: app_s_(a['Name']) || e.split('@')[0], role: app_accRole_(a) };
+}
+function app_findAccount_(email) {
+  return app_accounts_(app_ss_()).rows.find(r => app_accEmail_(r) === email) || null;
 }
 
-function app_signIn_(p) {
-  const user = app_s_(p.username).toLowerCase(), pw = p.password === undefined || p.password === null ? '' : String(p.password);
-  if (!user || !pw) throw new Error('Type your username and password.');
-  const cache = CacheService.getScriptCache(), key = 'signin:' + user;
-  const tries = Number(cache.get(key) || 0);
-  if (tries >= APP_ACC.TRIES) throw new Error('Too many wrong tries for this username. Wait ' + APP_ACC.LOCK_MIN + ' minutes, then try again.');
-  const a = app_accounts_(app_ss_()).rows.find(r => app_s_(r['Username']).toLowerCase() === user);
-  const real = a ? app_s_(a['Password']) : '';
-  if (!a || !real || real !== pw.trim()) {
-    cache.put(key, String(tries + 1), APP_ACC.LOCK_MIN * 60);
-    Utilities.sleep(600);
-    throw new Error('Wrong username or password.');
+/* ── step 1: email a 6-digit code ── */
+function app_sendCode_(p) {
+  const email = app_s_(p.email).toLowerCase();
+  if (!APP_EMAIL_RE.test(email)) throw new Error('Type your DPWH email address.');
+  const a = app_findAccount_(email);
+  if (!a) throw new Error('There is no account for ' + email + '. Ask the BOE administrator to add you.');
+  if (app_accOff_(a)) throw new Error('This account is switched off. Ask the BOE administrator.');
+  const cache = CacheService.getScriptCache(), now = Date.now();
+  const last = Number(cache.get('otp-last:' + email) || 0);
+  if (now - last < APP_ACC.RESEND_SEC * 1000) throw new Error('A code was just sent. Wait ' + Math.ceil((APP_ACC.RESEND_SEC * 1000 - (now - last)) / 1000) + ' seconds, then ask again.');
+  const hour = Number(cache.get('otp-hour:' + email) || 0);
+  if (hour >= APP_ACC.CODES_PER_HOUR) throw new Error('Too many codes for this email. Wait an hour, then try again.');
+  const code = String(parseInt(Utilities.getUuid().replace(/-/g, '').slice(0, 12), 16) % 1000000).padStart(6, '0');
+  const exp = now + APP_ACC.CODE_MIN * 60000;
+  cache.put('otp:' + email, JSON.stringify({ h: app_codeHash_(email, code), exp: exp, tries: 0 }), APP_ACC.CODE_MIN * 60);
+  const who = app_s_(a['Name']) || email.split('@')[0];
+  MailApp.sendEmail({
+    to: email, name: 'BOE Employee Database',
+    subject: code + ' is your BOE Employee Database sign-in code',
+    body: 'Hi ' + who + ',\n\nYour sign-in code is: ' + code + '\n\nIt works for ' + APP_ACC.CODE_MIN + ' minutes. If you did not ask for it, ignore this email.\n\nBureau of Equipment · DPWH',
+    htmlBody: '<div style="font-family:Tahoma,Segoe UI,Arial,sans-serif;font-size:14px;color:#1b1b1b">' +
+      '<p>Hi ' + app_html_(who) + ',</p><p>Your sign-in code for the <b>BOE Employee Database</b> is:</p>' +
+      '<p style="font-size:28px;font-weight:bold;letter-spacing:6px;color:#0B3A75;margin:12px 0">' + code + '</p>' +
+      '<p>It works for ' + APP_ACC.CODE_MIN + ' minutes. If you did not ask for it, ignore this email.</p>' +
+      '<p style="color:#666;font-size:12px">Bureau of Equipment · Department of Public Works and Highways</p></div>'
+  });
+  cache.put('otp-last:' + email, String(now), APP_ACC.RESEND_SEC);
+  cache.put('otp-hour:' + email, String(hour + 1), 3600);
+  return { sent: true, email: email, minutes: APP_ACC.CODE_MIN, resend: APP_ACC.RESEND_SEC };
+}
+function app_codeHash_(email, code) {
+  return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature('otp|' + email + '|' + code, app_secret_()));
+}
+function app_html_(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+/* ── step 2: check the code and hand out a sign-in pass ── */
+function app_verifyCode_(p) {
+  const email = app_s_(p.email).toLowerCase(), code = app_s_(p.code).replace(/\D/g, '');
+  if (!APP_EMAIL_RE.test(email) || code.length !== 6) throw new Error('Type the 6-digit code from the email.');
+  const cache = CacheService.getScriptCache(), key = 'otp:' + email;
+  let c = null; try { c = JSON.parse(cache.get(key) || 'null'); } catch (e) { c = null; }
+  if (!c || !(c.exp > Date.now())) throw new Error('That code has expired. Ask for a new one.');
+  if (c.tries >= APP_ACC.CODE_TRIES) { cache.remove(key); throw new Error('Too many wrong codes. Ask for a new one.'); }
+  if (app_codeHash_(email, code) !== c.h) {
+    c.tries++;
+    const left = Math.max(1, Math.floor((c.exp - Date.now()) / 1000));
+    if (c.tries >= APP_ACC.CODE_TRIES) cache.remove(key); else cache.put(key, JSON.stringify(c), left);
+    Utilities.sleep(400);
+    throw new Error(c.tries >= APP_ACC.CODE_TRIES ? 'Too many wrong codes. Ask for a new one.' : 'Wrong code. ' + (APP_ACC.CODE_TRIES - c.tries) + ' tries left.');
   }
-  if (app_accOff_(a)) throw new Error('This account is switched off. Ask the Admin.');
   cache.remove(key);
-  return { token: app_token_(user, a), me: app_accMe_(a), days: APP_ACC.DAYS };
+  const a = app_findAccount_(email);
+  if (!a) throw new Error('There is no account for ' + email + '.');
+  if (app_accOff_(a)) throw new Error('This account is switched off. Ask the BOE administrator.');
+  return { token: app_token_(email, a), me: app_accMe_(a), days: APP_ACC.DAYS };
 }
 
-/* A sign-in pass: "username|expiry" plus a signature only this script can make (a secret kept in Script Properties).
-   The signature also covers the password and role, so changing either in the Accounts tab signs that person out. */
-function app_token_(user, a) {
-  const exp = Date.now() + APP_ACC.DAYS * 86400000;
-  const body = user + '|' + exp;
+/* A sign-in pass: "email|expiry" plus a signature only this script can make (a secret kept in Script Properties).
+   The signature also covers the role, so changing someone's role in the Accounts tab signs them out. */
+function app_token_(email, a) {
+  const body = email + '|' + (Date.now() + APP_ACC.DAYS * 86400000);
   return Utilities.base64EncodeWebSafe(body) + '.' + app_sign_(body, a);
 }
 function app_sign_(body, a) {
-  const raw = Utilities.computeHmacSha256Signature(body + '|' + app_s_(a['Password']) + '|' + app_accRole_(a), app_secret_());
-  return Utilities.base64EncodeWebSafe(raw).replace(/=+$/, '');
+  return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(body + '|' + app_accRole_(a), app_secret_())).replace(/=+$/, '');
 }
 function app_secret_() {
   const P = PropertiesService.getScriptProperties();
@@ -225,14 +296,13 @@ function app_checkToken_(token) {
   if (!t || dot < 1) throw out('Please sign in.');
   let body = '';
   try { body = Utilities.newBlob(Utilities.base64DecodeWebSafe(t.slice(0, dot))).getDataAsString(); } catch (e) { throw out(); }
-  const bar = body.lastIndexOf('|'), user = body.slice(0, bar), exp = Number(body.slice(bar + 1));
-  if (!user || !(exp > Date.now())) throw out('Your sign-in has expired. Please sign in again.');
-  const a = app_accounts_(app_ss_()).rows.find(r => app_s_(r['Username']).toLowerCase() === user);
-  if (!a || !app_s_(a['Password']) || app_sign_(body, a) !== t.slice(dot + 1)) throw out();
-  if (app_accOff_(a)) throw out('This account is switched off. Ask the Admin.');
+  const bar = body.lastIndexOf('|'), email = body.slice(0, bar), exp = Number(body.slice(bar + 1));
+  if (!email || !(exp > Date.now())) throw out('Your sign-in has expired. Please sign in again.');
+  const a = app_findAccount_(email);
+  if (!a || app_sign_(body, a) !== t.slice(dot + 1)) throw out();
+  if (app_accOff_(a)) throw out('This account is switched off. Ask the BOE administrator.');
   return app_accMe_(a);
 }
-
 
 /* ▶ Run once from the editor */
 function setupApp() {
@@ -262,13 +332,17 @@ function checkApp() {
   let acc = [];
   try { acc = app_accounts_(app_ss_()).rows; } catch (e) { acc = []; }
   const live = acc.filter(a => !app_accOff_(a));
-  const noPw = live.filter(a => !app_s_(a['Password'])).map(a => app_s_(a['Username']));
+  const bad = live.map(a => app_accEmail_(a)).filter(e => !APP_EMAIL_RE.test(e));
+  const notDpwh = live.map(a => app_accEmail_(a)).filter(e => APP_EMAIL_RE.test(e) && !/@dpwh\.gov\.ph$/.test(e));
+  let quota = '?'; try { quota = MailApp.getRemainingDailyQuota(); } catch (e) { quota = 'not allowed yet (' + e.message + ')'; }
   out.push('Loaded in ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s',
     '• ' + d.employees.length + ' employees, ' + d.hist.length + ' history entries',
     '• Data size: ' + Math.round(JSON.stringify(d).length / 1024) + ' KB',
     '• Extra tabs missing: ' + (d.needsUpgrade.length ? d.needsUpgrade.join(', ') + ' (run upgradeSheets)' : 'none'),
     '', 'Accounts tab: ' + live.length + ' active account(s), ' + live.filter(a => app_accRole_(a) === 'Admin').length + ' Admin',
-    noPw.length ? '• No password yet (cannot sign in): ' + noPw.join(', ') : '• Every active account has a password',
+    bad.length ? '• Not an email address (cannot sign in): ' + bad.join(', ') : '• Every active account has an email address',
+    notDpwh.length ? '• Not a DPWH email: ' + notDpwh.join(', ') : '• All are @dpwh.gov.ph',
+    '• Sign-in codes this script can still email today: ' + quota,
     '', 'The page is on GitHub, so no HTML file is needed here. After changing a .gs file: Deploy → Manage deployments → ✏️ → Version: New version → Deploy.');
   return app_say_('✅ Server side works', out.join('\n'));
 }
@@ -318,7 +392,7 @@ function getBootstrap() {
     hist: pack(T.hist), pd: pack(T.pd), cd: pack(T.cd), seats: pack(T.seats), pos: pack(T.pos), off: pack(T.off), pay: pack(T.pay),
     log: log,
     users: me.role !== 'Admin' ? [] : APP_ME_
-      ? app_accounts_(ss).rows.map(a => ({ email: app_s_(a['Username']).toLowerCase(), username: app_s_(a['Username']).toLowerCase(), name: app_s_(a['Name']), role: app_accRole_(a), active: app_accOff_(a) ? 'No' : 'Yes', hasPassword: !!app_s_(a['Password']) }))
+      ? app_accounts_(ss).rows.map(a => ({ email: app_accEmail_(a), name: app_s_(a['Name']), role: app_accRole_(a), active: app_accOff_(a) ? 'No' : 'Yes' }))
       : pack(T.users).map(u => ({ email: app_s_(u['Email']), name: app_s_(u['Name']), role: app_s_(u['Role']) || 'Viewer', active: app_s_(u['Active']) || 'Yes' })),
     signIn: !!APP_ME_,
     lists: { plantillaTypes: APP.PLANTILLA_TYPES, contractTypes: APP.CONTRACT_TYPES, moveTypes: APP.MOVE_TYPES, endTypes: APP.END_TYPES,
