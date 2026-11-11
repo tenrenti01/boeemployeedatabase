@@ -2058,7 +2058,7 @@ function viewSeats() {
 /* ═══════════════════════ organizational chart ═══════════════════════ */
 /* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
    designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone:
-   engineers first, then by salary grade, highest first. */
+   engineers first, then by salary grade, highest first; same grade by pay, then by longest service. */
 const orgName = e => (e['First Name'] + (e['Middle Name'] ? ' ' + e['Middle Name'][0] + '.' : '') + ' ' + e['Last Name'] + (e['Suffix'] ? ' ' + e['Suffix'] : '')).toUpperCase();
 function orgIndex() {
   const at = {}, lost = [];
@@ -2069,9 +2069,12 @@ function orgIndex() {
     if (code === '' || !IX.off[code]) { lost.push(e); return; }
     (at[code] = at[code] || []).push(e);
   });
-  // Who sits higher: engineers first, then the higher salary grade (plantilla and CoS / JO mixed), plantilla first on a tie
+  // Who sits higher: engineers first, then the higher salary grade (plantilla and CoS / JO mixed).
+  // Same grade: the higher pay first (step, or daily rate x 22), then the longer service, then plantilla before CoS / JO.
   const sg = e => Number(C(e).sg) || 0, cos = e => C(e).kind === 'plantilla' ? 0 : 1, eng = e => /^engineer\b/i.test(String(C(e).position)) ? 0 : 1;
-  const order = (a, b) => eng(a) - eng(b) || sg(b) - sg(a) || cos(a) - cos(b) || fullName(a).localeCompare(fullName(b));
+  const pay = e => { const c = C(e); return c.kind === 'contract' ? (Number(c.daily) || 0) * 22 : Number(c.monthly) || 0; };
+  const since = e => String(C(e).start || '9999');
+  const order = (a, b) => eng(a) - eng(b) || sg(b) - sg(a) || pay(b) - pay(a) || since(a).localeCompare(since(b)) || cos(a) - cos(b) || fullName(a).localeCompare(fullName(b));
   Object.keys(at).forEach(k => at[k].sort(order)); lost.sort(order);
   // The head is still the OIC, else the highest-graded plantilla employee (a Director outranks an Engineer)
   const head = code => { const l = at[code] || []; return l.find(e => C(e).type === 'Designation (OIC)') || l.filter(e => C(e).kind === 'plantilla').sort((a, b) => sg(b) - sg(a) || fullName(a).localeCompare(fullName(b)))[0] || null; };
