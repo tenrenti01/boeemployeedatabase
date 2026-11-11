@@ -640,6 +640,34 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
 /* ═══ Simple view: plain grey desktop-program look, same as the OKB approval queue.
    It is the default; "Modern view" in the top bar switches back (remembered per computer). ═══ */
 .themeBtn .tOn{display:none}
+/* Sign-in screen (boerecords.online) and the account button */
+.acctBtn svg{width:14px;height:14px;flex:none}
+@media (max-width:1500px){html:not(.classic) .acctBtn .aOn{display:none}html:not(.classic) .acctBtn{padding:5px 8px}}
+@media (max-width:1100px){.acctBtn .aOn{display:none}}
+.signin{min-height:calc(100vh - 40px);display:grid;place-items:center;padding:24px 16px}
+.siBox{width:min(380px,100%);background:var(--card);border-radius:var(--r);box-shadow:var(--shadow-card-hi);overflow:hidden;border:1px solid var(--line)}
+.siTitle{background:var(--grad);color:#fff;font:700 .95rem var(--cond);letter-spacing:.08em;text-transform:uppercase;padding:12px 18px}
+.siBody{padding:20px 22px 18px;display:grid;gap:12px}
+.siHead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.siHead .seal{width:46px;height:46px;font-size:.9rem;flex:none}
+.siLogo{width:50px;height:50px;object-fit:contain;flex:none}
+.siHead b{display:block;font:700 1.35rem var(--cond);color:var(--head);text-transform:uppercase;letter-spacing:.02em}
+.siHead span{color:var(--muted);font-size:.85rem}
+.siField{display:grid;gap:5px}
+.siField span{font-size:.8rem;font-weight:600;color:var(--muted)}
+.siField input{width:100%;box-sizing:border-box}
+.siErr{color:var(--bad);background:var(--bad-soft);border-radius:var(--r-sm);padding:8px 10px;font-size:.88rem}
+.siNote{color:var(--warn);background:var(--warn-soft);border-radius:var(--r-sm);padding:8px 10px;font-size:.88rem}
+.siGo{width:100%;justify-content:center;padding-top:10px;padding-bottom:10px}
+.siHelp{margin:2px 0 0;color:var(--muted);font-size:.8rem;text-align:center}
+html.classic .signin{min-height:calc(100vh - 20px)}
+html.classic .siBox{border:1px solid #707070;border-radius:0;box-shadow:0 4px 14px rgba(0,0,0,.12);background:#fff}
+html.classic .siTitle{background:linear-gradient(#FFFFFF,#E9E9E9);color:#222;border-bottom:1px solid #A0A0A0;font:bold 12px Tahoma,"Segoe UI",Verdana,sans-serif;letter-spacing:0;text-transform:none;padding:6px 10px}
+html.classic .siHead b{font:bold 16px Tahoma,"Segoe UI",Verdana,sans-serif;text-transform:none;color:#0B3A75}
+html.classic .siErr,html.classic .siNote{border-radius:0;border:1px solid #C9C28A;background:#FFFFE1;color:#5A3A00}
+html.classic .siErr{border-color:#E0A0A0;background:#FFF0F0;color:#8A1010}
+html.classic .siField span{font-weight:normal;color:#333}
+@media (max-width:780px),(pointer:coarse){.signin .siField input{font-size:16px!important}}   /* iPhone zooms into boxes under 16px */
 .themeBtn svg{width:14px;height:14px;flex:none}
 @media (max-width:1500px){html:not(.classic) .themeBtn .tOff{display:none}html:not(.classic) .themeBtn{padding:5px 8px}}
 html.classic .themeBtn svg{width:12px;height:12px}
@@ -870,7 +898,6 @@ html.classic .statusbar:empty{display:none}
 @media print{html.classic body{background:#fff}}
 </style>
 <script>try{if(localStorage.getItem('boe.theme')!=='modern')document.documentElement.classList.add('classic')}catch(e){document.documentElement.classList.add('classic')}</script>
-<script>try{window.top.postMessage({boe:'edms',state:'loaded'},'*')}catch(e){}</script>
 </head>
 <body>
 <header class="top" id="top" hidden>
@@ -890,6 +917,7 @@ html.classic .statusbar:empty{display:none}
     <span class="sync" id="sync" hidden></span>
     <button type="button" class="btn small themeBtn" id="themeBtn" data-act="theme" title="Switch between the simple grey look and the modern look" aria-label="Switch between the simple grey look and the modern look"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h18v18H3zM3 9h18M9 21V9"/></svg><span class="tOn">Modern view</span><span class="tOff">Simple view</span></button>
     <button type="button" class="btn primary" id="newHireBtn" data-act="newHire" hidden>＋ New hire</button>
+    <button type="button" class="btn small acctBtn" id="acctBtn" data-act="account" title="Account · sign out" aria-label="Account and sign out" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg><span class="aOn">Sign out</span></button>
     <div class="who" id="who"></div>
   </div>
 </header>
@@ -957,11 +985,96 @@ const canEdit = () => D && (D.me.role === 'Admin' || D.me.role === 'Editor');
 const mailto = e => (e ? `<a class="mail" href="mailto:${esc(e)}" title="Send an email to ${esc(e)}">${esc(e)}</a>` : '—');
 
 /* ═══════════════════════ server bridge ═══════════════════════ */
+const inAppsScript = () => !!(window.google && google.script && google.script.run);
 function call(fn, arg) {
+  if (!inAppsScript()) return api(fn, arg);
   return new Promise((resolve, reject) => {
-    if (!(window.google && google.script && google.script.run)) return reject(new Error('Open this page from the web app link.'));
     google.script.run.withSuccessHandler(resolve).withFailureHandler(e => reject(new Error((e && e.message) || String(e))))[fn](arg);
   });
+}
+
+/* ═══════════════════════ sign-in (boerecords.online) ═══════════════════════ */
+/* The page lives on GitHub; the data stays in the Google Sheet. Each request goes to the Apps Script /exec link
+   (window.EDMS_API, set in config.js) with the sign-in pass from the Accounts tab. */
+const SESSION_KEY = 'boe.session';
+let SESSION = null;
+function readSession() {
+  try { const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); return s && s.token && s.exp > Date.now() ? s : null; }
+  catch (e) { return null; }
+}
+function writeSession(s) {
+  SESSION = s;
+  try { if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s)); else localStorage.removeItem(SESSION_KEY); } catch (e) { /* private window: stays for this visit only */ }
+}
+async function api(fn, arg) {
+  const url = String(window.EDMS_API || '').trim();
+  if (!/^https?:\/\/\S+$/.test(url)) throw new Error('The server link isn\'t set yet. Paste the Apps Script /exec link in config.js on GitHub.');
+  let r, j;
+  try { r = await fetch(url, { method: 'POST', body: JSON.stringify({ fn: fn, arg: arg === undefined ? null : arg, token: SESSION ? SESSION.token : '' }) }); }
+  catch (e) { throw new Error('Couldn\'t reach the server. Check your internet connection and try again.'); }
+  try { j = await r.json(); }
+  catch (e) { throw new Error('The server sent back something unexpected (' + r.status + '). Check the link in config.js, and that the Apps Script is deployed for Anyone.'); }
+  if (j && j.ok) return j.result;
+  const msg = (j && j.error) || 'The server said no.';
+  if (j && j.signIn && fn !== 'signIn') signOut(msg);
+  throw new Error(msg);
+}
+function start() {
+  if (inAppsScript()) return boot();
+  SESSION = readSession();
+  if (!SESSION) return showSignIn();
+  window.__ME = SESSION.user;
+  boot();
+}
+function showSignIn(note) {
+  window.__booted = true;                                   // the "still loading" safety net must not fire behind this screen
+  $('#top').hidden = true; closeModal();
+  const sb = $('#statusbar'); if (sb) sb.innerHTML = '';
+  $('#view').innerHTML = `<div class="signin"><form class="siBox" id="siForm" novalidate autocomplete="on">
+    <div class="siTitle">BOE Employee Database</div>
+    <div class="siBody">
+      <div class="siHead"><img class="siLogo" src="assets/dpwh-logo.png" alt="DPWH" onerror="this.outerHTML='<div class=&quot;seal&quot;>BOE</div>'"><div><b>Sign in</b><span>Bureau of Equipment · DPWH</span></div></div>
+      ${note ? `<div class="siNote">${esc(note)}</div>` : ''}
+      <label class="siField"><span>Username</span><input id="siUser" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+      <label class="siField"><span>Password</span><input id="siPass" name="password" type="password" autocomplete="current-password" required></label>
+      <div class="siErr" id="siErr" role="alert" hidden></div>
+      <button class="btn primary siGo" id="siGo" type="submit">Sign in</button>
+      <p class="siHelp">No account, or forgot your password? Ask the BOE administrator.</p>
+    </div></form></div>`;
+  let u = ''; try { u = localStorage.getItem('boe.lastUser') || ''; } catch (e) { /* ignore */ }
+  $('#siUser').value = u;
+  if (!matchMedia('(pointer: coarse)').matches) (u ? $('#siPass') : $('#siUser')).focus();
+  $('#siForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const err = $('#siErr'), go = $('#siGo'), user = $('#siUser').value.trim(), pass = $('#siPass').value;
+    err.hidden = true;
+    if (!user || !pass) { err.textContent = 'Type your username and password.'; err.hidden = false; return; }
+    go.disabled = true; go.textContent = 'Signing in…';
+    try {
+      const r = await api('signIn', { username: user, password: pass });
+      writeSession({ token: r.token, user: r.me.username, name: r.me.name, role: r.me.role, exp: Date.now() + r.days * 86400000 - 60000 });
+      try { localStorage.setItem('boe.lastUser', r.me.username); } catch (e) { /* ignore */ }
+      window.__ME = r.me.username; window.__booted = false;
+      $('#view').innerHTML = '<div class="loading"><div class="spin"></div><span class="label">Loading the masterlist…</span></div>';
+      boot();
+    } catch (e) {
+      err.textContent = e.message; err.hidden = false;
+      go.disabled = false; go.textContent = 'Sign in';
+      $('#siPass').select();
+    }
+  });
+}
+function signOut(note) {
+  writeSession(null); clearCache();
+  PENDING.length = 0; BASE = null; D = null;
+  showSignIn(note || '');
+}
+function formAccount() {
+  if (!SESSION) return;
+  openModal(`<header><div><span class="label">Signed in</span><h2>${esc(SESSION.name || SESSION.user)}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
+    <div class="body"><dl class="kv"><dt>Username</dt><dd class="mono">${esc(SESSION.user)}</dd><dt>Role</dt><dd>${esc((D && D.me.role) || SESSION.role)}</dd></dl>
+      <p class="muted" style="font-size:.9rem;margin:10px 0 0">To change your password, ask the BOE administrator. Signing out also clears the copy of the records kept on this device.</p></div>
+    <footer><span></span><div class="actions"><button type="button" class="btn" data-act="close">Close</button><button type="button" class="btn danger" data-act="signOutNow">Sign out</button></div></footer>`);
 }
 
 /* ═══════════════════════ indexes ═══════════════════════ */
@@ -1081,7 +1194,9 @@ async function boot() {
     if (cached) softRender(); else go(location.hash.replace('#', '') || 'dashboard');
     badge(); pump();
   } catch (e) {
-    REFRESHING = false; badge();
+    REFRESHING = false;
+    if (!inAppsScript() && !SESSION) return;                 // signed out meanwhile: the sign-in screen is already showing
+    badge();
     if (cached) toast('Couldn\'t refresh from Google: ' + e.message + ' You\'re seeing the last-loaded data.', 'err', 8000);
     else { window.__booted = true; window.__bootFail('Couldn\'t load the masterlist', e.message); }
   }
@@ -1098,6 +1213,7 @@ function chrome() {
   $('#who').innerHTML = '<b>' + esc(D.me.name || D.me.email) + '</b>' + esc(D.me.role);
   $('#newHireBtn').hidden = !canEdit();
   $('#usersTab').hidden = D.me.role !== 'Admin';
+  $('#acctBtn').hidden = !SESSION;
   pubBadge();
   renderStatus();
 }
@@ -2686,7 +2802,7 @@ const FIELDS = {
     auth: { label: 'Authorized monthly', type: 'num', get: s => numOrNull(s['Authorized Monthly (PHP)']) }
   },
   users: {
-    email: { label: 'Email', type: 'text', get: u => u.email }, name: { label: 'Name', type: 'text', get: u => u.name },
+    email: { label: 'Email', type: 'text', get: u => u.email }, username: { label: 'Username', type: 'text', get: u => u.username || u.email }, name: { label: 'Name', type: 'text', get: u => u.name },
     role: { label: 'Role', type: 'cat', get: u => u.role }, active: { label: 'Active', type: 'cat', get: u => (u.active === 'Yes' ? 'a' : 'b') + u.email }
   }
 };
@@ -3583,6 +3699,48 @@ function formCOE(id) {
 }
 
 /* ═══════════════════════ admin ═══════════════════════ */
+/* Admin page blocks. With sign-in accounts (boerecords.online) the Accounts tab replaces the Google-email users list,
+   and the public test link no longer applies. */
+function accountsPanel(list) {
+  return `<section class="panel">
+    <div class="panelHead"><h3>${hi('key')}Accounts</h3><span class="label">sign-in</span></div>
+    <p class="muted" style="font-size:.9rem;max-width:84ch">Who can sign in. Add people, set passwords, change roles or switch someone off in the <b>Accounts</b> tab of the Google Sheet.
+      Changing a person's password or role there signs them out everywhere. <b>Admin</b> = everything · <b>Editor</b> = can save changes · <b>Viewer</b> = can only look.</p>
+    <div class="tableWrap"><table>
+      <thead><tr>${sortTh('users', 'username', 'Username')}${sortTh('users', 'name', 'Name')}${sortTh('users', 'role', 'Role')}${sortTh('users', 'active', 'Active')}<th>Password</th></tr></thead>
+      <tbody>${list.map(u => `
+        <tr><td class="mono" style="font-size:.88rem">${esc(u.username || u.email)}${(u.username || u.email) === D.me.email ? ' <span class="pill filled">you</span>' : ''}</td><td>${esc(u.name || '—')}</td>
+          <td>${esc(u.role)}</td><td>${u.active === 'Yes' ? '<span class="pill filled">Active</span>' : '<span class="pill sep">Switched off</span>'}</td>
+          <td>${u.hasPassword ? '<span class="muted">set</span>' : '<span class="pill warn">none yet</span>'}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">No accounts yet.</td></tr>'}
+      </tbody></table></div>
+  </section>`;
+}
+function usersPanel(list) {
+  return `  <section class="panel">
+    <div class="panelHead"><h3>${hi('key')}Users</h3><button class="btn primary small" data-act="addUser">＋ Add user</button></div>
+    <p class="muted" style="font-size:.9rem">Who can open this system. Each person also needs the spreadsheet shared with them: Editor to save changes, Viewer to only look.</p>
+    <div class="tableWrap"><table>
+      <thead><tr>${sortTh('users', 'email', 'Email')}${sortTh('users', 'name', 'Name')}${sortTh('users', 'role', 'Role')}${sortTh('users', 'active', 'Active')}<th></th></tr></thead>
+      <tbody>${list.map(u => `
+        <tr><td class="mono" style="font-size:.88rem">${mailto(u.email)}${u.email === D.me.email ? ' <span class="pill filled">you</span>' : ''}</td><td>${esc(u.name || '—')}</td>
+          <td>${esc(u.role)}</td><td>${u.active === 'Yes' ? '<span class="pill filled">Active</span>' : '<span class="pill sep">Switched off</span>'}</td>
+          <td><button class="btn small" data-act="editUser" data-email="${esc(u.email)}">Edit</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No users yet.</td></tr>'}
+      </tbody></table></div>
+  </section>`;
+}
+function publicPanel() {
+  return `  <section class="panel"><div class="panelHead"><h3>${hi('globe')}Public test link</h3><span class="pill ${D.publicLink ? 'warn' : 'filled'}">${D.publicLink ? 'ON · open to anyone' : 'Off · sign-in only'}</span></div>
+    <p class="muted" style="font-size:.9rem;max-width:80ch">For testing. A second link that opens without signing in. While this is <b>On</b>, anyone with that link can see every record and add, change or remove them (history edits still need the master password). Your regular link keeps working with sign-in as before.</p>
+    <div class="actions"><button class="btn ${D.publicLink ? 'danger' : 'primary'}" data-act="publicToggle">${D.publicLink ? 'Switch the public link off' : 'Switch the public link on'}</button></div>
+    <details><summary class="label" style="cursor:pointer">How to make the public link (once)</summary>
+      <ol class="muted" style="font-size:.9rem;margin:8px 0 0;padding-left:20px;display:grid;gap:4px">
+        <li>In Apps Script: <b>Deploy → New deployment</b> → ⚙ → <b>Web app</b>.</li>
+        <li>Description: <i>Public test</i>. Execute as: <b>Me</b>. Who has access: <b>Anyone</b>. Click Deploy.</li>
+        <li>Copy that Web app URL. That's the public test link. Keep using your old link for normal work.</li>
+        <li>When testing is done, switch it off here. To remove it for good: Deploy → Manage deployments → pick <i>Public test</i> → Archive.</li>
+      </ol></details>
+  </section>`;
+}
 function viewAdmin() {
   if (D.me.role !== 'Admin') return '<p class="empty">Only Admins can open this page.</p>';
   const list = sortRows('users', D.users || []);
@@ -3605,28 +3763,8 @@ function viewAdmin() {
     }).join('')}</div>
     ${(D.needsUpgrade || []).indexOf('Offices tree') >= 0 ? '<div class="note warnNote">The Offices tab has no <b>Parent Code</b> and <b>Level</b> columns yet. Run <b>upgradeSheets</b> once, then reload.</div>' : ''}
   </section>
-  <section class="panel">
-    <div class="panelHead"><h3>${hi('key')}Users</h3><button class="btn primary small" data-act="addUser">＋ Add user</button></div>
-    <p class="muted" style="font-size:.9rem">Who can open this system. Each person also needs the spreadsheet shared with them: Editor to save changes, Viewer to only look.</p>
-    <div class="tableWrap"><table>
-      <thead><tr>${sortTh('users', 'email', 'Email')}${sortTh('users', 'name', 'Name')}${sortTh('users', 'role', 'Role')}${sortTh('users', 'active', 'Active')}<th></th></tr></thead>
-      <tbody>${list.map(u => `
-        <tr><td class="mono" style="font-size:.88rem">${mailto(u.email)}${u.email === D.me.email ? ' <span class="pill filled">you</span>' : ''}</td><td>${esc(u.name || '—')}</td>
-          <td>${esc(u.role)}</td><td>${u.active === 'Yes' ? '<span class="pill filled">Active</span>' : '<span class="pill sep">Switched off</span>'}</td>
-          <td><button class="btn small" data-act="editUser" data-email="${esc(u.email)}">Edit</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty">No users yet.</td></tr>'}
-      </tbody></table></div>
-  </section>
-  <section class="panel"><div class="panelHead"><h3>${hi('globe')}Public test link</h3><span class="pill ${D.publicLink ? 'warn' : 'filled'}">${D.publicLink ? 'ON · open to anyone' : 'Off · sign-in only'}</span></div>
-    <p class="muted" style="font-size:.9rem;max-width:80ch">For testing. A second link that opens without signing in. While this is <b>On</b>, anyone with that link can see every record and add, change or remove them (history edits still need the master password). Your regular link keeps working with sign-in as before.</p>
-    <div class="actions"><button class="btn ${D.publicLink ? 'danger' : 'primary'}" data-act="publicToggle">${D.publicLink ? 'Switch the public link off' : 'Switch the public link on'}</button></div>
-    <details><summary class="label" style="cursor:pointer">How to make the public link (once)</summary>
-      <ol class="muted" style="font-size:.9rem;margin:8px 0 0;padding-left:20px;display:grid;gap:4px">
-        <li>In Apps Script: <b>Deploy → New deployment</b> → ⚙ → <b>Web app</b>.</li>
-        <li>Description: <i>Public test</i>. Execute as: <b>Me</b>. Who has access: <b>Anyone</b>. Click Deploy.</li>
-        <li>Copy that Web app URL. That's the public test link. Keep using your old link for normal work.</li>
-        <li>When testing is done, switch it off here. To remove it for good: Deploy → Manage deployments → pick <i>Public test</i> → Archive.</li>
-      </ol></details>
-  </section>
+  ${D.signIn ? accountsPanel(list) : usersPanel(list)}
+  ${D.signIn ? '' : publicPanel()}
   <div class="grid2">
     <section class="panel"><div class="panelHead"><h3>${hi('lock')}Master password</h3><span class="label">edit &amp; delete</span></div>
       <p class="muted" style="font-size:.9rem">Needed to edit or delete history entries and to delete a person permanently. It's kept in the script, not in the spreadsheet.</p>
@@ -3746,7 +3884,7 @@ const hi = name => '<span class="hico" aria-hidden="true"><svg viewBox="0 0 24 2
 /* ═══════════════════════ public test-link badge ═══════════════════════ */
 function pubBadge() {
   const b = $('#pubBadge'); if (!b || !D) return;
-  const on = D.me.isPublic || (D.me.role === 'Admin' && D.publicLink);
+  const on = !D.signIn && (D.me.isPublic || (D.me.role === 'Admin' && D.publicLink));
   b.hidden = !on;
   if (!on) return;
   b.querySelector('span').textContent = D.me.isPublic ? 'Public test link' : 'Public test link is ON';
@@ -4010,6 +4148,11 @@ document.addEventListener('click', ev => {
   if (act === 'backdrop') { if (ev.target === a) closeModal(); return; }
   if (act === 'close') return closeModal();
   if (act === 'theme') return toggleTheme();
+  if (act === 'account') return formAccount();
+  if (act === 'signOutNow') {
+    if (PENDING.length || SYNCING) return toast('Wait a moment: your changes are still saving.', 'err', 4000);
+    return signOut('You are signed out.');
+  }
   if (act === 'profile') return go('profile', id);
   if (act === 'kind') { S.kind = a.dataset.kind; return render(); }
   if (act === 'more') {
@@ -4148,7 +4291,7 @@ $('#q').addEventListener('input', ev => {
 });
 
 window.__appReady = true;
-boot();
+start();
 </script>
 </body>
 </html>

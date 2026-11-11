@@ -74,19 +74,165 @@ const APP = {
 
 /* ───────────────────────── entry points ───────────────────────── */
 
-/* The page is split into Index + Script1, Script2, ... so each file is small enough to paste in one go */
+/* ───────────────────────── web API for boerecords.online ─────────────────────────
+   The page lives on GitHub Pages (boerecords.online) and talks to this script through doPost.
+   Deploy as a Web app with  Execute as: Me  ·  Who has access: Anyone.
+   People sign in with a username and password from the "Accounts" tab; no Google account is needed. */
+
+var APP_WEB_ = false;   // true while answering a web request
+var APP_ME_ = null;     // the signed-in account for this request, set by doPost after the token checks out
+
+const APP_ACC = {
+  TAB: 'Accounts',
+  HEADERS: ['Username', 'Password', 'Name', 'Role', 'Active', 'Notes'],
+  ROLES: ['Admin', 'Editor', 'Viewer'],
+  DAYS: 7,              // a sign-in lasts this long on a device (Sign out ends it sooner)
+  TRIES: 5,             // wrong passwords allowed per username…
+  LOCK_MIN: 15          // …before waiting this many minutes
+};
+
+/* What the page may ask for. Anything not listed here can't be called from outside. */
+const APP_API_ = {
+  getBootstrap: () => getBootstrap(), getPhoto: a => getPhoto(a),
+  saveNewHire: a => saveNewHire(a), saveJobChange: a => saveJobChange(a), saveNameChange: a => saveNameChange(a),
+  savePersonal: a => savePersonal(a), savePhoto: a => savePhoto(a), separateEmployee: a => separateEmployee(a),
+  saveSeat: a => saveSeat(a), saveOrderFile: a => saveOrderFile(a), removeOrderFile: a => removeOrderFile(a),
+  saveLicense: a => saveLicense(a), removeLicense: a => removeLicense(a), saveOffice: a => saveOffice(a), deleteOffice: a => deleteOffice(a),
+  updateEntry: a => updateEntry(a), deleteEntry: a => deleteEntry(a), deleteEmployee: a => deleteEmployee(a),
+  setMasterPassword: a => setMasterPassword(a), saveSettings: a => saveSettings(a)
+};
+
+/* Opening the /exec link in a browser just says the server is up (and makes the Accounts tab the first time).
+   It is plain JSON on purpose: no HTML page, so nothing here can be scripted. */
 function doGet() {
-  const t = HtmlService.createTemplateFromFile('Index');
-  // Who is signed in, so the page only reuses data this same person loaded before
-  let email = '';
-  try { email = String(Session.getActiveUser().getEmail() || '').trim().toLowerCase(); } catch (e) { email = ''; }
-  t.meJson = JSON.stringify(email || 'public').replace(/</g, '\\u003c');   // 'public' = a test-link visitor
-  return t.evaluate()
-    .setTitle(APP.NAME)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    // Lets boerecords.online show the app inside its page (Google sign-in still applies)
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  APP_WEB_ = true;
+  const out = { ok: true, app: APP.NAME, message: 'The BOE Employee Database server is running. Open the app at boerecords.online.' };
+  try { app_accounts_(app_ss_()); out.accountsTab = 'ready'; } catch (e) { out.ok = false; out.error = String(e && e.message || e); }
+  return app_out_(out);
 }
+
+function doPost(e) {
+  APP_WEB_ = true; APP_ME_ = null;
+  let req;
+  try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); }
+  catch (x) { return app_out_({ ok: false, error: 'The server could not read that request.' }); }
+  const fn = app_s_(req.fn);
+  try {
+    if (fn === 'signIn') return app_out_({ ok: true, result: app_signIn_(req.arg || {}) });
+    APP_ME_ = app_checkToken_(req.token);
+    if (fn === 'whoAmI') return app_out_({ ok: true, result: APP_ME_ });
+    if (!Object.prototype.hasOwnProperty.call(APP_API_, fn)) throw new Error('Unknown request "' + fn + '".');
+    return app_out_({ ok: true, result: APP_API_[fn](req.arg) });
+  } catch (err) {
+    return app_out_({ ok: false, error: String((err && err.message) || err), signIn: !!(err && err.signIn) });
+  } finally {
+    APP_ME_ = null;
+  }
+}
+function app_out_(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/* The Accounts tab. Made the first time it's needed, filled with the people already in the Users tab
+   (usernames from their emails, passwords blank: type one for each person who may sign in). */
+function app_accounts_(ss) {
+  if (!ss.getSheetByName(APP_ACC.TAB)) {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(20000);
+    try { if (!ss.getSheetByName(APP_ACC.TAB)) app_makeAccounts_(ss); }
+    finally { lock.releaseLock(); }
+  }
+  return app_read_(ss, APP_ACC.TAB);
+}
+function app_makeAccounts_(ss) {
+  const sh = ss.insertSheet(APP_ACC.TAB);
+  const H = APP_ACC.HEADERS;
+  const rows = [], taken = {};
+  let users = [];
+  try { users = app_read_(ss, APP.T.users).rows; } catch (e) { users = []; }
+  users.forEach(u => {
+    const email = app_s_(u['Email']).toLowerCase();
+    if (!email) return;
+    let base = email.split('@')[0].replace(/[^a-z0-9._-]/g, '') || 'user', name = base, n = 2;
+    while (taken[name]) name = base + (n++);
+    taken[name] = true;
+    const role = APP_ACC.ROLES.indexOf(app_s_(u['Role'])) >= 0 ? app_s_(u['Role']) : 'Viewer';
+    rows.push([name, '', app_s_(u['Name']), role, /^(no|n|false|inactive)$/i.test(app_s_(u['Active'])) ? 'No' : 'Yes', 'From the Users tab (' + email + ')']);
+  });
+  if (!rows.some(r => r[3] === 'Admin')) rows.unshift(['admin', '', 'Administrator', 'Admin', 'Yes', 'Type a password, then sign in with it']);
+  const body = Math.max(rows.length + 200, 300);
+  if (sh.getMaxRows() < body + 1) sh.insertRowsAfter(sh.getMaxRows(), body + 1 - sh.getMaxRows());
+  sh.getRange(1, 1, 1, H.length).setValues([H]).setFontWeight('bold').setBackground('#1F3A5F').setFontColor('#FFFFFF');
+  sh.getRange(2, 1, body, 2).setNumberFormat('@');                        // usernames and passwords stay exactly as typed
+  sh.getRange(1, 2).setNote('Type each person\'s password here. Blank = that person can\'t sign in.\nChanging a password signs that person out everywhere.');
+  sh.getRange(1, 4).setNote('Admin = everything · Editor = can save changes · Viewer = can only look');
+  sh.getRange(1, 5).setNote('No = switched off (they are signed out at once)');
+  sh.getRange(2, 4, body, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(APP_ACC.ROLES, true).setAllowInvalid(false).build());
+  sh.getRange(2, 5, body, 1).setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(['Yes', 'No'], true).setAllowInvalid(false).build());
+  if (rows.length) sh.getRange(2, 1, rows.length, H.length).setValues(rows);
+  sh.setFrozenRows(1);
+  sh.setColumnWidths(1, 2, 150); sh.setColumnWidth(3, 220); sh.setColumnWidths(4, 2, 90); sh.setColumnWidth(6, 320);
+  return sh;
+}
+function app_accRole_(a) {
+  const r = app_s_(a['Role']).toLowerCase();
+  return APP_ACC.ROLES.find(x => x.toLowerCase() === r) || 'Viewer';
+}
+function app_accOff_(a) { return /^(no|n|false|inactive|off)$/i.test(app_s_(a['Active'])); }
+function app_accMe_(a) {
+  const u = app_s_(a['Username']).toLowerCase();
+  return { email: u, username: u, name: app_s_(a['Name']) || u, role: app_accRole_(a) };
+}
+
+function app_signIn_(p) {
+  const user = app_s_(p.username).toLowerCase(), pw = p.password === undefined || p.password === null ? '' : String(p.password);
+  if (!user || !pw) throw new Error('Type your username and password.');
+  const cache = CacheService.getScriptCache(), key = 'signin:' + user;
+  const tries = Number(cache.get(key) || 0);
+  if (tries >= APP_ACC.TRIES) throw new Error('Too many wrong tries for this username. Wait ' + APP_ACC.LOCK_MIN + ' minutes, then try again.');
+  const a = app_accounts_(app_ss_()).rows.find(r => app_s_(r['Username']).toLowerCase() === user);
+  const real = a ? app_s_(a['Password']) : '';
+  if (!a || !real || real !== pw.trim()) {
+    cache.put(key, String(tries + 1), APP_ACC.LOCK_MIN * 60);
+    Utilities.sleep(600);
+    throw new Error('Wrong username or password.');
+  }
+  if (app_accOff_(a)) throw new Error('This account is switched off. Ask the Admin.');
+  cache.remove(key);
+  return { token: app_token_(user, a), me: app_accMe_(a), days: APP_ACC.DAYS };
+}
+
+/* A sign-in pass: "username|expiry" plus a signature only this script can make (a secret kept in Script Properties).
+   The signature also covers the password and role, so changing either in the Accounts tab signs that person out. */
+function app_token_(user, a) {
+  const exp = Date.now() + APP_ACC.DAYS * 86400000;
+  const body = user + '|' + exp;
+  return Utilities.base64EncodeWebSafe(body) + '.' + app_sign_(body, a);
+}
+function app_sign_(body, a) {
+  const raw = Utilities.computeHmacSha256Signature(body + '|' + app_s_(a['Password']) + '|' + app_accRole_(a), app_secret_());
+  return Utilities.base64EncodeWebSafe(raw).replace(/=+$/, '');
+}
+function app_secret_() {
+  const P = PropertiesService.getScriptProperties();
+  let s = P.getProperty('SIGNIN_SECRET');
+  if (!s) { s = Utilities.getUuid() + Utilities.getUuid(); P.setProperty('SIGNIN_SECRET', s); }
+  return s;
+}
+function app_checkToken_(token) {
+  const out = msg => { const e = new Error(msg || 'Please sign in again.'); e.signIn = true; return e; };
+  const t = app_s_(token), dot = t.indexOf('.');
+  if (!t || dot < 1) throw out('Please sign in.');
+  let body = '';
+  try { body = Utilities.newBlob(Utilities.base64DecodeWebSafe(t.slice(0, dot))).getDataAsString(); } catch (e) { throw out(); }
+  const bar = body.lastIndexOf('|'), user = body.slice(0, bar), exp = Number(body.slice(bar + 1));
+  if (!user || !(exp > Date.now())) throw out('Your sign-in has expired. Please sign in again.');
+  const a = app_accounts_(app_ss_()).rows.find(r => app_s_(r['Username']).toLowerCase() === user);
+  if (!a || !app_s_(a['Password']) || app_sign_(body, a) !== t.slice(dot + 1)) throw out();
+  if (app_accOff_(a)) throw out('This account is switched off. Ask the Admin.');
+  return app_accMe_(a);
+}
+
 function include(name) {
   try { return HtmlService.createHtmlOutputFromFile(name).getContent(); }
   catch (e) { return '<script>window.__missing = (window.__missing || []).concat(' + JSON.stringify(String(name)) + ');<\/script>'; }
@@ -180,7 +326,10 @@ function getBootstrap() {
     employees: pack(T.emp), ids: pack(T.ids), emails: pack(T.emails), elig: pack(T.elig), edu: pack(T.edu), pwd: pack(T.pwd), names: pack(T.names),
     hist: pack(T.hist), pd: pack(T.pd), cd: pack(T.cd), seats: pack(T.seats), pos: pack(T.pos), off: pack(T.off), pay: pack(T.pay),
     log: log,
-    users: me.role === 'Admin' ? pack(T.users).map(u => ({ email: app_s_(u['Email']), name: app_s_(u['Name']), role: app_s_(u['Role']) || 'Viewer', active: app_s_(u['Active']) || 'Yes' })) : [],
+    users: me.role !== 'Admin' ? [] : APP_ME_
+      ? app_accounts_(ss).rows.map(a => ({ email: app_s_(a['Username']).toLowerCase(), username: app_s_(a['Username']).toLowerCase(), name: app_s_(a['Name']), role: app_accRole_(a), active: app_accOff_(a) ? 'No' : 'Yes', hasPassword: !!app_s_(a['Password']) }))
+      : pack(T.users).map(u => ({ email: app_s_(u['Email']), name: app_s_(u['Name']), role: app_s_(u['Role']) || 'Viewer', active: app_s_(u['Active']) || 'Yes' })),
+    signIn: !!APP_ME_,
     lists: { plantillaTypes: APP.PLANTILLA_TYPES, contractTypes: APP.CONTRACT_TYPES, moveTypes: APP.MOVE_TYPES, endTypes: APP.END_TYPES,
              statuses: APP.STATUSES, idTypes: APP.ID_TYPES, reasons: APP.NAME_REASONS, causes: causes.length ? causes : APP.DEFAULT_CAUSES }
   };
@@ -940,7 +1089,10 @@ function app_ss_() {
 }
 
 function app_user_(ss) {
-  const email = String(Session.getActiveUser().getEmail() || '').trim().toLowerCase();
+  if (APP_ME_) return APP_ME_;                                        // a signed-in web request
+  if (APP_WEB_) return { email: '', name: '', role: 'None' };        // a web request without a valid sign-in gets nothing
+  // Run from the Apps Script editor (setupApp, checkApp…): only the owner and editors of the script can do that
+  const email = String(Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail() || '').trim().toLowerCase();
   const users = app_read_(ss, APP.T.users).rows;
   const u = users.find(r => String(r['Email']).trim().toLowerCase() === email);
   let role = u ? String(u['Role'] || 'Viewer') : 'None';
@@ -1021,7 +1173,7 @@ function app_nextId_(ss, name, key, prefix, digits) {
 }
 
 function app_log_(ss, email, action, record, details) {
-  try { app_append_(ss, APP.T.log, { 'Timestamp': new Date(), 'User': email || 'visitor (public link)', 'Action': action, 'Record': record || '', 'Details': details || '' }); }
+  try { app_append_(ss, APP.T.log, { 'Timestamp': new Date(), 'User': email || 'unknown', 'Action': action, 'Record': record || '', 'Details': details || '' }); }
   catch (e) { /* logging must never block a save */ }
 }
 

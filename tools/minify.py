@@ -137,4 +137,5 @@ def main():
           % (after / 1024, before / 1024, 100 - after * 100.0 / before))
 
 
-main()
+if __name__ == '__main__':
+    main()
