@@ -902,6 +902,80 @@ html.classic .statusbar:empty{display:none}
 @media (max-width:1480px){html:not(.classic) .who{display:none}}
 @media (max-width:780px){html.classic body{font-size:13px}}
 @media (max-width:680px){html.classic .statusbar{display:none}html.classic .toast{bottom:16px}html.classic .sync{bottom:10px}}
+/* Organizational chart */
+.org{display:grid;gap:22px;min-width:0}
+.oApex{display:grid;justify-items:center}
+.oBar{font:700 1.35rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--grad);padding:8px 34px;border-radius:12px;box-shadow:var(--shadow-card);margin-bottom:14px;text-align:center}
+.oStem{display:block;width:2px;height:20px;background:var(--line-2)}
+.oApex .oStem:last-child{margin-bottom:-22px}
+.oc{display:flex;gap:10px;align-items:center;text-align:left;width:100%;min-width:0;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--plantilla);border-radius:12px;padding:8px 10px;cursor:pointer;transition:box-shadow .25s var(--ease),transform .25s var(--ease)}
+.oc.cos{border-left-color:var(--orange)}
+.oc:hover{box-shadow:var(--shadow-card-hi);transform:translateY(-1px)}
+.oc .av{width:44px;height:44px}
+.ocT{display:grid;gap:1px;min-width:0}
+.ocT b{font-size:.8rem;line-height:1.2;color:var(--head);overflow-wrap:anywhere}
+.ocT > span{font-size:.73rem;color:var(--muted);line-height:1.25;overflow-wrap:anywhere}
+.ocT .ocR{color:var(--orange-2);font-weight:600}
+.ocTags{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
+.oc.head{width:auto;min-width:min(100%,250px);max-width:360px;border:1px solid var(--line);border-top:3px solid var(--orange);padding:10px 14px;box-shadow:var(--shadow-card)}
+.oc.head .av{width:58px;height:58px;border-radius:14px}
+.oc.head .ocT b{font-size:.92rem}
+.od{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card);overflow:hidden;min-width:0}
+.odH{display:flex;justify-content:space-between;align-items:baseline;gap:6px 12px;flex-wrap:wrap;background:var(--grad);color:#fff;padding:10px 18px}
+.odH h2{color:#fff;font-size:1.35rem}
+.odH > span{font-size:.8rem;opacity:.92}
+.odB{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:16px;justify-items:center;min-width:0}
+.odS{display:flex;flex-wrap:wrap;gap:14px;width:100%;align-items:flex-start}
+.os{flex:var(--cols,1) 1 calc(var(--cols,1) * 205px);min-width:min(100%,230px);border:1px solid var(--line-2);border-radius:14px;background:var(--soft);display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:0 10px 10px;justify-items:center;align-content:start}
+.osH{justify-self:stretch;margin:0 -10px;padding:7px 12px;background:var(--plantilla-soft);color:var(--head);font:700 1rem var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:13px 13px 0 0;border-bottom:1px solid var(--line-2)}
+.osH small,.ouH small{font:500 .72rem var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-left:4px}
+.osU{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;width:100%;align-items:start}
+.ou{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;min-width:0}
+.ouH{font:700 .86rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--head);text-align:center;padding:5px 6px;border-bottom:2px solid var(--orange);text-wrap:balance}
+.oNone{font-size:.76rem;color:var(--muted);border:1px dashed var(--line-2);border-radius:10px;padding:6px 12px;text-align:center}
+.oMore{width:100%}
+.oMore summary{cursor:pointer;font-weight:600;font-size:.85rem;color:var(--head);padding:4px 2px}
+.oGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-top:6px}
+.oOut{display:grid;gap:4px;align-content:start;font-size:.76rem}
+.oLegend{display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;font-size:.8rem;color:var(--muted)}
+.oLegend i{display:inline-block;width:4px;height:14px;border-radius:2px;margin-right:6px;vertical-align:-2px;background:var(--plantilla)}
+.oLegend i.c{background:var(--orange)}
+html.classic .org{gap:10px}
+html.classic .oBar{font:bold 13px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none;background:linear-gradient(#FFFFFF,#E9E9E9);color:#000;border:1px solid #A0A0A0;border-radius:0;box-shadow:none;padding:4px 24px;margin-bottom:8px}
+html.classic .oStem{background:#A0A0A0;height:12px}
+html.classic .oApex .oStem:last-child{margin-bottom:-10px}
+html.classic .oc{border-radius:0;border:1px solid #A0A0A0;border-left:3px solid #3A6EA5;padding:4px 6px;gap:6px;transition:none;background:#fff}
+html.classic .oc.cos{border-left-color:#D08A3A}
+html.classic .oc:hover{background:#E5F3FB;box-shadow:none;transform:none}
+html.classic .oc .av{width:34px;height:34px}
+html.classic .ocT b{font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;color:#000}
+html.classic .ocT > span{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .ocT .ocR{color:#8A4A00;font-weight:normal}
+html.classic .oc.head{border:1px solid #A0A0A0;border-top:2px solid #3A6EA5;box-shadow:none;padding:6px 10px}
+html.classic .oc.head .av{width:48px;height:48px;border-radius:0}
+html.classic .oc.head .ocT b{font-size:12px}
+html.classic .od{border-radius:0;border:1px solid #A0A0A0;box-shadow:none}
+html.classic .odH{background:linear-gradient(#FFFFFF,#E9E9E9);color:#000;padding:3px 8px;border-bottom:1px solid #A0A0A0}
+html.classic .odH h2{color:#000;font:bold 13px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none}
+html.classic .odH > span{font:11px Tahoma,"Segoe UI",Arial,sans-serif;opacity:1;color:#444}
+html.classic .odB{padding:8px;gap:8px}
+html.classic .odS{gap:8px}
+html.classic .os{border-radius:0;border:1px solid #A0A0A0;background:#F7F7F7;padding:0 6px 6px;gap:6px}
+html.classic .osH{margin:0 -6px;border-radius:0;background:#E9E9E9;color:#000;font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;padding:3px 8px;border-bottom:1px solid #A0A0A0}
+html.classic .osH small,html.classic .ouH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .osU{gap:6px}
+html.classic .ou{gap:4px}
+html.classic .ouH{font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;color:#000;border-bottom:1px solid #A0A0A0;background:#F0F0F0;padding:2px 6px}
+html.classic .oNone{border-radius:0;font:11px Tahoma,"Segoe UI",Arial,sans-serif;padding:3px 8px}
+html.classic .oMore summary{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;color:#000}
+html.classic .oLegend{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .oLegend i{border-radius:0;background:#3A6EA5}
+html.classic .oLegend i.c{background:#D08A3A}
+html.classic .oOut{font:11px Tahoma,"Segoe UI",Arial,sans-serif}
+@media (max-width:1700px){html:not(.classic) .who{display:none}html:not(.classic) .tabs button{padding:8px 7px;letter-spacing:.05em}html:not(.classic) .tabs button::after{left:7px;right:7px}}
+@media (max-width:1420px){html:not(.classic) .tabs button{padding:8px 5px;font-size:.9rem;letter-spacing:.03em}html:not(.classic) .tabs button::after{left:5px;right:5px}}
+@media (max-width:1320px){html:not(.classic) .topIn{flex-wrap:wrap}}
+@media (max-width:680px){.odB{padding:10px}.oc.head{min-width:0;width:100%;max-width:none}.osU{grid-template-columns:1fr}}
 @media print{html.classic body{background:#fff}}
 </style>
 <script>try{if(localStorage.getItem('boe.theme')!=='modern')document.documentElement.classList.add('classic')}catch(e){document.documentElement.classList.add('classic')}</script>
@@ -914,6 +988,7 @@ html.classic .statusbar:empty{display:none}
       <button type="button" data-go="dashboard">Dashboard</button>
       <button type="button" data-go="employees">Employees</button>
       <button type="button" data-go="seats">Plantilla Seats</button>
+      <button type="button" data-go="org">Org Chart</button>
       <button type="button" data-go="reports">Reports</button>
       <button type="button" data-go="admin" id="usersTab" hidden>Admin</button>
     </nav>
@@ -969,7 +1044,7 @@ setTimeout(function () {
 <script>
 /* ═══════════════════════ state ═══════════════════════ */
 let D = null, IX = null;
-const S = { view: 'dashboard', id: null, q: '', kind: 'all', office: '', fix: '', seatFilter: 'all', seatOffice: '', offOpen: {} };
+const S = { view: 'dashboard', id: null, q: '', kind: 'all', office: '', fix: '', seatFilter: 'all', seatOffice: '', offOpen: {}, orgDiv: '', orgKind: 'all' };
 const ICON = {
   pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
@@ -1549,7 +1624,7 @@ function go(view, id) {
   const parts = String(view).split('/');
   S.view = parts[0] || 'dashboard'; S.id = id || parts[1] || null;
   if (S.view === 'users') S.view = 'admin';
-  if (!['dashboard', 'employees', 'profile', 'seats', 'reports', 'admin'].includes(S.view)) S.view = 'dashboard';
+  if (!['dashboard', 'employees', 'profile', 'seats', 'org', 'reports', 'admin'].includes(S.view)) S.view = 'dashboard';
   if ($('#modalRoot').innerHTML) closeModal();
   if (S.view === 'profile' && S.id) { rememberProfile(S.id); if (S.q) rememberSearch(S.q); }
   try { history.replaceState(null, '', '#' + S.view + (S.id ? '/' + S.id : '')); } catch (e) { /* some frames block this */ }
@@ -1557,7 +1632,7 @@ function go(view, id) {
   render(true); window.scrollTo(0, 0);
 }
 let LAST_HTML = '';
-const VIEWS = () => ({ dashboard: viewDashboard, employees: viewEmployees, profile: viewProfile, seats: viewSeats, reports: viewReports, admin: viewAdmin });
+const VIEWS = () => ({ dashboard: viewDashboard, employees: viewEmployees, profile: viewProfile, seats: viewSeats, org: viewOrg, reports: viewReports, admin: viewAdmin });
 function render(animate) {
   const v = $('#view'), html = VIEWS()[S.view]();
   LAST_HTML = html; v.innerHTML = html;
@@ -1978,6 +2053,87 @@ function viewSeats() {
         <td>${holder ? `<button class="linkish" data-act="profile" data-id="${esc(holder['Employee Number'])}"><b>${esc(fullName(holder))}</b></button>` : '—'}</td>
         <td>${!holder && canEdit() ? `<button class="btn small" data-act="newHire" data-item="${esc(s['Item Number'])}">Hire into seat</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="6" class="empty">No seats match.</td></tr>'}
     </tbody></table></div>`;
+}
+
+/* ═══════════════════════ organizational chart ═══════════════════════ */
+/* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
+   designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone. */
+const orgName = e => (e['First Name'] + (e['Middle Name'] ? ' ' + e['Middle Name'][0] + '.' : '') + ' ' + e['Last Name'] + (e['Suffix'] ? ' ' + e['Suffix'] : '')).toUpperCase();
+function orgIndex() {
+  const at = {}, lost = [];
+  const C = e => IX.cur[e['Employee Number']];
+  active().forEach(e => {
+    const c = C(e), code = String(c.officeCode);
+    if (S.orgKind === 'plantilla' && c.kind !== 'plantilla') return;
+    if (code === '' || !IX.off[code]) { lost.push(e); return; }
+    (at[code] = at[code] || []).push(e);
+  });
+  const order = (a, b) => (C(a).kind === 'plantilla' ? 0 : 1) - (C(b).kind === 'plantilla' ? 0 : 1) || (Number(C(b).sg) || 0) - (Number(C(a).sg) || 0) || fullName(a).localeCompare(fullName(b));
+  Object.keys(at).forEach(k => at[k].sort(order)); lost.sort(order);
+  const head = code => { const l = at[code] || []; return l.find(e => C(e).type === 'Designation (OIC)') || l.find(e => C(e).kind === 'plantilla') || null; };
+  const count = code => Object.keys(IX.offUnder[code] || {}).reduce((n, k) => n + (at[k] || []).length, 0);
+  return { at: at, lost: lost, head: head, count: count, shown: {} };
+}
+function orgCard(e, isHead, role) {
+  const id = e['Employee Number'], c = IX.cur[id];
+  const tags = (c.type === 'Designation (OIC)' ? '<span class="pill warn">OIC</span>' : '') +
+    (e['Mother Unit'] ? `<span class="pill warn" title="Mother unit">from ${esc(e['Mother Unit'])}</span>` : c.reassigned && String(c.officeCode) !== '' ? `<span class="pill warn" title="Plantilla office">from ${esc(c.seatOffice)}</span>` : '');
+  return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b><span>${esc(c.position || 'Position not on record')}${c.sg !== '' ? ' (SG ' + esc(c.sg) + ')' : ''}</span>${c.item ? `<span class="mono">${esc(c.item)}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${tags ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
+}
+const orgPeople = n => n + (n === 1 ? ' person' : ' people');
+function orgUnit(name, list, note) {
+  return `<div class="ou"><div class="ouH">${esc(name)} <small>${list.length}</small></div>${list.map(e => orgCard(e)).join('') || `<div class="oNone">${esc(note || 'No one assigned yet')}</div>`}</div>`;
+}
+/* One office and everything under it. Divisions and sections get a head; a unit is a plain column of people. */
+function orgNode(code, O) {
+  const off = IX.off[code], lvl = orgLevel(off), kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
+  if (lvl === 'Unit' && !kids.length) return orgUnit(off['Office Name'], O.at[code] || []);
+  const head = O.head(code), seen = head && O.shown[head['Employee Number']];
+  const rest = (O.at[code] || []).filter(e => e !== head);
+  const headHtml = seen ? '' : head ? orgCard(head, true) : `<div class="oNone">${rest.length || kids.length ? 'No head on record' : 'No one assigned yet'}</div>`;
+  if (lvl === 'Division') {
+    const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
+    const big = rest.length > 12;
+    return `<section class="od"><div class="odH"><h2>${esc(off['Office Name'])}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
+      <div class="odB">${headHtml}
+        ${rest.length ? `<details class="oMore"${big ? '' : ' open'}><summary>Assigned straight to the ${esc(/division/i.test(off['Office Name']) ? 'division' : 'office')} · ${rest.length}</summary><div class="oGrid">${rest.map(e => orgCard(e)).join('')}</div></details>` : ''}
+        ${kids.length ? `<div class="odS">${kids.map(k => orgNode(k, O)).join('')}</div>` : ''}
+      </div></section>`;
+  }
+  const cols = kids.length + (rest.length && kids.length ? 1 : 0) || 1;
+  return `<div class="os" style="--cols:${cols}"><div class="osH">${esc(off['Office Name'])} <small>${O.count(code)}</small></div>${headHtml}
+    ${kids.length ? `<div class="osU">${rest.length ? orgUnit('Section staff', rest) : ''}${kids.map(k => orgNode(k, O)).join('')}</div>`
+      : rest.length ? `<div class="osU">${rest.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+}
+function viewOrg() {
+  const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
+  if (!roots.length) return '<p class="empty">No offices on record yet. Add divisions, sections and units on the Admin page.</p>';
+  if (S.orgDiv && roots.indexOf(S.orgDiv) < 0) S.orgDiv = '';
+  const O = orgIndex();
+  // The bureau's own head sits at the very top, with the assistant director under them
+  const apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
+  const asst = apex ? (IX.offKids[apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
+  const top = apex ? O.head(apex) : null, second = asst ? O.head(asst) : null;
+  let apexHtml = '';
+  if ((!S.orgDiv || S.orgDiv === apex) && (top || second)) {
+    if (top) O.shown[top['Employee Number']] = true;
+    if (second) O.shown[second['Employee Number']] = true;
+    apexHtml = `<div class="oApex"><div class="oBar">${esc(D.agency || 'Bureau')}</div>${top ? orgCard(top, true, IX.off[apex]['Office Name']) : ''}${top && second ? '<i class="oStem"></i>' : ''}${second ? orgCard(second, true, IX.off[asst]['Office Name']) : ''}<i class="oStem"></i></div>`;
+  }
+  const seg = (act, cur, k, l) => `<button type="button" data-act="${act}" data-f="${esc(k)}" aria-pressed="${cur === k}">${esc(l)}</button>`;
+  const total = Object.keys(O.at).reduce((n, k) => n + O.at[k].length, 0) + O.lost.length;
+  const note = e => { const c = IX.cur[e['Employee Number']]; return (c.entry && c.entry['Remarks']) || (String(c.officeCode) === '' ? 'No office on record' : 'Office ' + c.officeCode + ' is not in the office list'); };
+  return `
+  <section style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap">
+    <div style="display:grid;gap:4px"><span class="eyebrow">${orgPeople(total)} · as of ${esc(fmtDate(D.today))}</span><h1>Organizational chart</h1></div>
+    <div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
+      <div class="seg" role="group" aria-label="Who to show">${seg('orgKind', S.orgKind, 'all', 'Everyone')}${seg('orgKind', S.orgKind, 'plantilla', 'Plantilla only')}</div></div>
+  </section>
+  <div class="oLegend"><span><i></i>Plantilla</span><span><i class="c"></i>CoS / JO</span><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
+  <div class="org">${apexHtml}${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
+    ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
+      <div class="odB"><div class="oGrid" style="width:100%">${O.lost.map(e => `<div class="oOut">${orgCard(e)}<span class="muted">${esc(note(e))}</span></div>`).join('')}</div></div></section>` : ''}
+  </div>`;
 }
 
 /* ═══════════════════════ reports ═══════════════════════ */
@@ -4218,6 +4374,8 @@ document.addEventListener('click', ev => {
   if (act === 'officeList') { S.office = a.dataset.office; S.kind = 'all'; S.fix = ''; return go('employees'); }
   if (act === 'seatsVacant') { S.seatFilter = 'vacant'; return go('seats'); }
   if (act === 'seatFilter') { S.seatFilter = a.dataset.f; return render(); }
+  if (act === 'orgDiv') { S.orgDiv = a.dataset.f; return render(); }
+  if (act === 'orgKind') { S.orgKind = a.dataset.f; return render(); }
   if (act === 'newHire') return formNewHire(a.dataset.item);
   if (act === 'addUser') return formUser('');
   if (act === 'addOffice') return formOffice('');
