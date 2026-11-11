@@ -4,7 +4,7 @@ Employee records of the **Bureau of Equipment (DPWH)**: profiles, plantilla, ser
 
 | Part | Where it runs | What it is |
 |---|---|---|
-| **The app** (`index.html`) | GitHub Pages: boerecords.online | Everything you see. Changes here go live about a minute after they're pushed. |
+| **The app** (`index.html`) | GitHub Pages: employees.boerecords.online | Everything you see. Changes here go live about a minute after they're pushed. |
 | **The server** (`edms/App.gs`) | Google Apps Script | Reads and writes the Google Sheet. The page talks to it through its `/exec` link. |
 | **The data** | The BOE Google Sheet | All records. Nothing is stored on GitHub. |
 | **Complete your record** (`photoapp/`) | Google Apps Script | The page employees open (QR link) to add their photo, TIN, education and past assignments. |
@@ -17,9 +17,10 @@ People sign in with their **DPWH email**: they get a 6-digit code by email and t
 
 ```
 index.html            The app (built from edms/Index.html, do not edit by hand)
+CNAME                 The site's address: employees.boerecords.online
 config.js             ⚙️ The server link (EDMS_API) and the photo app link (RECORD_URL)
-record/               boerecords.online/record → opens "Complete your record" (good for QR codes)
-demo/                 boerecords.online/demo   → the app with MADE-UP people, for presentations
+record/               employees.boerecords.online/record → opens "Complete your record" (good for QR codes)
+demo/                 employees.boerecords.online/demo → the app with MADE-UP people, for presentations
 assets/               Logos and icons
 
 edms/                 The server's Apps Script project
@@ -70,14 +71,14 @@ The tab is created automatically the first time the server runs, filled with the
 - **Page changes** (looks, forms, reports, PDFs): edit `edms/Index.html`, run `python3 tools/build.py`, then push. Live in about a minute. No Apps Script deploy needed.
 - **Server changes** (`edms/App.gs`): paste it into Apps Script, then **Deploy ▸ Manage deployments ▸ ✏️ ▸ New version ▸ Deploy**. Keep the same deployment so the `/exec` link never changes.
 
-## Domain: boerecords.online (GoDaddy)
+## Address: employees.boerecords.online (GoDaddy)
 
-1. GitHub: **Settings ▸ Pages**. Source: Deploy from a branch · `main` · `/ (root)`.
-2. GoDaddy ▸ **My Products** ▸ boerecords.online ▸ **DNS**:
-   - Delete the existing `A` record for `@` ("Parked") and turn off any **Forwarding**.
-   - Add four `A` records, Name `@`: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
-   - Set the `CNAME` record named `www` to `tenrenti01.github.io`.
-3. Back in **Settings ▸ Pages ▸ Custom domain**, type `boerecords.online` and click **Save** (GitHub adds a `CNAME` file). When the check turns green, tick **Enforce HTTPS**.
+The `CNAME` file in this repo tells GitHub Pages the address.
+
+1. GoDaddy ▸ **My Products** ▸ boerecords.online ▸ **DNS** ▸ **Add New Record**: Type **CNAME**, Name **employees**, Value **tenrenti01.github.io**, TTL 1 hour.
+2. GitHub ▸ this repo ▸ **Settings ▸ Pages**: Custom domain shows `employees.boerecords.online`. When the DNS check turns green, tick **Enforce HTTPS** (the certificate can take up to an hour).
+
+Other BOE systems can get their own subdomain the same way (one CNAME record each, and their own repo's custom domain).
 
 ---
 
