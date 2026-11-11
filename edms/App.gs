@@ -233,10 +233,6 @@ function app_checkToken_(token) {
   return app_accMe_(a);
 }
 
-function include(name) {
-  try { return HtmlService.createHtmlOutputFromFile(name).getContent(); }
-  catch (e) { return '<script>window.__missing = (window.__missing || []).concat(' + JSON.stringify(String(name)) + ');<\/script>'; }
-}
 
 /* ▶ Run once from the editor */
 function setupApp() {
@@ -262,23 +258,18 @@ function checkApp() {
   catch (e) { return app_say_('❌ The server side has a problem', String(e && e.stack || e)); }
   if (d.denied) return app_say_('⚠️ You are not in the Users tab', 'Signed in as ' + d.me.email + '. Add this email to the Users tab with Role = Admin.');
 
-  // The page file(s). A one-file build has no include() calls; a split build lists Script1, Script2, ...
-  let indexHtml = '';
-  try { indexHtml = HtmlService.createHtmlOutputFromFile('Index').getContent(); } catch (e) { indexHtml = ''; }
-  const parts = (indexHtml.match(/include\('(\w+)'\)/g) || []).map(x => x.replace(/include\('|'\)/g, ''));
-  const files = [['Index', /<\/html>\s*$/i]].concat(parts.map(n => [n, new RegExp('<!-- end of ' + n + ' -->\\s*$')]));
-  const fileLines = files.map(f => {
-    let t = null;
-    try { t = HtmlService.createHtmlOutputFromFile(f[0]).getContent(); } catch (e) { t = null; }
-    if (t === null) return '• ' + f[0] + ': MISSING. Make an HTML file named exactly ' + f[0] + '.';
-    return '• ' + f[0] + ': ' + (f[1].test(t) ? 'complete (' + Math.round(t.length / 1024) + ' KB)' : 'CUT OFF — the paste did not finish. Select all of ' + f[0] + '.html and paste it again.');
-  });
+  // The page lives on GitHub (boerecords.online) now; this project only needs the .gs files.
+  let acc = [];
+  try { acc = app_accounts_(app_ss_()).rows; } catch (e) { acc = []; }
+  const live = acc.filter(a => !app_accOff_(a));
+  const noPw = live.filter(a => !app_s_(a['Password'])).map(a => app_s_(a['Username']));
   out.push('Loaded in ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s',
     '• ' + d.employees.length + ' employees, ' + d.hist.length + ' history entries',
     '• Data size: ' + Math.round(JSON.stringify(d).length / 1024) + ' KB',
     '• Extra tabs missing: ' + (d.needsUpgrade.length ? d.needsUpgrade.join(', ') + ' (run upgradeSheets)' : 'none'),
-    '', 'Page files:', fileLines.join('\n'),
-    '', 'If a file says CUT OFF, repaste just that file. Then Deploy → Manage deployments → ✏️ → Version: New version → Deploy, and reload the app.');
+    '', 'Accounts tab: ' + live.length + ' active account(s), ' + live.filter(a => app_accRole_(a) === 'Admin').length + ' Admin',
+    noPw.length ? '• No password yet (cannot sign in): ' + noPw.join(', ') : '• Every active account has a password',
+    '', 'The page is on GitHub, so no HTML file is needed here. After changing a .gs file: Deploy → Manage deployments → ✏️ → Version: New version → Deploy.');
   return app_say_('✅ Server side works', out.join('\n'));
 }
 
