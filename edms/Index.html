@@ -2057,7 +2057,8 @@ function viewSeats() {
 
 /* ═══════════════════════ organizational chart ═══════════════════════ */
 /* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
-   designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone. */
+   designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone:
+   engineers first, then by salary grade, highest first. */
 const orgName = e => (e['First Name'] + (e['Middle Name'] ? ' ' + e['Middle Name'][0] + '.' : '') + ' ' + e['Last Name'] + (e['Suffix'] ? ' ' + e['Suffix'] : '')).toUpperCase();
 function orgIndex() {
   const at = {}, lost = [];
@@ -2068,9 +2069,12 @@ function orgIndex() {
     if (code === '' || !IX.off[code]) { lost.push(e); return; }
     (at[code] = at[code] || []).push(e);
   });
-  const order = (a, b) => (C(a).kind === 'plantilla' ? 0 : 1) - (C(b).kind === 'plantilla' ? 0 : 1) || (Number(C(b).sg) || 0) - (Number(C(a).sg) || 0) || fullName(a).localeCompare(fullName(b));
+  // Who sits higher: engineers first, then the higher salary grade (plantilla and CoS / JO mixed), plantilla first on a tie
+  const sg = e => Number(C(e).sg) || 0, cos = e => C(e).kind === 'plantilla' ? 0 : 1, eng = e => /^engineer\b/i.test(String(C(e).position)) ? 0 : 1;
+  const order = (a, b) => eng(a) - eng(b) || sg(b) - sg(a) || cos(a) - cos(b) || fullName(a).localeCompare(fullName(b));
   Object.keys(at).forEach(k => at[k].sort(order)); lost.sort(order);
-  const head = code => { const l = at[code] || []; return l.find(e => C(e).type === 'Designation (OIC)') || l.find(e => C(e).kind === 'plantilla') || null; };
+  // The head is still the OIC, else the highest-graded plantilla employee (a Director outranks an Engineer)
+  const head = code => { const l = at[code] || []; return l.find(e => C(e).type === 'Designation (OIC)') || l.filter(e => C(e).kind === 'plantilla').sort((a, b) => sg(b) - sg(a) || fullName(a).localeCompare(fullName(b)))[0] || null; };
   const count = code => Object.keys(IX.offUnder[code] || {}).reduce((n, k) => n + (at[k] || []).length, 0);
   return { at: at, lost: lost, head: head, count: count, shown: {} };
 }
