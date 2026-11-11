@@ -145,7 +145,7 @@
       <tr class="click" data-act="profile" data-id="${esc(e['Employee Number'])}" tabindex="0">
         <td><div class="who2">${avatar(e)}<div><b>${esc(fullName(e))}</b><span>${esc(e['Employee Number'])}${e['Old Record ID'] ? ' · ' + esc(e['Old Record ID']) : ''}</span></div></div></td>
         <td>${esc(c.position || '—')}${c.sg !== '' ? ` <span class="tag">SG ${esc(c.sg)}${c.step !== '' ? '-' + esc(c.step) : ''}</span>` : ''}</td>
-        <td title="${esc(c.office)}">${esc(c.officeCode === '' ? '—' : c.officeCode)}${c.reassigned ? ` <span class="muted" style="font-size:.8rem" title="Plantilla office">from ${esc(c.seatOffice)}</span>` : ''}</td>
+        <td title="${esc(c.office)}">${esc(c.officeCode === '' ? '—' : c.officeCode)}${c.reassigned ? ` <span class="muted" style="font-size:.8rem" title="Plantilla office">from ${esc(c.seatOffice)}</span>` : e['Mother Unit'] ? ` <span class="muted" style="font-size:.8rem" title="Mother unit">from ${esc(e['Mother Unit'])}</span>` : ''}</td>
         <td>${statusPill(c)}</td>
         <td class="num">${c.years === '' ? '—' : esc(c.years)}</td></tr>`; }).join('') || '<tr><td colspan="5" class="empty">No one matches. Try a different search or filter.</td></tr>'}
     </tbody></table></div>`;}function viewProfile() {const e = IX.emp[S.id];if (!e) return '<p class="empty">Employee not found. <button class="btn small" data-go="employees">Back to the list</button></p>';const id = e['Employee Number'], c = IX.cur[id], h = IX.hist[id] || [];const ids = IX.ids[id] || [], el = IX.elig[id] || [], ed = IX.edu[id] || [], pw = (IX.pwd[id] || [])[0], nm = (IX.names[id] || []).slice().sort((a, b) => String(b['Date Effective']).localeCompare(String(a['Date Effective'])));const lic = IX.lic[id] || [], ra1080 = hasRA1080(id);const retireOn = e['Birthday'] ? (b => new Date(b.getFullYear() + D.retireAge, b.getMonth(), b.getDate()))(toDate(e['Birthday'])) : null;const soon = retireOn && (retireOn - toDate(D.today)) / 86400000 <= 366 && !c.separated;const sp = c.separated && c.entry ? IX.sepd[c.entry['Entry ID']] : null;return `
@@ -178,7 +178,8 @@
       <dt>Assigned to</dt><dd class="w">${esc(c.officeCode === '' ? '—' : offLetterName(c.officeCode))}${c.officeCode !== '' ? ` <span class="tag">${esc(c.officeCode)}</span>` : ''}</dd>
       ${c.kind === 'plantilla' ? `<dt>Monthly salary</dt><dd>${peso(c.monthly)}${c.monthlyYear ? ` <span class="muted" style="font-size:.8rem">${c.monthlyYear} rates</span>` : ''}</dd>`
         : c.kind === 'contract' ? `<dt>Fund</dt><dd>${esc(c.fund || '—')}</dd>` : '<dt>Pay</dt><dd>—</dd>'}
-      ${c.kind === 'plantilla' ? `<dt>Plantilla office</dt><dd class="w">${esc(c.seatOffice !== '' && IX.off[c.seatOffice] ? IX.off[c.seatOffice]['Office Name'] : '—')}${c.seatOffice !== '' ? ` <span class="tag">${esc(c.seatOffice)}</span>` : ''}${c.reassigned ? ' <span class="pill warn">Reassigned</span>' : ''}</dd>`
+      ${e['Mother Unit'] ? `<dt>Mother unit</dt><dd class="w">${esc(e['Mother Unit'])} <span class="pill warn">Detailed in</span></dd>` : ''}
+      ${e['Mother Unit'] && c.seatOffice === '' ? '' : c.kind === 'plantilla' ? `<dt>Plantilla office</dt><dd class="w">${esc(c.seatOffice !== '' && IX.off[c.seatOffice] ? IX.off[c.seatOffice]['Office Name'] : '—')}${c.seatOffice !== '' ? ` <span class="tag">${esc(c.seatOffice)}</span>` : ''}${c.reassigned ? ' <span class="pill warn">Reassigned</span>' : ''}</dd>`
         : c.kind === 'contract' ? `<dt>Work</dt><dd class="w">${esc(c.work || '—')} · ${esc(c.tech || '—')}</dd>` : ''}
       <dt>Service start</dt><dd>${esc(fmtDate(c.start))}</dd>
       <dt>Years of service</dt><dd>${c.years === '' ? '—' : esc(c.years)}</dd>
