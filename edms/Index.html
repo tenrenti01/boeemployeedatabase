@@ -2165,13 +2165,305 @@ function viewOrg() {
   <section style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap">
     <div style="display:grid;gap:4px"><span class="eyebrow">${orgPeople(total)} · as of ${esc(fmtDate(D.today))}</span><h1>Organizational chart</h1></div>
     <div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
-      <div class="seg" role="group" aria-label="Who to show">${seg('orgKind', S.orgKind, 'all', 'Everyone')}${seg('orgKind', S.orgKind, 'plantilla', 'Plantilla only')}</div></div>
+      <div class="seg" role="group" aria-label="Who to show">${seg('orgKind', S.orgKind, 'all', 'Everyone')}${seg('orgKind', S.orgKind, 'plantilla', 'Plantilla only')}</div>
+      <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
   </section>
   <div class="oLegend"><span><i></i>Plantilla</span><span><i class="c"></i>CoS / JO</span><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
   <div class="org">${apexHtml}${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
     ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
       <div class="odB"><div class="oGrid" style="width:100%">${O.lost.map(e => `<div class="oOut">${orgCard(e)}<span class="muted">${esc(note(e))}</span></div>`).join('')}</div></div></section>` : ''}
   </div>`;
+}
+
+/* ═══════════════════════ org chart download (HD image / PDF) ═══════════════════════
+   A separate, print-ready drawing of one office in the DPWH presentation style: dotted white sheet, white header box,
+   gradient unit headers, plain white cards. It is drawn off-screen, turned into a picture, and saved as PNG or PDF. */
+const XO = { office: '', who: 'all', pos: true, sg: true, item: true, from: false, kind: true, date: true, hd: true, color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
+const XO_CSS = `
+.xo{--navy:#0D47A1;--title:#0F2A5C;--orange:#F26522;--muted:#5A6B85;--wire:#A9BFE3;
+ --gn:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%);--go:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%);
+ --sh:0 14px 34px rgba(16,41,90,.10),0 3px 8px rgba(16,41,90,.06);--ft:'Barlow Condensed','Arial Narrow',Arial,sans-serif;--fb:Inter,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+ box-sizing:border-box;margin:0;padding:34px 46px 30px;color:#1D2939;font:400 13px/1.3 var(--fb);text-align:left;display:flex;flex-direction:column;
+ background-color:#fff;background-image:radial-gradient(circle,rgba(13,71,161,.13) 1.6px,transparent 1.9px);background-size:30px 30px}
+.xo *{box-sizing:border-box;margin:0;padding:0}
+.xo b{font-weight:inherit}.xo i,.xo em{font-style:normal}
+.xo .xhd{display:flex;align-items:center;gap:16px;padding:14px 22px;background:#fff;border-radius:18px;box-shadow:var(--sh)}
+.xo .xhd img{height:70px;width:auto}
+.xo .xbrand{display:grid;gap:3px}
+.xo .xbrand b{font:800 30px/1 var(--ft);letter-spacing:.04em;color:var(--title);text-transform:uppercase}
+.xo .xbrand em,.xo h1 em,.xo .xdh em{color:var(--orange)}
+.xo .xbrand span{font:500 15px var(--fb);color:var(--muted)}
+.xo .xas{margin-left:auto;font:700 15px var(--ft);letter-spacing:.08em;text-transform:uppercase;color:var(--title);white-space:nowrap}
+.xo h1{margin:24px 0 2px;text-align:center;font:800 40px/1.05 var(--ft);letter-spacing:.03em;text-transform:uppercase;color:var(--title)}
+.xo .xsub{text-align:center;font:500 14px var(--fb);color:var(--muted)}
+.xo .xbody{display:grid;gap:26px;margin-top:20px}
+.xo .xdiv{display:grid;gap:22px}
+.xo .xdh{text-align:center;font:800 32px/1.05 var(--ft);letter-spacing:.03em;text-transform:uppercase;color:var(--title);margin-top:14px}
+.xo .xsec{display:grid}
+.xo .xsec.box{background:rgba(255,255,255,.66);border:1.5px solid #DCE4F0;border-radius:20px;padding:0 18px 18px}
+.xo .xsh{margin:0 -18px 22px;padding:11px 18px;border-radius:18px 18px 0 0;background:#0F2A5C;color:#fff;display:flex;gap:10px;align-items:center;justify-content:center}
+.xo .xsh b{font:700 22px/1.1 var(--ft);letter-spacing:.05em;text-transform:uppercase;text-align:center}
+.xo .xsh i,.xo .xuh i{font:700 13px var(--fb);background:rgba(255,255,255,.22);border-radius:999px;min-width:26px;height:26px;padding:0 7px;display:flex;align-items:center;justify-content:center;flex:none}
+.xo .xtop{display:grid;justify-items:center;margin-top:12px}
+.xo .xstem{width:3px;height:26px;background:var(--wire)}
+.xo .xunits{display:grid;gap:18px;align-items:start}
+.xo .xunits.more{margin-top:18px}
+.xo .xunit{display:grid;gap:10px;min-width:0}
+.xo .xconn{position:relative;height:26px;display:block}
+.xo .xconn::before{content:"";position:absolute;top:0;bottom:0;left:0;right:-18px;border-top:3px solid var(--wire)}
+.xo .xconn::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1.5px);width:3px;background:var(--wire)}
+.xo .xunit:first-child .xconn::before{left:calc(50% - 1.5px);border-left:3px solid var(--wire);border-top-left-radius:16px}
+.xo .xunit:last-child .xconn::before{right:calc(50% - 1.5px);border-right:3px solid var(--wire);border-top-right-radius:16px}
+.xo .xunit:first-child .xconn::after,.xo .xunit:last-child .xconn::after{display:none}
+.xo .xunit:only-child .xconn::before{display:none}
+.xo .xunit:only-child .xconn::after{display:block}
+.xo .nowire .xconn{display:none}
+.xo .xuh{margin-top:-10px;border-radius:12px;color:#fff;padding:10px 14px;min-height:64px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--sh);background:var(--gn)}
+.xo .nowire .xuh{margin-top:0}
+.xo .xuh.or{background:var(--go)}
+.xo .xuh b{font:700 17px/1.12 var(--ft);letter-spacing:.05em;text-transform:uppercase;text-align:center}
+.xo .xub{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:10px}
+.xo .xpc{position:relative;background:#fff;border-radius:14px;box-shadow:var(--sh);padding:10px 12px;display:flex;gap:12px;align-items:center;min-height:76px;min-width:0}
+.xo .xpc img,.xo .xav{width:56px;height:56px;border-radius:12px;flex:none;box-shadow:0 2px 6px rgba(16,41,90,.18)}
+.xo .xpc img{object-fit:cover}
+.xo .xav{display:flex;align-items:center;justify-content:center;background:#E3EDFB;color:var(--navy);font:700 18px var(--ft);letter-spacing:.04em}
+.xo .xpt{display:grid;gap:2px;min-width:0}
+.xo .xpt b{font:700 13.5px/1.2 var(--fb);color:var(--title);overflow-wrap:anywhere}
+.xo .xpt span{font:400 12px/1.3 var(--fb);color:var(--muted);overflow-wrap:anywhere}
+.xo .xpt .xitem{font:500 11.5px ui-monospace,Consolas,'Courier New',monospace;color:#6b7a93;letter-spacing:.02em}
+.xo .xtags{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.xo .xtags i{font:600 10.5px var(--fb);letter-spacing:.03em;border-radius:999px;padding:2px 9px;color:#0D47A1;background:#E3EDFB}
+.xo .xtags i.cos{color:#B4480F;background:#FFE9DA}
+.xo .xtags i.from{color:#5A6B85;background:#EEF1F6}
+.xo .xpc.chief{padding:14px 20px;gap:16px;min-width:380px;max-width:100%;border-radius:16px}
+.xo .xpc.chief img,.xo .xpc.chief .xav{width:84px;height:84px;border-radius:16px}
+.xo .xpc.chief .xav{font-size:28px}
+.xo .xpc.chief .xpt b{font:800 24px/1.05 var(--ft);letter-spacing:.03em}
+.xo .xpc.chief .xpt span{font-size:13.5px}
+.xo .xpc.chief .xpt .xitem{font-size:12px}
+.xo .xrole{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);white-space:nowrap;font:700 12px/1.3 var(--ft);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--go);padding:3px 12px;border-radius:999px;box-shadow:var(--sh)}
+.xo .xvac{min-width:380px;min-height:112px;border:2px dashed #B9C6DA;border-radius:16px;background:rgba(255,255,255,.8);display:grid;align-content:center;justify-items:center;gap:3px;color:var(--muted)}
+.xo .xvac b{font:800 22px var(--ft);letter-spacing:.08em;text-transform:uppercase;color:var(--title)}
+.xo .xnone{border:1.5px dashed #C5D0E0;border-radius:14px;min-height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;background:rgba(255,255,255,.7)}
+.xo .xft{margin-top:auto;padding-top:26px;text-align:right;font:500 11.5px var(--fb);color:var(--muted)}
+`;
+/* "Floating EQUIPMENT Division": the orange part is the second half of the name, before the closing word */
+function xoTitle(name) {
+  const w = String(name || '').trim().split(/\s+/);
+  if (w.length < 2) return esc(name);
+  if (!/^(division|section|unit)$/i.test(w[w.length - 1])) return esc(w.slice(0, -1).join(' ')) + ' <em>' + esc(w[w.length - 1]) + '</em>';
+  const rest = w.slice(0, -1), cut = Math.floor(rest.length / 2);
+  if (rest.length < 2) return '<em>' + esc(rest[0]) + '</em> ' + esc(w[w.length - 1]);
+  return esc(rest.slice(0, cut).join(' ')) + ' <em>' + esc(rest.slice(cut).join(' ')) + '</em> ' + esc(w[w.length - 1]);
+}
+function xoCard(e, role, X) {
+  const id = e['Employee Number'], c = IX.cur[id], local = (D._photoLocal || {})[id];
+  X.ids[id] = 1;
+  const src = (XO.hd ? (local !== undefined ? local : PHOTO[id]) : '') || (D.thumbs || {})[id] || '';
+  const pic = /^data:image\//.test(src) ? `<img src="${esc(src)}" alt="" />` : `<span class="xav">${esc(initials(e))}</span>`;
+  const line = [XO.pos ? esc(c.position || 'Position not on record') : '', XO.sg && c.sg !== '' && c.sg !== undefined ? 'SG ' + esc(c.sg) : ''].filter(Boolean).join(' · ');
+  const from = e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
+  const tags = (XO.kind ? (c.kind === 'contract' ? `<i class="cos">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</i>` : `<i>${esc(c.status || 'Permanent')}</i>`) : '') +
+    (XO.from && from ? `<i class="from">from ${esc(from)}</i>` : '');
+  return `<div class="xpc${role ? ' chief' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
+}
+function xoUnit(name, list, X) {
+  const or = XO.color === 'orange' || (XO.color === 'alt' && X.k++ % 2 === 1);
+  return `<div class="xunit"><i class="xconn"></i><div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${list.length}</i></div><div class="xub">${list.map(e => xoCard(e, '', X)).join('') || '<div class="xnone">No one assigned yet</div>'}</div></div>`;
+}
+/* Columns side by side under a chief; too many for the page width wrap to a second row (only the first row is wired) */
+function xoCols(cols, wired) {
+  if (!cols.length) return '';
+  const max = XO.orient === 'portrait' ? 3 : 5, rows = [];
+  for (let i = 0; i < cols.length; i += max) rows.push(cols.slice(i, i + max));
+  return rows.map((r, i) => `<div class="xunits${i ? ' more' : ''}${wired && !i ? '' : ' nowire'}" style="grid-template-columns:repeat(${r.length},minmax(0,1fr))">${r.join('')}</div>`).join('');
+}
+function xoHead(code, O, lvl, X, below) {
+  const h = O.head(code); if (h && O.shown[h['Employee Number']]) return '';
+  const name = IX.off[code]['Office Name'];
+  const base = /assistant/i.test(name) ? 'Assistant Bureau Director' : /director/i.test(name) ? 'Bureau Director' : lvl === 'Division' ? 'Division Chief' : 'Section Chief';
+  const box = h ? xoCard(h, (IX.cur[h['Employee Number']].type === 'Designation (OIC)' ? 'OIC · ' : '') + base, X) : `<div class="xvac"><b>Vacant</b><span>${esc(base)} not on record</span></div>`;
+  return `<div class="xtop">${box}${below ? '<i class="xstem"></i>' : ''}</div>`;
+}
+const xoUnder = (code, O) => Object.keys(IX.offUnder[code] || {}).reduce((l, k) => l.concat(O.at[k] || []), []);
+function xoNode(code, O, X, root) {
+  const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
+  const kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
+  if (lvl === 'Unit' && !kids.length) return `<section class="xsec">${xoCols([xoUnit(name, O.at[code] || [], X)], false)}</section>`;
+  const head = O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
+  if (lvl === 'Division') {
+    let direct = [], order = kids;
+    if (code === O.apex) {
+      const C = e => IX.cur[e['Employee Number']];
+      const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
+      const t = rest.filter(tech), a = rest.filter(e => !tech(e));
+      if (t.length) direct.push(xoUnit('Technical Staff', t, X));
+      if (a.length) direct.push(xoUnit('Administrative Staff', a, X));
+      order = kids.slice().sort((x, y) => (x === O.asst ? 0 : 1) - (y === O.asst ? 0 : 1));
+    } else if (rest.length) direct.push(xoUnit('Division Staff', rest, X));
+    return `<section class="xdiv">${root ? '' : `<div class="xdh">${xoTitle(name)}</div>`}<div class="xsec">${xoHead(code, O, lvl, X, direct.length > 0)}${xoCols(direct, true)}</div>${order.map(k => xoNode(k, O, X, false)).join('')}</section>`;
+  }
+  const cols = [];
+  if (rest.length) cols.push(xoUnit(kids.length ? 'Section Staff' : 'Staff', rest, X));
+  kids.forEach(k => cols.push(xoUnit(IX.off[k]['Office Name'], xoUnder(k, O), X)));
+  return `<section class="xsec${root ? '' : ' box'}">${root ? '' : `<div class="xsh"><b>${esc(name)}</b><i>${O.count(code)}</i></div>`}${xoHead(code, O, lvl, X, cols.length > 0)}${xoCols(cols, true)}</section>`;
+}
+/* The whole sheet as HTML. X.ids collects who is on it (to fetch their full-size photos). */
+function xoBuild(X) {
+  const keep = S.orgKind; S.orgKind = XO.who === 'plantilla' ? 'plantilla' : 'all';
+  let O; try { O = orgIndex(); } finally { S.orgKind = keep; }
+  const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
+  O.apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
+  O.asst = O.apex ? (IX.offKids[O.apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
+  const agency = String(D.agency || 'Bureau of Equipment'), aw = agency.split(' ');
+  const code = XO.office && IX.off[XO.office] ? XO.office : '';
+  let title, sub = '', body, n, headDiv = '';
+  if (!code) {
+    const top = O.apex ? O.head(O.apex) : null;
+    let apex = '';
+    if (top) { apex = `<div class="xtop">${xoCard(top, 'Bureau Director', X)}</div>`; O.shown[top['Employee Number']] = true; }
+    title = xoTitle(agency); body = apex + roots.map(c => xoNode(c, O, X, false)).join('');
+    n = Object.keys(O.at).reduce((s, k) => s + O.at[k].length, 0);
+  } else {
+    const off = IX.off[code], path = (IX.offPath || {})[code] || [off], lvl = orgLevel(off);
+    title = xoTitle(off['Office Name']); body = xoNode(code, O, X, true); n = O.count(code);
+    if (path.length > 1) headDiv = path[0]['Office Name'];
+    if (lvl === 'Unit' && path.length > 2) sub = path[path.length - 2]['Office Name'] + ' · ';
+  }
+  const W = XO.orient === 'portrait' ? 1100 : 1500, minH = Math.round(XO.orient === 'portrait' ? W * 1.4142 : W / 1.4142);
+  const logo = src => /^data:image\//.test(String(src || '')) ? `<img src="${esc(src)}" alt="" />` : '';
+  return { W, html: `<div class="xo" style="width:${W}px;min-height:${minH}px;--wire:${esc(XO.wire)}"><style>${X.fonts || ''}${XO_CSS}</style>
+    <div class="xhd">${logo(D.logo || X.logo1)}${logo(D.logo2 || X.logo2)}<div class="xbrand"><b>${esc(aw.slice(0, -1).join(' '))} <em>${esc(aw[aw.length - 1])}</em></b><span>${esc(D.department || 'Department of Public Works and Highways')}${headDiv ? ' · ' + esc(headDiv) : ''}</span></div><div class="xas">Organizational Chart</div></div>
+    <h1>${title}</h1><div class="xsub">${esc(sub)}${n} personnel${XO.who === 'plantilla' ? ' (plantilla only)' : ''}</div>
+    <div class="xbody">${body}</div>
+    ${XO.date ? `<div class="xft">Generated ${esc(fmtDate(D.today))}</div>` : ''}</div>` };
+}
+/* The two web fonts, packed into the drawing itself (a picture cannot load fonts from the internet). No internet: plain fonts. */
+let XO_FONTS;
+async function xoFonts() {
+  if (XO_FONTS !== undefined) return XO_FONTS;
+  try {
+    const css = await (await fetch('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap')).text();
+    const blocks = css.split('/* ').filter(b => /^latin \*\//.test(b)).map(b => b.slice(b.indexOf('@font-face')));
+    const urls = Array.from(new Set(blocks.join('').match(/https:\/\/fonts\.gstatic\.com\/[^)\s'"]+/g) || [])), data = {};
+    await Promise.all(urls.map(async u => {
+      const bytes = new Uint8Array(await (await fetch(u)).arrayBuffer()); let s = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      data[u] = 'data:font/woff2;base64,' + btoa(s);
+    }));
+    XO_FONTS = blocks.join('\n').replace(/https:\/\/fonts\.gstatic\.com\/[^)\s'"]+/g, u => data[u] || u);
+  } catch (e) { XO_FONTS = ''; }
+  return XO_FONTS;
+}
+/* Draw the sheet off-screen and return it as a canvas, as sharp as the browser allows (up to 2x) */
+async function xoCanvas(onStep) {
+  const say = onStep || (() => {});
+  say('Preparing…');
+  const X = { ids: {}, k: 0, fonts: await xoFonts() };
+  // No logo saved on the Admin page: use the two that ship with the site
+  const asset = async f => { try { const b = await (await fetch(f)).blob(); return await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.onerror = () => r(''); fr.readAsDataURL(b); }); } catch (e) { return ''; } };
+  if (!D.logo) X.logo1 = await asset('assets/dpwh-logo.png');
+  if (!D.logo2) X.logo2 = await asset('assets/bagong-pilipinas.png');
+  if (XO.hd) {
+    xoBuild(X);
+    const need = Object.keys(X.ids).filter(id => PHOTO[id] === undefined && (D.thumbs || {})[id]);
+    let done = 0;
+    const next = async () => { while (need.length) { await loadPhoto(need.shift()); say('Getting photos… ' + (++done)); } };
+    await Promise.all([1, 2, 3, 4, 5, 6].map(next));
+  }
+  say('Drawing…');
+  X.ids = {}; X.k = 0;
+  const built = xoBuild(X), W = built.W;
+  const fr = document.createElement('iframe');
+  fr.setAttribute('aria-hidden', 'true'); fr.tabIndex = -1;
+  fr.style.cssText = 'position:fixed;left:-30000px;top:0;width:' + W + 'px;height:200px;border:0;visibility:hidden';
+  document.body.appendChild(fr);
+  let xml, H;
+  try {
+    const d = fr.contentDocument; d.open(); d.write('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">' + built.html + '</body></html>'); d.close();
+    const el = d.body.firstElementChild;
+    try { await d.fonts.ready; } catch (e) { /* older browsers */ }
+    await Promise.all(Array.from(d.images).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+    H = Math.ceil(el.getBoundingClientRect().height);
+    xml = new XMLSerializer().serializeToString(el);
+  } finally { fr.remove(); }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><foreignObject x="0" y="0" width="${W}" height="${H}">${xml}</foreignObject></svg>`;
+  const img = new Image();
+  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('This browser could not draw the chart. Try Chrome or Edge.')); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+  try { await img.decode(); } catch (e) { /* already loaded */ }
+  await new Promise(r => setTimeout(r, 120));
+  const scale = Math.max(0.5, Math.min(2, 15000 / W, 15000 / H, Math.sqrt(120e6 / (W * H))));
+  const cv = document.createElement('canvas'); cv.width = Math.round(W * scale); cv.height = Math.round(H * scale);
+  const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.imageSmoothingQuality = 'high';
+  g.drawImage(img, 0, 0, cv.width, cv.height);
+  return cv;
+}
+/* One-page PDF that is just the picture, on a page of the same shape (A4 width; taller charts get a longer page) */
+function xoPdf(jpeg, w, h) {
+  const pw = XO.orient === 'portrait' ? 595.28 : 841.89, ph = Math.round(pw * h / w * 100) / 100;
+  const enc = s => new TextEncoder().encode(s), parts = [], offs = []; let len = 0;
+  const put = b => { parts.push(b); len += b.length; };
+  const obj = (n, body, stream) => { offs[n] = len; put(enc(n + ' 0 obj\n' + body + (stream ? '\nstream\n' : '\nendobj\n'))); if (stream) { put(stream); put(enc('\nendstream\nendobj\n')); } };
+  put(enc('%PDF-1.4\n%âãÏÓ\n'));
+  const content = enc('q ' + pw + ' 0 0 ' + ph + ' 0 0 cm /Im0 Do Q');
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw + ' ' + ph + '] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>');
+  obj(4, '<< /Type /XObject /Subtype /Image /Width ' + w + ' /Height ' + h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpeg.length + ' >>', jpeg);
+  obj(5, '<< /Length ' + content.length + ' >>', content);
+  const xref = len;
+  put(enc('xref\n0 6\n0000000000 65535 f \n' + [1, 2, 3, 4, 5].map(n => String(offs[n]).padStart(10, '0') + ' 00000 n \n').join('') + 'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF\n'));
+  const out = new Uint8Array(len); let p = 0; parts.forEach(b => { out.set(b, p); p += b.length; });
+  return out;
+}
+function formOrgDownload() {
+  XO.office = S.orgDiv || ''; XO.who = S.orgKind === 'plantilla' ? 'plantilla' : 'all';
+  const chk = (k, l) => `<label style="display:flex;gap:8px;align-items:center;font-weight:400;cursor:pointer"><input type="checkbox" id="xo_${k}" ${XO[k] ? 'checked' : ''} style="width:16px;height:16px;flex:none"> ${l}</label>`;
+  openModal(`<header><div><span class="label">Organizational chart</span><h2>Download as picture or PDF</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
+    <div class="body">
+      <div class="fgrid">
+        ${field('xoOffice', 'Which office', offSelect('xoOffice', XO.office, 'Whole bureau'), 'span2', 'A division, a section, or a single unit')}
+        ${field('xoWho', 'Who to include', sel('xoWho', [['all', 'Everyone'], ['plantilla', 'Plantilla only']], XO.who), 'span2')}
+        ${field('xoFmt', 'File type', sel('xoFmt', [['png', 'HD image (PNG)'], ['pdf', 'PDF']], XO.fmt))}
+        ${field('xoOrient', 'Page', sel('xoOrient', [['landscape', 'Landscape'], ['portrait', 'Portrait']], XO.orient))}
+        ${field('xoColor', 'Unit header colour', sel('xoColor', [['blue', 'Blue'], ['orange', 'Orange'], ['alt', 'Alternate']], XO.color))}
+        ${field('xoWire', 'Line colour', sel('xoWire', [['#A9BFE3', 'Light blue'], ['#0D47A1', 'Navy'], ['#F26522', 'Orange'], ['#9AA5B5', 'Grey']], XO.wire))}
+      </div>
+      <div class="f"><label>Show on each person</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
+          ${chk('pos', 'Position')}${chk('sg', 'Salary grade')}${chk('item', 'Item number')}${chk('kind', 'Permanent / CoS tag')}${chk('from', 'Parent office (e.g. "from EPD")')}
+        </div></div>
+      <div class="f"><label>Other</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
+          ${chk('date', 'Generation date')}${chk('hd', 'Full-size photos (sharper, slower)')}
+        </div></div>
+      <div class="formErr" id="xoErr" hidden></div>
+    </div>
+    <footer><span class="muted" style="font-size:.85rem" id="xoNote">A big chart can take a little while.</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="button" class="btn primary" id="xoGo" data-act="orgDlGo">${ICON.dl} Download</button></div></footer>`);
+}
+async function orgDownloadGo() {
+  const btn = $('#xoGo'), err = $('#xoErr'), note = $('#xoNote');
+  if (!btn || btn.disabled) return;
+  ['pos', 'sg', 'item', 'kind', 'from', 'date', 'hd'].forEach(k => { XO[k] = $('#xo_' + k).checked; });
+  XO.office = $('#xoOffice').value; XO.who = $('#xoWho').value; XO.fmt = $('#xoFmt').value; XO.orient = $('#xoOrient').value; XO.color = $('#xoColor').value; XO.wire = $('#xoWire').value;
+  err.hidden = true; btn.disabled = true;
+  try {
+    const cv = await xoCanvas(t => { if (note) note.textContent = t; });
+    const now = new Date(), p = n => String(n).padStart(2, '0');
+    const name = 'BOE-OrgChart-' + (XO.office || 'Whole-Bureau') + '_' + now.getFullYear() + '-' + p(now.getMonth() + 1) + '-' + p(now.getDate()) + '_' + p(now.getHours()) + p(now.getMinutes());
+    if (XO.fmt === 'pdf') {
+      const bin = atob(cv.toDataURL('image/jpeg', 0.93).split(',')[1]), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      download(name + '.pdf', 'application/pdf', xoPdf(bytes, cv.width, cv.height));
+    } else {
+      const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+      if (!blob) throw new Error('The chart is too big to save as one picture. Pick a division or a section instead.');
+      download(name + '.png', 'image/png', blob);
+    }
+    closeModal();
+  } catch (e) {
+    err.textContent = e.message || 'The chart could not be made.'; err.hidden = false; btn.disabled = false; if (note) note.textContent = '';
+  }
 }
 
 /* ═══════════════════════ reports ═══════════════════════ */
@@ -4499,6 +4791,8 @@ document.addEventListener('click', ev => {
   if (act === 'seatFilter') { S.seatFilter = a.dataset.f; return render(); }
   if (act === 'orgDiv') { S.orgDiv = a.dataset.f; return render(); }
   if (act === 'orgKind') { S.orgKind = a.dataset.f; return render(); }
+  if (act === 'orgDl') return formOrgDownload();
+  if (act === 'orgDlGo') return orgDownloadGo();
   if (act === 'newHire') return formNewHire(a.dataset.item);
   if (act === 'addUser') return formUser('');
   if (act === 'addOffice') return formOffice('');
