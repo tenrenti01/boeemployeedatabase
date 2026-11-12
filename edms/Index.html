@@ -986,9 +986,14 @@ body.wide main{max-width:none}
 .org .odB .ocT > .ocR{line-height:15px}
 .org .odB .oc .ocTags{height:18px;min-height:0;margin-top:1px;align-items:center}
 .org .odB .oVac{height:var(--chH,72px);min-height:0;width:var(--ocW,250px);min-width:0;padding:0 10px}
-/* The office picker, Chart settings and Download stay in view while the chart scrolls */
-.orgBar{position:sticky;top:var(--topH,64px);z-index:15;display:flex;justify-content:flex-end;padding:8px 0;margin:-8px 0;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.orgBar .toolbar{flex-wrap:wrap;justify-content:flex-end}
+/* Only the Download button stays in view while the chart scrolls: a zero-height sticky row, the toolbar leaves room for it */
+.orgDl{position:sticky;top:calc(var(--topH,64px) + 8px);z-index:15;height:0;display:flex;justify-content:flex-end;align-items:flex-start;overflow:visible;pointer-events:none}
+.orgDl .btn{pointer-events:auto;box-shadow:0 6px 18px rgba(16,41,90,.22)}
+.orgHead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-top:-22px}
+html.classic .orgHead{margin-top:-8px}
+.orgHead .toolbar{flex-wrap:wrap;justify-content:flex-end;padding-right:132px;margin-left:auto}
+@media (max-width:1560px){.orgHead .toolbar{padding-right:0;padding-top:44px}}
+@media (max-width:680px){.orgHead{padding-top:44px;margin-top:-13px}html.classic .orgHead{margin-top:-8px}.orgHead .toolbar{padding:0;margin-left:0;justify-content:flex-start}}
 .otSH.or{background:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%)}
 .otSH.bl{background:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%)}
 html.classic .org .oc,html.classic .org .oc.cos,html.classic .org .oc.head{border:1px solid #B8B8B8;box-shadow:none}
@@ -2268,7 +2273,7 @@ const orgVars = (nlS, nlH, w) => `--chS:${orgDim(nlS, false)}px;--chH:${orgDim(n
 /* Makes the columns as wide as the longest name needs when there is room, so names stay on one line.
    No room: names take two lines (every card of that kind). Still too wide: shrink a little, then scroll. */
 function fitOrg() {
-  const bar = document.querySelector('.top'); if (bar) document.documentElement.style.setProperty('--topH', bar.offsetHeight + 'px');
+  const bar = document.querySelector('.top'); if (bar) document.documentElement.style.setProperty('--topH', (/sticky|fixed/.test(getComputedStyle(bar).position) ? bar.offsetHeight : 0) + 'px');
   document.querySelectorAll('.ot.root').forEach(t => {
     const set = (a, b, w) => { t.style.cssText = orgVars(a, b, w); t.classList.toggle('n2s', a === 2); t.classList.toggle('n2h', b === 2); };
     set(1, 1, 250);
@@ -2301,13 +2306,13 @@ function viewOrg() {
   const note = e => { const c = IX.cur[e['Employee Number']]; return (c.entry && c.entry['Remarks']) || (String(c.officeCode) === '' ? 'No office on record' : 'Office ' + c.officeCode + ' is not in the office list'); };
   setTimeout(fitOrg, 0);
   return `
-  <section style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap">
+  <div class="orgDl"><button type="button" class="btn primary" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
+  <section class="orgHead">
     <div style="display:grid;gap:4px"><span class="eyebrow">${orgPeople(total)} · as of ${esc(fmtDate(D.today))}</span><h1>Organizational chart</h1></div>
-  </section>
-  <div class="orgBar"><div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
+    <div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
       <div class="seg" role="group" aria-label="Who to show">${seg('orgKind', S.orgKind, 'all', 'Everyone')}${seg('orgKind', S.orgKind, 'plantilla', 'Plantilla only')}</div>
-      <button type="button" class="btn" data-act="orgLook" title="Choose what each box shows and the colours">Chart settings</button>
-      <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div></div>
+      <button type="button" class="btn" data-act="orgLook" title="Choose what each box shows and the colours">Chart settings</button></div>
+  </section>
   <div class="oLegend"><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
   <div class="org" style="${orgVars(1, 1, 250)}">${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
     ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
@@ -2583,18 +2588,48 @@ async function xoCanvas(onStep) {
     try { await d.fonts.ready; } catch (e) { /* older browsers */ }
     await Promise.all(Array.from(d.images).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
     const box = el.getBoundingClientRect(); W = Math.ceil(box.width); H = Math.ceil(box.height);
+    XO_LAST = { html: built.html, W: W, H: H };
     xml = new XMLSerializer().serializeToString(el);
   } finally { fr.remove(); }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><foreignObject x="0" y="0" width="${W}" height="${H}">${xml}</foreignObject></svg>`;
   const img = new Image();
-  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('This browser could not draw the chart. Try Chrome or Edge.')); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+  await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(xoCant()); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
   try { await img.decode(); } catch (e) { /* already loaded */ }
   await new Promise(r => setTimeout(r, 120));
-  const scale = Math.max(0.5, Math.min(2, 15000 / W, 15000 / H, Math.sqrt(120e6 / (W * H))));
+  // Phones and tablets allow much smaller pictures than a computer (about 16 million dots on an iPhone)
+  const small = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/i.test(navigator.platform || ''));
+  const area = small ? 15e6 : 120e6, side = small ? 8000 : 15000;
+  const scale = Math.max(0.2, Math.min(2, side / W, side / H, Math.sqrt(area / (W * H))));
   const cv = document.createElement('canvas'); cv.width = Math.round(W * scale); cv.height = Math.round(H * scale);
-  const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.imageSmoothingQuality = 'high';
+  const g = cv.getContext('2d'); if (!g) throw xoCant();
+  g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.imageSmoothingQuality = 'high';
   g.drawImage(img, 0, 0, cv.width, cv.height);
+  // Safari (every browser on an iPhone or iPad) lets the chart be drawn but not saved; the dots also stay blank when it fails
+  try { const px = g.getImageData(Math.round(40 * scale), Math.round(60 * scale), 1, 1).data; if (px[3] === 0) throw 0; } catch (e) { throw xoCant(); }
   return cv;
+}
+/* The browser cannot turn the chart into a picture: the caller shows the print view instead */
+let XO_LAST = null;
+const xoCant = () => { const e = new Error('This browser cannot save the chart as a picture.'); e.printView = true; return e; };
+/* Full-screen view of the chart with a Print button (the phone's print sheet can save it as a PDF) */
+function xoPrintView() {
+  const b = XO_LAST; if (!b) return;
+  const old = document.getElementById('xoPrint'); if (old) old.remove();
+  const wrap = document.createElement('div'); wrap.id = 'xoPrint';
+  wrap.style.cssText = 'position:fixed;inset:0;z-index:1000;background:#E4E9F1;display:flex;flex-direction:column';
+  const bar = document.createElement('div'); bar.style.cssText = 'display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;background:#0F2A5C;color:#fff;font:600 14px system-ui,sans-serif';
+  const t = document.createElement('span'); t.textContent = 'Print, then choose Save as PDF';
+  const btns = document.createElement('span'); btns.style.cssText = 'display:flex;gap:8px;flex:none';
+  const mk = (label, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = label; x.style.cssText = 'font:600 14px system-ui,sans-serif;padding:8px 14px;border-radius:8px;border:0;background:#fff;color:#0F2A5C'; x.addEventListener('click', fn); btns.appendChild(x); return x; };
+  const fr = document.createElement('iframe'); fr.title = 'Organizational chart'; fr.style.cssText = 'flex:1;border:0;width:100%;background:#fff';
+  mk('Print', () => { try { fr.contentWindow.focus(); fr.contentWindow.print(); } catch (e) { window.print(); } });
+  mk('Close', () => wrap.remove());
+  bar.appendChild(t); bar.appendChild(btns); wrap.appendChild(bar); wrap.appendChild(fr); document.body.appendChild(wrap);
+  const d = fr.contentDocument; d.open();
+  d.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=' + b.W + '"><style>@page{size:' + b.W + 'px ' + b.H + 'px;margin:0}html,body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>' + b.html + '</body></html>');
+  d.close();
+  const fit = () => { try { d.body.style.zoom = String(Math.min(1, fr.clientWidth / b.W)); } catch (e) { /* not supported */ } };
+  fit();
 }
 /* One-page PDF that is just the picture, on a page of the same shape (A4 width; taller charts get a longer page) */
 function xoPdf(jpeg, w, h) {
@@ -2670,6 +2705,7 @@ async function orgDownloadGo() {
     }
     closeModal(); if (S.view === 'org') render();
   } catch (e) {
+    if ((e.printView || /SecurityError|insecure|tainted/i.test(String(e.name) + ' ' + String(e.message))) && XO_LAST) { closeModal(); xoPrintView(); return toast('This phone cannot save the picture directly. Use Print, then Save as PDF.'); }
     err.textContent = e.message || 'The chart could not be made.'; err.hidden = false; btn.disabled = false; if (note) note.textContent = '';
   }
 }
