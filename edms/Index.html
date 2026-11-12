@@ -4570,6 +4570,48 @@ function publicPanel() {
       </ol></details>
   </section>`;
 }
+/* Import photos: a text file prepared outside the app, one person per line: employee number, photo, thumbnail (tab-separated data URLs).
+   The photos are saved through the normal photo save, so the audit trail and size checks still apply. */
+let PH_IMPORT = [];
+function photoImportPanel() {
+  return `<section class="panel"><div class="panelHead"><h3>${hi('user')}Import photos</h3><span class="label">many at once</span></div>
+    <p class="muted" style="font-size:.9rem">Pick a photo file prepared for this system (name ends in <b>.boephotos.txt</b>). You will see who is in it before anything is saved. A person who already has a photo gets it replaced.</p>
+    <div class="actions" style="justify-content:flex-start"><input type="file" id="phImp" accept=".txt,text/plain" aria-label="Photo file"></div>
+    <div id="phImpOut" style="margin-top:10px"></div></section>`;
+}
+async function photoImportRead(input) {
+  const out = $('#phImpOut'); PH_IMPORT = [];
+  const f = input.files && input.files[0]; if (!f) { out.textContent = ''; return; }
+  const bad = [], seen = {};
+  (await f.text()).split(/\r?\n/).forEach((line, i) => {
+    if (!line.trim()) return;
+    const p = line.split('\t'), id = String(p[0] || '').trim().padStart(4, '0'), e = IX.emp[id];
+    const ok = v => /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(String(v || '')) && String(v).length <= 49000;
+    if (!e) return bad.push('Line ' + (i + 1) + ': no employee numbered ' + id);
+    if (p.length !== 3 || !ok(p[1]) || !ok(p[2])) return bad.push('Line ' + (i + 1) + ' (' + fullName(e) + '): the picture is damaged or too big');
+    if (seen[id]) return bad.push('Line ' + (i + 1) + ': ' + fullName(e) + ' is in the file twice');
+    seen[id] = 1; PH_IMPORT.push({ id: id, photo: p[1], thumb: p[2] });
+  });
+  out.textContent = '';
+  const box = document.createElement('div'); box.style.cssText = 'display:grid;gap:10px';
+  if (bad.length) { const n = document.createElement('div'); n.className = 'note warnNote'; n.textContent = bad.length + ' line' + (bad.length === 1 ? '' : 's') + ' skipped. ' + bad.slice(0, 6).join(' · ') + (bad.length > 6 ? ' …' : ''); box.appendChild(n); }
+  const grid = document.createElement('div'); grid.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px';
+  PH_IMPORT.forEach(x => { const c = document.createElement('div'); c.style.cssText = 'display:flex;gap:8px;align-items:center;width:230px;min-width:0';
+    const im = document.createElement('img'); im.src = x.thumb; im.alt = ''; im.style.cssText = 'width:44px;height:44px;border-radius:8px;object-fit:cover;flex:none';
+    const t = document.createElement('span'); t.style.cssText = 'font-size:.82rem;min-width:0;overflow-wrap:anywhere'; t.textContent = fullName(IX.emp[x.id]);
+    c.appendChild(im); c.appendChild(t); grid.appendChild(c); });
+  box.appendChild(grid);
+  const row = document.createElement('div'); row.className = 'actions'; row.style.justifyContent = 'flex-start';
+  const go = document.createElement('button'); go.type = 'button'; go.className = 'btn primary'; go.dataset.act = 'phImpGo'; go.disabled = !PH_IMPORT.length;
+  go.textContent = PH_IMPORT.length ? 'Save ' + PH_IMPORT.length + ' photo' + (PH_IMPORT.length === 1 ? '' : 's') : 'Nothing to save';
+  row.appendChild(go); box.appendChild(row); out.appendChild(box);
+}
+function photoImportGo() {
+  const list = PH_IMPORT; PH_IMPORT = []; let n = 0; const fail = [];
+  list.forEach(x => { try { queueSave('savePhoto', { employeeId: x.id, photo: x.photo, thumb: x.thumb }); n++; } catch (e) { fail.push(x.id + ': ' + e.message); } });
+  toast(n + ' photo' + (n === 1 ? '' : 's') + ' saved' + (fail.length ? ' · ' + fail.length + ' could not be saved' : ''));
+  render();
+}
 function viewAdmin() {
   if (D.me.role !== 'Admin') return '<p class="empty">Only Admins can open this page.</p>';
   const list = sortRows('users', D.users || []);
@@ -4593,6 +4635,7 @@ function viewAdmin() {
     ${(D.needsUpgrade || []).indexOf('Offices tree') >= 0 ? '<div class="note warnNote">The Offices tab has no <b>Parent Code</b> and <b>Level</b> columns yet. Run <b>upgradeSheets</b> once, then reload.</div>' : ''}
   </section>
   ${D.signIn ? accountsPanel(list) : usersPanel(list)}
+  ${photoImportPanel()}
   ${D.signIn ? '' : publicPanel()}
   <div class="grid2">
     <section class="panel"><div class="panelHead"><h3>${hi('lock')}Master password</h3><span class="label">edit &amp; delete</span></div>
@@ -4999,6 +5042,7 @@ document.addEventListener('click', ev => {
   if (act === 'seatFilter') { S.seatFilter = a.dataset.f; return render(); }
   if (act === 'orgDiv') { S.orgDiv = a.dataset.f; return render(); }
   if (act === 'orgKind') { S.orgKind = a.dataset.f; return render(); }
+  if (act === 'phImpGo') return photoImportGo();
   if (act === 'orgDl') return formOrgDownload();
   if (act === 'orgLook') return formOrgDownload(true);
   if (act === 'orgLookGo') return orgLookGo();
@@ -5110,6 +5154,7 @@ $('#sugg').addEventListener('mousedown', ev => {
   if (t.dataset.sq !== undefined) runSearch(t.dataset.sq);
 });
 document.addEventListener('change', ev => {
+  if (ev.target && ev.target.id === 'phImp') return void photoImportRead(ev.target);
   if (ev.target.id === 'officeSel') { S.office = ev.target.value; render(); }
   if (ev.target.id === 'seatOfficeSel') { S.seatOffice = ev.target.value; render(); }
 });
