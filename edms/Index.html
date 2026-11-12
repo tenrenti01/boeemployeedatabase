@@ -2196,33 +2196,34 @@ const XO_CSS = `
 .xo .xas{margin-left:auto;font:700 15px var(--ft);letter-spacing:.08em;text-transform:uppercase;color:var(--title);white-space:nowrap}
 .xo h1{margin:24px 0 2px;text-align:center;font:800 40px/1.05 var(--ft);letter-spacing:.03em;text-transform:uppercase;color:var(--title)}
 .xo .xsub{text-align:center;font:500 14px var(--fb);color:var(--muted)}
-.xo .xbody{display:grid;gap:26px;margin-top:20px}
-.xo .xdiv{display:grid;gap:22px}
-.xo .xdh{text-align:center;font:800 32px/1.05 var(--ft);letter-spacing:.03em;text-transform:uppercase;color:var(--title);margin-top:14px}
-.xo .xsec{display:grid}
-.xo .xsec.box{background:rgba(255,255,255,.66);border:1.5px solid #DCE4F0;border-radius:20px;padding:0 18px 18px}
-.xo .xsh{margin:0 -18px 22px;padding:11px 18px;border-radius:18px 18px 0 0;background:#0F2A5C;color:#fff;display:flex;gap:10px;align-items:center;justify-content:center}
-.xo .xsh b{font:700 22px/1.1 var(--ft);letter-spacing:.05em;text-transform:uppercase;text-align:center}
+.xo .xbody{display:flex;justify-content:center;margin-top:26px}
+.xo .xn{display:flex;flex-direction:column;align-items:center;min-width:0}
+.xo .xn.full{align-self:stretch;width:100%;align-items:stretch}
+.xo .xtop{display:flex;justify-content:center;padding-top:20px}
+.xo .xstem{display:block;width:3px;height:26px;background:var(--wire);flex:none}
+.xo .xkids{display:flex;align-items:flex-start;justify-content:center}
+.xo .xk{position:relative;padding:26px 9px 0;display:flex;justify-content:center}
+.xo .xk::before{content:"";position:absolute;top:0;left:0;right:0;height:26px;border-top:3px solid var(--wire)}
+.xo .xk::after{content:"";position:absolute;top:0;left:calc(50% - 1.5px);width:3px;height:26px;background:var(--wire)}
+.xo .xk:first-child::before{left:calc(50% - 1.5px);border-left:3px solid var(--wire);border-top-left-radius:16px}
+.xo .xk:last-child::before{right:calc(50% - 1.5px);border-right:3px solid var(--wire);border-top-right-radius:16px}
+.xo .xk:first-child::after,.xo .xk:last-child::after{display:none}
+.xo .xk:only-child::before{display:none}
+.xo .xk:only-child::after{display:block}
+.xo .xsh{align-self:stretch;min-width:300px;height:60px;padding:6px 14px;border-radius:14px;background:#0F2A5C;color:#fff;display:flex;gap:10px;align-items:center;justify-content:center;box-shadow:var(--sh)}
+.xo .xsh b{font:700 19px/1.08 var(--ft);letter-spacing:.05em;text-transform:uppercase;text-align:center}
 .xo .xsh i,.xo .xuh i{font:700 13px var(--fb);background:rgba(255,255,255,.22);border-radius:999px;min-width:26px;height:26px;padding:0 7px;display:flex;align-items:center;justify-content:center;flex:none}
-.xo .xtop{display:grid;justify-items:center;margin-top:12px}
-.xo .xstem{width:3px;height:26px;background:var(--wire)}
-.xo .xunits{display:grid;gap:18px;align-items:start}
-.xo .xunits.more{margin-top:18px}
-.xo .xunit{display:grid;gap:10px;min-width:0}
-.xo .xconn{position:relative;height:26px;display:block}
-.xo .xconn::before{content:"";position:absolute;top:0;bottom:0;left:0;right:-18px;border-top:3px solid var(--wire)}
-.xo .xconn::after{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 1.5px);width:3px;background:var(--wire)}
-.xo .xunit:first-child .xconn::before{left:calc(50% - 1.5px);border-left:3px solid var(--wire);border-top-left-radius:16px}
-.xo .xunit:last-child .xconn::before{right:calc(50% - 1.5px);border-right:3px solid var(--wire);border-top-right-radius:16px}
-.xo .xunit:first-child .xconn::after,.xo .xunit:last-child .xconn::after{display:none}
-.xo .xunit:only-child .xconn::before{display:none}
-.xo .xunit:only-child .xconn::after{display:block}
-.xo .nowire .xconn{display:none}
-.xo .xuh{margin-top:-10px;border-radius:12px;color:#fff;padding:10px 14px;min-height:64px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--sh);background:var(--gn)}
-.xo .nowire .xuh{margin-top:0}
+.xo .xleaf{width:300px;display:grid;gap:10px;align-content:start}
+.xo .xleaf.wide{width:100%}
+.xo .xleaf.wide .xub{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.xo .xstack{width:300px;display:grid;gap:10px}
+.xo .xarea{background:rgba(255,255,255,.7);border:1.5px solid #DCE4F0;border-radius:18px;padding:0 14px 14px;display:flex;flex-direction:column}
+.xo .xarea .xsh{margin:0 -14px;border-radius:16px 16px 0 0;box-shadow:none}
+.xo .xareaB{display:flex;gap:18px;align-items:flex-start;padding-top:14px}
+.xo .xuh{border-radius:12px;color:#fff;padding:6px 14px;height:78px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--sh);background:var(--gn)}
 .xo .xuh.or{background:var(--go)}
 .xo .xuh b{font:700 17px/1.12 var(--ft);letter-spacing:.05em;text-transform:uppercase;text-align:center}
-.xo .xub{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:10px}
+.xo .xub{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .xo .xpc{position:relative;background:#fff;border-radius:14px;box-shadow:var(--sh);padding:10px 12px;display:flex;gap:12px;align-items:center;min-height:76px;min-width:0}
 .xo .xpc img,.xo .xav{width:56px;height:56px;border-radius:12px;flex:none;box-shadow:0 2px 6px rgba(16,41,90,.18)}
 .xo .xpc img{object-fit:cover}
@@ -2235,14 +2236,14 @@ const XO_CSS = `
 .xo .xtags i{font:600 10.5px var(--fb);letter-spacing:.03em;border-radius:999px;padding:2px 9px;color:#0D47A1;background:#E3EDFB}
 .xo .xtags i.cos{color:#B4480F;background:#FFE9DA}
 .xo .xtags i.from{color:#5A6B85;background:#EEF1F6}
-.xo .xpc.chief{padding:14px 20px;gap:16px;min-width:380px;max-width:100%;border-radius:16px}
+.xo .xpc.chief{padding:14px 20px;gap:16px;width:380px;min-height:136px;border-radius:16px}
 .xo .xpc.chief img,.xo .xpc.chief .xav{width:84px;height:84px;border-radius:16px}
 .xo .xpc.chief .xav{font-size:28px}
 .xo .xpc.chief .xpt b{font:800 24px/1.05 var(--ft);letter-spacing:.03em}
 .xo .xpc.chief .xpt span{font-size:13.5px}
 .xo .xpc.chief .xpt .xitem{font-size:12px}
 .xo .xrole{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);white-space:nowrap;font:700 12px/1.3 var(--ft);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--go);padding:3px 12px;border-radius:999px;box-shadow:var(--sh)}
-.xo .xvac{min-width:380px;min-height:112px;border:2px dashed #B9C6DA;border-radius:16px;background:rgba(255,255,255,.8);display:grid;align-content:center;justify-items:center;gap:3px;color:var(--muted)}
+.xo .xvac{width:380px;min-height:136px;border:2px dashed #B9C6DA;border-radius:16px;background:rgba(255,255,255,.8);display:grid;align-content:center;justify-items:center;gap:3px;color:var(--muted)}
 .xo .xvac b{font:800 22px var(--ft);letter-spacing:.08em;text-transform:uppercase;color:var(--title)}
 .xo .xnone{border:1.5px dashed #C5D0E0;border-radius:14px;min-height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;background:rgba(255,255,255,.7)}
 .xo .xft{margin-top:auto;padding-top:26px;text-align:right;font:500 11.5px var(--fb);color:var(--muted)}
@@ -2267,46 +2268,60 @@ function xoCard(e, role, X) {
     (XO.from && from ? `<i class="from">from ${esc(from)}</i>` : '');
   return `<div class="xpc${role ? ' chief' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
 }
-function xoUnit(name, list, X) {
+/* One column: a gradient header and its people stacked top to bottom */
+function xoLeaf(name, list, X, wide) {
   const or = XO.color === 'orange' || (XO.color === 'alt' && X.k++ % 2 === 1);
-  return `<div class="xunit"><i class="xconn"></i><div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${list.length}</i></div><div class="xub">${list.map(e => xoCard(e, '', X)).join('') || '<div class="xnone">No one assigned yet</div>'}</div></div>`;
+  return `<div class="xleaf${wide ? ' wide' : ''}"><div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${list.length}</i></div><div class="xub">${list.map(e => xoCard(e, '', X)).join('') || '<div class="xnone">No one assigned yet</div>'}</div></div>`;
 }
-/* Columns side by side under a chief; too many for the page width wrap to a second row (only the first row is wired) */
-function xoCols(cols, wired) {
-  if (!cols.length) return '';
-  const max = XO.orient === 'portrait' ? 3 : 5, rows = [];
-  for (let i = 0; i < cols.length; i += max) rows.push(cols.slice(i, i + max));
-  return rows.map((r, i) => `<div class="xunits${i ? ' more' : ''}${wired && !i ? '' : ' nowire'}" style="grid-template-columns:repeat(${r.length},minmax(0,1fr))">${r.join('')}</div>`).join('');
-}
-function xoHead(code, O, lvl, X, below) {
-  const h = O.head(code); if (h && O.shown[h['Employee Number']]) return '';
-  const name = IX.off[code]['Office Name'];
+/* Children side by side on one level, wired to the box above them */
+const xoKids = kids => kids.length ? `<i class="xstem"></i><div class="xkids">${kids.map(k => `<div class="xk">${k}</div>`).join('')}</div>` : '';
+function xoRole(code, h) {
+  const name = IX.off[code]['Office Name'], lvl = orgLevel(IX.off[code]);
   const base = /assistant/i.test(name) ? 'Assistant Bureau Director' : /director/i.test(name) ? 'Bureau Director' : lvl === 'Division' ? 'Division Chief' : 'Section Chief';
-  const box = h ? xoCard(h, (IX.cur[h['Employee Number']].type === 'Designation (OIC)' ? 'OIC · ' : '') + base, X) : `<div class="xvac"><b>Vacant</b><span>${esc(base)} not on record</span></div>`;
-  return `<div class="xtop">${box}${below ? '<i class="xstem"></i>' : ''}</div>`;
+  return (h && IX.cur[h['Employee Number']].type === 'Designation (OIC)' ? 'OIC · ' : '') + base;
+}
+function xoHead(code, O, X) {
+  const h = O.head(code);
+  return h ? xoCard(h, xoRole(code, h), X) : `<div class="xvac"><b>Vacant</b><span>${esc(xoRole(code, null))} not on record</span></div>`;
 }
 const xoUnder = (code, O) => Object.keys(IX.offUnder[code] || {}).reduce((l, k) => l.concat(O.at[k] || []), []);
+const xoBar = (code, O) => `<div class="xsh"><b>${esc(IX.off[code]['Office Name'])}</b><i>${O.count(code)}</i></div>`;
+/* An office and everything under it, as a tree: its head on top, the offices under it on one level below */
 function xoNode(code, O, X, root) {
-  const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
+  const off = IX.off[code], lvl = orgLevel(off);
   const kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
-  if (lvl === 'Unit' && !kids.length) return `<section class="xsec">${xoCols([xoUnit(name, O.at[code] || [], X)], false)}</section>`;
+  if (lvl === 'Unit' && !kids.length) return root ? `<div class="xn full">${xoLeaf(off['Office Name'], O.at[code] || [], X, true)}</div>` : xoLeaf(off['Office Name'], O.at[code] || [], X);
+  if (code === O.apex) return xoApex(O, X, [code], root);
   const head = O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
+  const below = [];
   if (lvl === 'Division') {
-    let direct = [], order = kids;
-    if (code === O.apex) {
-      const C = e => IX.cur[e['Employee Number']];
-      const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
-      const t = rest.filter(tech), a = rest.filter(e => !tech(e));
-      if (t.length) direct.push(xoUnit('Technical Staff', t, X));
-      if (a.length) direct.push(xoUnit('Administrative Staff', a, X));
-      order = kids.slice().sort((x, y) => (x === O.asst ? 0 : 1) - (y === O.asst ? 0 : 1));
-    } else if (rest.length) direct.push(xoUnit('Division Staff', rest, X));
-    return `<section class="xdiv">${root ? '' : `<div class="xdh">${xoTitle(name)}</div>`}<div class="xsec">${xoHead(code, O, lvl, X, direct.length > 0)}${xoCols(direct, true)}</div>${order.map(k => xoNode(k, O, X, false)).join('')}</section>`;
+    if (rest.length) below.push(xoLeaf('Division Staff', rest, X));
+    kids.forEach(k => below.push(xoNode(k, O, X, false)));
+  } else {
+    if (rest.length && kids.length) below.push(xoLeaf('Section Staff', rest, X));
+    kids.forEach(k => below.push(xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X)));
   }
-  const cols = [];
-  if (rest.length) cols.push(xoUnit(kids.length ? 'Section Staff' : 'Staff', rest, X));
-  kids.forEach(k => cols.push(xoUnit(IX.off[k]['Office Name'], xoUnder(k, O), X)));
-  return `<section class="xsec${root ? '' : ' box'}">${root ? '' : `<div class="xsh"><b>${esc(name)}</b><i>${O.count(code)}</i></div>`}${xoHead(code, O, lvl, X, cols.length > 0)}${xoCols(cols, true)}</section>`;
+  const stack = !kids.length && lvl !== 'Division' && rest.length ? `<i class="xstem"></i><div class="xstack">${rest.map(e => xoCard(e, '', X)).join('')}</div>` : '';
+  return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKids(below)}</div>`;
+}
+/* The top of the bureau: Director, then the Assistant Director, then one level holding the Director's own staff,
+   the other offices under the Director (ADMIN) and every division in `divs` */
+function xoApex(O, X, divs, root) {
+  const apex = O.apex, C = e => IX.cur[e['Employee Number']];
+  const top = O.head(apex), rest = (O.at[apex] || []).filter(e => e !== top);
+  const asstHead = O.asst ? O.head(O.asst) : null, asstRest = O.asst ? (O.at[O.asst] || []).filter(e => e !== asstHead) : [];
+  const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
+  const groups = [];
+  const t = rest.filter(tech), a = rest.filter(e => !tech(e));
+  if (t.length) groups.push(xoLeaf('Technical Staff', t, X));
+  if (a.length) groups.push(xoLeaf('Administrative Staff', a, X));
+  if (asstRest.length) groups.push(xoLeaf('Staff of the Assistant Director', asstRest, X));
+  const level = [];
+  if (groups.length) level.push(`<div class="xarea"><div class="xsh"><b>${esc(IX.off[apex]['Office Name'])} · Staff</b><i>${rest.length + asstRest.length}</i></div><div class="xareaB">${groups.join('')}</div></div>`);
+  (IX.offKids[apex] || []).map(o => String(o['Office Code'])).filter(k => k !== O.asst).forEach(k => level.push(xoNode(k, O, X, false)));
+  divs.filter(c => c !== apex).forEach(c => level.push(xoNode(c, O, X, false)));
+  const asst = O.asst ? `<i class="xstem"></i><div class="xtop">${xoHead(O.asst, O, X)}</div>` : '';
+  return `<div class="xn"><div class="xtop">${top ? xoCard(top, xoRole(apex, top), X) : xoHead(apex, O, X)}</div>${asst}${xoKids(level)}</div>`;
 }
 /* The whole sheet as HTML. X.ids collects who is on it (to fetch their full-size photos). */
 function xoBuild(X) {
@@ -2319,10 +2334,8 @@ function xoBuild(X) {
   const code = XO.office && IX.off[XO.office] ? XO.office : '';
   let title, sub = '', body, n, headDiv = '';
   if (!code) {
-    const top = O.apex ? O.head(O.apex) : null;
-    let apex = '';
-    if (top) { apex = `<div class="xtop">${xoCard(top, 'Bureau Director', X)}</div>`; O.shown[top['Employee Number']] = true; }
-    title = xoTitle(agency); body = apex + roots.map(c => xoNode(c, O, X, false)).join('');
+    title = xoTitle(agency);
+    body = O.apex ? xoApex(O, X, roots, true) : `<div class="xn">${xoKids(roots.map(c => xoNode(c, O, X, false))).replace('<i class="xstem"></i>', '')}</div>`;
     n = Object.keys(O.at).reduce((s, k) => s + O.at[k].length, 0);
   } else {
     const off = IX.off[code], path = (IX.offPath || {})[code] || [off], lvl = orgLevel(off);
@@ -2332,7 +2345,7 @@ function xoBuild(X) {
   }
   const W = XO.orient === 'portrait' ? 1100 : 1500, minH = Math.round(XO.orient === 'portrait' ? W * 1.4142 : W / 1.4142);
   const logo = src => /^data:image\//.test(String(src || '')) ? `<img src="${esc(src)}" alt="" />` : '';
-  return { W, html: `<div class="xo" style="width:${W}px;min-height:${minH}px;--wire:${esc(XO.wire)}"><style>${X.fonts || ''}${XO_CSS}</style>
+  return { W, html: `<div class="xo" style="width:max-content;min-width:${W}px;min-height:${minH}px;--wire:${esc(XO.wire)}"><style>${X.fonts || ''}${XO_CSS}</style>
     <div class="xhd">${logo(D.logo || X.logo1)}${logo(D.logo2 || X.logo2)}<div class="xbrand"><b>${esc(aw.slice(0, -1).join(' '))} <em>${esc(aw[aw.length - 1])}</em></b><span>${esc(D.department || 'Department of Public Works and Highways')}${headDiv ? ' · ' + esc(headDiv) : ''}</span></div><div class="xas">Organizational Chart</div></div>
     <h1>${title}</h1><div class="xsub">${esc(sub)}${n} personnel${XO.who === 'plantilla' ? ' (plantilla only)' : ''}</div>
     <div class="xbody">${body}</div>
@@ -2373,10 +2386,10 @@ async function xoCanvas(onStep) {
   }
   say('Drawing…');
   X.ids = {}; X.k = 0;
-  const built = xoBuild(X), W = built.W;
+  const built = xoBuild(X); let W = built.W;
   const fr = document.createElement('iframe');
   fr.setAttribute('aria-hidden', 'true'); fr.tabIndex = -1;
-  fr.style.cssText = 'position:fixed;left:-30000px;top:0;width:' + W + 'px;height:200px;border:0;visibility:hidden';
+  fr.style.cssText = 'position:fixed;left:-40000px;top:0;width:30000px;height:200px;border:0;visibility:hidden';
   document.body.appendChild(fr);
   let xml, H;
   try {
@@ -2384,7 +2397,7 @@ async function xoCanvas(onStep) {
     const el = d.body.firstElementChild;
     try { await d.fonts.ready; } catch (e) { /* older browsers */ }
     await Promise.all(Array.from(d.images).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
-    H = Math.ceil(el.getBoundingClientRect().height);
+    const box = el.getBoundingClientRect(); W = Math.ceil(box.width); H = Math.ceil(box.height);
     xml = new XMLSerializer().serializeToString(el);
   } finally { fr.remove(); }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><foreignObject x="0" y="0" width="${W}" height="${H}">${xml}</foreignObject></svg>`;
@@ -2425,7 +2438,7 @@ function formOrgDownload() {
         ${field('xoOffice', 'Which office', offSelect('xoOffice', XO.office, 'Whole bureau'), 'span2', 'A division, a section, or a single unit')}
         ${field('xoWho', 'Who to include', sel('xoWho', [['all', 'Everyone'], ['plantilla', 'Plantilla only']], XO.who), 'span2')}
         ${field('xoFmt', 'File type', sel('xoFmt', [['png', 'HD image (PNG)'], ['pdf', 'PDF']], XO.fmt))}
-        ${field('xoOrient', 'Page', sel('xoOrient', [['landscape', 'Landscape'], ['portrait', 'Portrait']], XO.orient))}
+        ${field('xoOrient', 'Page', sel('xoOrient', [['landscape', 'Landscape'], ['portrait', 'Portrait']], XO.orient), '', 'A wide chart makes the page wider')}
         ${field('xoColor', 'Unit header colour', sel('xoColor', [['blue', 'Blue'], ['orange', 'Orange'], ['alt', 'Alternate']], XO.color))}
         ${field('xoWire', 'Line colour', sel('xoWire', [['#A9BFE3', 'Light blue'], ['#0D47A1', 'Navy'], ['#F26522', 'Orange'], ['#9AA5B5', 'Grey']], XO.wire))}
       </div>
