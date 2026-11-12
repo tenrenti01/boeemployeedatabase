@@ -927,6 +927,9 @@ html.classic .statusbar:empty{display:none}
 .osH{justify-self:stretch;margin:0 -10px;padding:7px 12px;background:var(--plantilla-soft);color:var(--head);font:700 1rem var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:13px 13px 0 0;border-bottom:1px solid var(--line-2)}
 .osH small,.ouH small{font:500 .72rem var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-left:4px}
 .osU{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;width:100%;align-items:start}
+.os.bare{border-color:transparent;background:none}
+.os.bare > .osH,.os.bare > .oVac{visibility:hidden}
+@media (max-width:680px){.os.bare > .osH,.os.bare > .oVac{display:none}}
 .os.lead{justify-items:stretch}
 .os.lead > .oc.head{justify-self:start}
 .os.lead > .oNone{justify-self:start}
@@ -970,6 +973,7 @@ html.classic .odS{gap:8px}
 html.classic .os{border-radius:0;border:1px solid #A0A0A0;background:#F7F7F7;padding:0 6px 6px;gap:6px}
 html.classic .osH{margin:0 -6px;border-radius:0;background:#E9E9E9;color:#000;font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;padding:3px 8px;border-bottom:1px solid #A0A0A0}
 html.classic .osH small,html.classic .ouH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .os.bare{border-color:transparent;background:none}
 html.classic .osU{gap:6px}
 html.classic .osU.under{margin-left:20px;padding-left:8px;border-left:1px solid #A0A0A0}
 html.classic .ou,html.classic .ouB{gap:4px}
@@ -2130,7 +2134,9 @@ function orgNode(code, O) {
     return `<section class="od"><div class="odH"><h2>${esc(off['Office Name'])}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
       <div class="odB">${headHtml}
         ${direct}
-        ${kids.length ? `<div class="odS">${kids.map(k => orgNode(k, O)).join('')}</div>` : ''}
+        ${kids.length ? `<div class="odS">${kids.map(k => orgLevel(IX.off[k]) === 'Unit' && !(IX.offKids[k] || []).length
+          ? `<div class="os bare" style="--cols:1"><div class="osH" aria-hidden="true">&nbsp;</div><div class="oNone oVac" aria-hidden="true"><b>&nbsp;</b><span>&nbsp;</span></div><div class="osU">${orgNode(k, O)}</div></div>`   // a unit straight under the division sits at unit height, not section height
+          : orgNode(k, O)).join('')}</div>` : ''}
       </div></section>`;
   }
   const cols = kids.length + (rest.length && kids.length ? 1 : 0) || 1;
