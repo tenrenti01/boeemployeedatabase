@@ -306,21 +306,18 @@ legend{font:600 .9rem var(--cond);letter-spacing:.2em;text-transform:uppercase;c
 
 /* Printed documents (preview) */
 #printArea{display:none}
-.doc{font-family:var(--body);color:#111;background:#fff;padding:28px;max-width:900px;margin:0 auto}
-.doc .dochead{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;gap:12px;border-bottom:2px solid #08295F;padding-bottom:10px;margin-bottom:6px}
-.doc .dochead > div:last-child img{margin-left:auto}
-.doc .dochead img{width:64px;height:64px;object-fit:contain}
-.doc .dochead div{text-align:center}
-.doc h1{font-family:var(--cond);font-size:1.7rem;text-align:center;letter-spacing:.06em;color:#08295F;margin-top:10px}
-.doc .agency{text-align:center;font-size:.9rem;margin-bottom:2px;color:#111}
+.doc{font-family:Tahoma,Verdana,Geneva,sans-serif;color:#000;background:#fff;padding:24pt 44px 28px;max-width:900px;margin:0 auto}
+.doc h1,html.classic .doc h1{font-family:Tahoma,Verdana,Geneva,sans-serif;font-size:12pt;font-weight:bold;text-align:center;letter-spacing:0;text-transform:none;color:#000;margin:0 0 4px}
+.doc .agency{text-align:center;font-size:10pt;margin-bottom:2px;color:#000}
 .doc table{font-size:.82rem}
 .doc th,.doc td{border:1px solid #999;padding:5px 6px;color:#111;white-space:normal}
-.doc th{position:static;background:#08295F;color:#fff;font-size:.78rem}
+.doc th{position:static;background:#333;color:#fff;font-size:.78rem}
 .doc .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 20px;margin:14px 0;font-size:.9rem}
 .doc .sign{display:flex;justify-content:space-between;margin-top:46px;font-size:.85rem}
 .doc .sign div{border-top:1px solid #111;padding-top:4px;min-width:220px;text-align:center}
 .doc .foot{margin-top:18px;font-size:.75rem;color:#555}
 .preview{background:#fff;border:1px solid var(--line-2);max-height:70vh;overflow:auto;border-radius:var(--r-sm)}
+@page{size:A4;margin:24pt 72pt 72pt}
 @media print{
   body{background:#fff}
   body > *:not(#printArea){display:none!important}
@@ -331,7 +328,7 @@ legend{font:600 .9rem var(--cond);letter-spacing:.2em;text-transform:uppercase;c
 /* The certificate's own styles live with its code, so the page, the Word file and
    the printed page can never drift apart. They are added to the page at start-up. */
 .coeWrap{background:#fff}
-.coeWrap .coe{padding:46px 44px}
+.coeWrap .coe{padding:24pt 44px 46px}
 
 /* Search clear, sortable headers, downloads */
 .search .clr{all:unset;position:absolute;right:7px;top:50%;transform:translateY(-50%);width:22px;height:22px;display:grid;place-items:center;border-radius:50%;cursor:pointer;color:var(--muted);font-size:1.05rem;line-height:1;transition:background .2s}
@@ -930,6 +927,10 @@ html.classic .statusbar:empty{display:none}
 .osH{justify-self:stretch;margin:0 -10px;padding:7px 12px;background:var(--plantilla-soft);color:var(--head);font:700 1rem var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:13px 13px 0 0;border-bottom:1px solid var(--line-2)}
 .osH small,.ouH small{font:500 .72rem var(--body);letter-spacing:0;text-transform:none;color:var(--muted);margin-left:4px}
 .osU{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;width:100%;align-items:start}
+.os.lead{justify-items:stretch}
+.os.lead > .oc.head{justify-self:start}
+.os.lead > .oNone{justify-self:start}
+.osU.under{width:auto;margin-left:26px;padding-left:12px;border-left:2px solid var(--line-2);grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .ou{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;min-width:0}
 .ouH{font:700 .86rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--head);text-align:center;padding:5px 6px;border-bottom:2px solid var(--orange);text-wrap:balance}
 .oNone{font-size:.76rem;color:var(--muted);border:1px dashed var(--line-2);border-radius:10px;padding:6px 12px;text-align:center}
@@ -964,6 +965,7 @@ html.classic .os{border-radius:0;border:1px solid #A0A0A0;background:#F7F7F7;pad
 html.classic .osH{margin:0 -6px;border-radius:0;background:#E9E9E9;color:#000;font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;padding:3px 8px;border-bottom:1px solid #A0A0A0}
 html.classic .osH small,html.classic .ouH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
 html.classic .osU{gap:6px}
+html.classic .osU.under{margin-left:20px;padding-left:8px;border-left:1px solid #A0A0A0}
 html.classic .ou{gap:4px}
 html.classic .ouH{font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;color:#000;border-bottom:1px solid #A0A0A0;background:#F0F0F0;padding:2px 6px}
 html.classic .oNone{border-radius:0;font:11px Tahoma,"Segoe UI",Arial,sans-serif;padding:3px 8px}
@@ -975,7 +977,7 @@ html.classic .oOut{font:11px Tahoma,"Segoe UI",Arial,sans-serif}
 @media (max-width:1700px){html:not(.classic) .who{display:none}html:not(.classic) .tabs button{padding:8px 7px;letter-spacing:.05em}html:not(.classic) .tabs button::after{left:7px;right:7px}}
 @media (max-width:1420px){html:not(.classic) .tabs button{padding:8px 5px;font-size:.9rem;letter-spacing:.03em}html:not(.classic) .tabs button::after{left:5px;right:5px}}
 @media (max-width:1320px){html:not(.classic) .topIn{flex-wrap:wrap}}
-@media (max-width:680px){.odB{padding:10px}.oc.head{min-width:0;width:100%;max-width:none}.osU{grid-template-columns:1fr}}
+@media (max-width:680px){.osU.under{margin-left:12px;padding-left:8px}.odB{padding:10px}.oc.head{min-width:0;width:100%;max-width:none}.osU{grid-template-columns:1fr}}
 @media print{html.classic body{background:#fff}}
 </style>
 <script>try{if(localStorage.getItem('boe.theme')!=='modern')document.documentElement.classList.add('classic')}catch(e){document.documentElement.classList.add('classic')}</script>
@@ -2093,7 +2095,8 @@ function orgUnit(name, list, note) {
 }
 /* One office and everything under it. Divisions and sections get a head; a unit is a plain column of people. */
 function orgNode(code, O) {
-  const off = IX.off[code], lvl = orgLevel(off), kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
+  const off = IX.off[code], lvl = orgLevel(off);
+  let kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
   if (lvl === 'Unit' && !kids.length) return orgUnit(off['Office Name'], O.at[code] || []);
   const head = O.head(code), seen = head && O.shown[head['Employee Number']];
   const rest = (O.at[code] || []).filter(e => e !== head);
@@ -2101,31 +2104,40 @@ function orgNode(code, O) {
   if (lvl === 'Division') {
     const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
     const big = rest.length > 12;
+    let direct = rest.length ? `<details class="oMore"${big ? '' : ' open'}><summary>Assigned straight to the ${esc(/division/i.test(off['Office Name']) ? 'division' : 'office')} · ${rest.length}</summary><div class="oGrid">${rest.map(e => orgCard(e)).join('')}</div></details>` : '';
+    if (code === O.apex) {
+      // The Director's own staff, shown as a technical group and an administrative group (a view only; nothing is stored)
+      const C = e => IX.cur[e['Employee Number']];
+      const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
+      const group = (name, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0], others = list.filter(e => e !== lead);
+        return `<div class="os lead" style="--cols:1"><div class="osH">${esc(name)} <small>${list.length}</small></div>${orgCard(lead, true)}${others.length ? `<div class="osU under">${others.map(e => orgCard(e)).join('')}</div>` : ''}</div>`; };
+      direct = rest.length ? `<div class="odS">${group('Technical', rest.filter(tech))}${group('Administrative', rest.filter(e => !tech(e)))}</div>` : '';
+      kids = kids.slice().sort((a, b) => (a === O.asst ? 0 : 1) - (b === O.asst ? 0 : 1));   // the Assistant Director's office first (left)
+    }
     return `<section class="od"><div class="odH"><h2>${esc(off['Office Name'])}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
       <div class="odB">${headHtml}
-        ${rest.length ? `<details class="oMore"${big ? '' : ' open'}><summary>Assigned straight to the ${esc(/division/i.test(off['Office Name']) ? 'division' : 'office')} · ${rest.length}</summary><div class="oGrid">${rest.map(e => orgCard(e)).join('')}</div></details>` : ''}
+        ${direct}
         ${kids.length ? `<div class="odS">${kids.map(k => orgNode(k, O)).join('')}</div>` : ''}
       </div></section>`;
   }
   const cols = kids.length + (rest.length && kids.length ? 1 : 0) || 1;
-  return `<div class="os" style="--cols:${cols}"><div class="osH">${esc(off['Office Name'])} <small>${O.count(code)}</small></div>${headHtml}
+  return `<div class="os${kids.length ? '' : ' lead'}" style="--cols:${cols}"><div class="osH">${esc(off['Office Name'])} <small>${O.count(code)}</small></div>${headHtml}
     ${kids.length ? `<div class="osU">${rest.length ? orgUnit('Section staff', rest) : ''}${kids.map(k => orgNode(k, O)).join('')}</div>`
-      : rest.length ? `<div class="osU">${rest.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+      : rest.length ? `<div class="osU under">${rest.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
 }
 function viewOrg() {
   const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
   if (!roots.length) return '<p class="empty">No offices on record yet. Add divisions, sections and units on the Admin page.</p>';
   if (S.orgDiv && roots.indexOf(S.orgDiv) < 0) S.orgDiv = '';
   const O = orgIndex();
-  // The bureau's own head sits at the very top, with the assistant director under them
-  const apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
-  const asst = apex ? (IX.offKids[apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
-  const top = apex ? O.head(apex) : null, second = asst ? O.head(asst) : null;
+  // The bureau's own head sits at the very top; the Assistant Director leads their own office, drawn first (left) under it
+  const apex = O.apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
+  O.asst = apex ? (IX.offKids[apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
+  const top = apex ? O.head(apex) : null;
   let apexHtml = '';
-  if ((!S.orgDiv || S.orgDiv === apex) && (top || second)) {
-    if (top) O.shown[top['Employee Number']] = true;
-    if (second) O.shown[second['Employee Number']] = true;
-    apexHtml = `<div class="oApex"><div class="oBar">${esc(D.agency || 'Bureau')}</div>${top ? orgCard(top, true, IX.off[apex]['Office Name']) : ''}${top && second ? '<i class="oStem"></i>' : ''}${second ? orgCard(second, true, IX.off[asst]['Office Name']) : ''}<i class="oStem"></i></div>`;
+  if ((!S.orgDiv || S.orgDiv === apex) && top) {
+    O.shown[top['Employee Number']] = true;
+    apexHtml = `<div class="oApex"><div class="oBar">${esc(D.agency || 'Bureau')}</div>${orgCard(top, true, IX.off[apex]['Office Name'])}<i class="oStem"></i></div>`;
   }
   const seg = (act, cur, k, l) => `<button type="button" data-act="${act}" data-f="${esc(k)}" aria-pressed="${cur === k}">${esc(l)}</button>`;
   const total = Object.keys(O.at).reduce((n, k) => n + O.at[k].length, 0) + O.lost.length;
@@ -2170,11 +2182,15 @@ function repArgs(a) {
   if (rep === 'ml') return ['ml', a.dataset.off !== undefined ? a.dataset.off : $('#mlOff').value, a.dataset.kind || $('#mlKind').value];
   return [rep];
 }
+/* The letterhead every generated document carries, the same one as the Bureau's memoranda:
+   DPWH seal on the left, Bagong Pilipinas on the right, four centred lines between them, Tahoma 11, all black. */
+const letterLines = () => [['Republic of the Philippines', 0], [String(D.department || 'Department of Public Works and Highways').toUpperCase(), 0], ['CENTRAL OFFICE', 1], ['NCR Compound, 2nd St. Port Area, Manila', 0]];
+function letterHead(img1, img2) {      // img1 / img2: ready-made <img> tags, for the Word file (it needs fixed sizes and file names)
+  const pic = src => src ? `<img src="${esc(src)}" alt="" style="height:63pt;width:auto">` : '';
+  return `<table class="lhead" cellspacing="0" cellpadding="0"><tr><td class="lhL" align="left" valign="top">${img1 !== undefined ? img1 : pic(D.logo)}</td><td class="lhC" align="center" valign="top">${letterLines().map(l => l[1] ? '<b>' + esc(l[0]) + '</b>' : esc(l[0])).join('<br>')}</td><td class="lhR" align="right" valign="top">${img2 !== undefined ? img2 : pic(D.logo2)}</td></tr></table>`;
+}
 function docHead(title, sub) {
-  return `<div class="dochead"><div>${D.logo ? `<img src="${esc(D.logo)}" alt="">` : ''}</div><div><div class="agency">Republic of the Philippines</div>
-    <div class="agency"><b>${esc(D.department || 'Department of Public Works and Highways')}</b></div><div class="agency">${esc(D.agency || 'Bureau of Equipment')}</div></div>
-    <div style="text-align:right">${D.logo2 ? `<img src="${esc(D.logo2)}" alt="">` : ''}</div></div>
-    <h1>${esc(title)}</h1>${sub ? `<div class="agency">${esc(sub)}</div>` : ''}`;
+  return `${letterHead()}<h1>${esc(title)}</h1>${sub ? `<div class="agency">${esc(sub)}</div>` : ''}`;
 }
 function docFoot() { return `<div class="foot">Printed ${esc(fmtDate(D.today))} · ${esc(D.agency || 'Bureau of Equipment')} Employee System</div>`; }
 function payFor(entry) {
@@ -3362,7 +3378,7 @@ function formExportCols(list, kind) {
     if (kind === 'xlsx') downloadXlsx(list, ids); else downloadCsv(list, ids);
   });
 }
-/* A small PDF writer: A4 portrait, built-in Helvetica, a table that flows over pages. No outside library needed. */
+/* A small PDF writer: A4, one-inch margins, the memorandum letterhead, a table that flows over pages. No outside library needed. */
 const HELV = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
 const HELVB = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584];
 const WIN = { '€': 128, '‚': 130, '„': 132, '…': 133, '‘': 145, '’': 146, '“': 147, '”': 148, '•': 149, '–': 150, '—': 151, '™': 153 };
@@ -3374,7 +3390,60 @@ function winBytes(str) {
   }
   return out;
 }
-const textW = (bytes, bold, size) => bytes.reduce((w, b) => w + (b >= 32 && b <= 126 ? (bold ? HELVB : HELV)[b - 32] : 556), 0) / 1000 * size;
+/* The PDFs are set in Tahoma when the browser may read this computer's own copy of the font (Chrome and Edge ask once).
+   Only the letters a document can use are packed into the file. Without it, the look-alike built-in Helvetica is used. */
+let PDFFONT = null, PDFFONT_DONE = false;
+const CP1252 = [0x20AC, 0, 0x201A, 0x0192, 0x201E, 0x2026, 0x2020, 0x2021, 0x02C6, 0x2030, 0x0160, 0x2039, 0x0152, 0, 0x017D, 0, 0, 0x2018, 0x2019, 0x201C, 0x201D, 0x2022, 0x2013, 0x2014, 0x02DC, 0x2122, 0x0161, 0x203A, 0x0153, 0, 0x017E, 0x0178];
+function ttfSubset(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  const u16 = o => dv.getUint16(o), i16 = o => dv.getInt16(o), u32 = o => dv.getUint32(o);
+  if (u32(0) !== 0x00010000 && u32(0) !== 0x74727565) return null;                       // TrueType outlines only
+  const T = {}; for (let i = 0, n = u16(4); i < n; i++) { const o = 12 + 16 * i; T[String.fromCharCode(u8[o], u8[o + 1], u8[o + 2], u8[o + 3])] = { off: u32(o + 8), len: u32(o + 12) }; }
+  if (!['head', 'hhea', 'maxp', 'hmtx', 'loca', 'glyf', 'cmap'].every(t => T[t])) return null;
+  const head = T.head.off, upem = u16(head + 18), longLoca = i16(head + 50), nGlyph = u16(T.maxp.off + 4), nH = u16(T.hhea.off + 34);
+  const adv = g => u16(T.hmtx.off + 4 * Math.min(g, nH - 1));
+  const loc = g => longLoca ? u32(T.loca.off + 4 * g) : u16(T.loca.off + 2 * g) * 2;
+  let sub = 0; for (let i = 0, n = u16(T.cmap.off + 2); i < n; i++) { const o = T.cmap.off + 4 + 8 * i, at = T.cmap.off + u32(o + 4); if (u16(at) === 4 && (u16(o) === 3 && u16(o + 2) === 1 || !sub)) sub = at; }
+  if (!sub) return null;
+  const segs = u16(sub + 6) / 2, endC = sub + 14, startC = endC + 2 * segs + 2, delta = startC + 2 * segs, range = delta + 2 * segs;
+  const gid = u => { for (let k = 0; k < segs; k++) if (u <= u16(endC + 2 * k)) { const st = u16(startC + 2 * k); if (u < st) return 0; const ro = u16(range + 2 * k); if (!ro) return (u + i16(delta + 2 * k)) & 0xFFFF; const g = u16(range + 2 * k + ro + 2 * (u - st)); return g ? (g + i16(delta + 2 * k)) & 0xFFFF : 0; } return 0; };
+  const keep = new Set([0]), w = [], k1000 = 1000 / upem;
+  for (let c = 32; c < 256; c++) { const u = c < 128 ? c : c < 160 ? CP1252[c - 128] : c, g = u ? gid(u) : 0; keep.add(g); w.push(Math.round(adv(g) * k1000)); }
+  const todo = Array.from(keep);                                                         // accented letters are built from other glyphs: keep those too
+  while (todo.length) { const g = todo.pop(), a = loc(g), b = loc(g + 1); if (b <= a || i16(T.glyf.off + a) >= 0) continue; let q = T.glyf.off + a + 10, fl;
+    do { fl = u16(q); const comp = u16(q + 2); if (!keep.has(comp)) { keep.add(comp); todo.push(comp); } q += 4 + (fl & 1 ? 4 : 2) + (fl & 8 ? 2 : fl & 0x40 ? 4 : fl & 0x80 ? 8 : 0); } while (fl & 0x20); }
+  const newLoca = new Uint8Array((nGlyph + 1) * 4), lv = new DataView(newLoca.buffer), chunks = []; let pos = 0;
+  for (let g = 0; g < nGlyph; g++) { lv.setUint32(4 * g, pos); if (!keep.has(g)) continue; const a = loc(g), b = loc(g + 1); if (b <= a) continue; const part = u8.subarray(T.glyf.off + a, T.glyf.off + b), pad = (4 - part.length % 4) % 4; chunks.push(part); if (pad) chunks.push(new Uint8Array(pad)); pos += part.length + pad; }
+  lv.setUint32(4 * nGlyph, pos);
+  const glyf = new Uint8Array(pos); let at = 0; chunks.forEach(c => { glyf.set(c, at); at += c.length; });
+  const headT = u8.slice(head, head + T.head.len), hv = new DataView(headT.buffer); hv.setUint32(8, 0); hv.setInt16(50, 1);
+  const tables = [['cmap'], ['cvt '], ['fpgm'], ['glyf', glyf], ['head', headT], ['hhea'], ['hmtx'], ['loca', newLoca], ['maxp'], ['prep']].filter(t => t[1] || T[t[0]]).map(t => [t[0], t[1] || u8.subarray(T[t[0]].off, T[t[0]].off + T[t[0]].len)]);
+  const sum = d => { let x = 0; const n = d.length & ~3, v = new DataView(d.buffer, d.byteOffset, d.length); for (let i = 0; i < n; i += 4) x = (x + v.getUint32(i)) >>> 0; if (d.length > n) { let last = 0; for (let i = n; i < n + 4; i++) last = (last << 8 | (i < d.length ? d[i] : 0)) >>> 0; x = (x + last) >>> 0; } return x; };
+  const nT = tables.length, es = Math.floor(Math.log2(nT)); let off = 12 + 16 * nT;
+  const total = off + tables.reduce((t, x) => t + (x[1].length + 3 & ~3), 0), out = new Uint8Array(total), ov = new DataView(out.buffer);
+  ov.setUint32(0, 0x00010000); ov.setUint16(4, nT); ov.setUint16(6, 16 << es); ov.setUint16(8, es); ov.setUint16(10, nT * 16 - (16 << es));
+  let headAt = 0;
+  tables.forEach((t, i) => { const o = 12 + 16 * i; for (let c = 0; c < 4; c++) out[o + c] = t[0].charCodeAt(c); ov.setUint32(o + 4, sum(t[1])); ov.setUint32(o + 8, off); ov.setUint32(o + 12, t[1].length); out.set(t[1], off); if (t[0] === 'head') headAt = off; off += t[1].length + 3 & ~3; });
+  ov.setUint32(headAt + 8, (0xB1B0AFBA - sum(out)) >>> 0);
+  const os2 = T['OS/2'], cap = os2 && u16(os2.off) >= 2 && os2.len >= 90 ? i16(os2.off + 88) : Math.round(i16(T.hhea.off + 4) * 0.72);
+  return { bytes: out, w: w, asc: Math.round(i16(T.hhea.off + 4) * k1000), desc: Math.round(i16(T.hhea.off + 6) * k1000), cap: Math.round(cap * k1000),
+    bbox: [36, 38, 40, 42].map(o => Math.round(i16(head + o) * k1000)) };
+}
+async function docFont() {
+  if (PDFFONT_DONE) return PDFFONT;
+  if (!window.queryLocalFonts) { PDFFONT_DONE = true; return null; }
+  try {
+    const names = window.EDMS_PDF_FONT || ['Tahoma', 'Tahoma-Bold'];
+    const list = await window.queryLocalFonts({ postscriptNames: names });
+    const pack = async bytes => { if (!window.CompressionStream) return null; const cs = new CompressionStream('deflate'), wr = cs.writable.getWriter(); wr.write(bytes); wr.close(); return new Uint8Array(await new Response(cs.readable).arrayBuffer()); };
+    const get = async (n, tag) => { const f = list.find(x => x.postscriptName === n); if (!f) return null; const t = ttfSubset(await (await f.blob()).arrayBuffer()); if (!t) return null; t.z = await pack(t.bytes); t.tag = tag + '+' + n.replace(/[^A-Za-z0-9-]/g, ''); return t; };
+    const reg = await get(names[0], 'EDMSAA'), bold = await get(names[1], 'EDMSAB');
+    if (reg && bold) PDFFONT = { reg: reg, bold: bold };
+    PDFFONT_DONE = true;
+  } catch (e) { /* not allowed (or asked and dismissed): Helvetica this time, ask again next time */ }
+  return PDFFONT;
+}
+const textW = (bytes, bold, size) => { const t = PDFFONT ? (bold ? PDFFONT.bold.w : PDFFONT.reg.w) : null; return bytes.reduce((w, b) => w + (t ? (b >= 32 ? t[b - 32] : 0) : (b >= 32 && b <= 126 ? (bold ? HELVB : HELV)[b - 32] : 556)), 0) / 1000 * size; };
 const pdfStr = bytes => '(' + bytes.map(b => b === 40 || b === 41 || b === 92 ? '\\' + String.fromCharCode(b) : (b < 32 || b > 126) ? '\\' + b.toString(8).padStart(3, '0') : String.fromCharCode(b)).join('') + ')';
 function fitText(str, maxW, bold, size) {
   let b = winBytes(str);
@@ -3457,13 +3526,14 @@ function logoJpeg(which) {
 }
 /* spec: { title, heading2, subtitle, meta: [[label, value]], columns: [{h, w, a, wrap}], rows | sections: [{heading, rows, total}], total, notes, signatures, landscape } */
 async function buildPdf(spec) {
+  await docFont();                       // Tahoma from this computer when allowed; must be ready before any text is measured
   const land = !!spec.landscape;
-  const W = land ? 841.89 : 595.28, H = land ? 595.28 : 841.89, M = 34, uw = W - 2 * M, fs = spec.fontSize || 8, lineH = fs * 1.22, pad = 4.5, headH = 18, bottom = 50;
+  const W = land ? 841.89 : 595.28, H = land ? 595.28 : 841.89, M = 72, uw = W - 2 * M, fs = spec.fontSize || 8, lineH = fs * 1.22, pad = 4.5, headH = 18, bottom = 72;
   const logos = [await logoJpeg(1), await logoJpeg(2)].filter(Boolean);
   const logo = logos[0] || null;
   const totalW = spec.columns.reduce((s, c) => s + c.w, 0);
   const cols = spec.columns.map(c => Object.assign({}, c, { pw: c.w / totalW * uw }));
-  const NAVY = '0.031 0.161 0.373', INK = '0.08 0.10 0.14', GREY = '0.38 0.42 0.48', ORANGE = '1 0.478 0.2';
+  const NAVY = '0 0 0', INK = '0 0 0', GREY = '0.38 0.38 0.38', ORANGE = '0.35 0.35 0.35', HEADFILL = '0.2 0.2 0.2';   // black on white, like the memoranda
   const Y = y => (H - y).toFixed(2);
   const txt = (bytes, x, y, size, bold, rgb) => 'BT /' + (bold ? 'F2' : 'F1') + ' ' + size + ' Tf ' + (rgb || INK) + ' rg ' + x.toFixed(2) + ' ' + Y(y) + ' Td ' + pdfStr(bytes) + ' Tj ET';
   const text = (str, x, y, size, bold, align, rgb) => {
@@ -3475,8 +3545,8 @@ async function buildPdf(spec) {
   if (spec.body) {                       // letter mode (certificate): a flow of paragraph / line blocks
     spec.body.forEach(bl => {
       if (bl.t === 'ltext') {
-        const bsize = bl.size || 11, blh = bsize * 1.5, blines = wrapRuns(bl.runs, uw, bsize, bl.indent || 0);
-        blocks.push({ t: 'ltext', size: bsize, lineH: blh, lines: blines, h: blines.length * blh + (bl.gap != null ? bl.gap : 6) });
+        const bsize = bl.size || 11, blh = bsize * 1.3, blines = wrapRuns(bl.runs, uw, bsize, bl.indent || 0);
+        blocks.push({ t: 'ltext', size: bsize, lineH: blh, lines: blines, just: bl.just !== false, h: blines.length * blh + (bl.gap != null ? bl.gap : 6) });
       } else blocks.push(bl);
     });
   } else {
@@ -3498,7 +3568,7 @@ async function buildPdf(spec) {
   }
   // 2. fill pages; a table that continues on a new page repeats its header row
   const metaRows = Math.ceil((spec.meta || []).length / 2);
-  const firstTop = 142 + (spec.heading2 ? 16 : 0) + (metaRows ? metaRows * 14 + 6 : 0), otherTop = 56;
+  const firstTop = 150 + (spec.heading2 ? 16 : 0) + (metaRows ? metaRows * 14 + 6 : 0), otherTop = 72;
   const pages = [[]]; let y = firstTop;
   blocks.forEach((b, bi) => {
     const next = blocks[bi + 1];
@@ -3513,19 +3583,15 @@ async function buildPdf(spec) {
   const streams = pages.map((list, pi) => {
     const ops = [];
     if (pi === 0) {
-      // DPWH on the left, the second seal on the right, each an inch in from the page edge
+      // The memorandum letterhead: seals 53 pt and 50 pt in from the page edges, four centred lines of 11 pt
       logos.forEach((g, gi) => {
-        const lh = 52, lw = g.w * lh / g.h;
-        const x = gi === 0 ? M : W - M - lw;
-        ops.push('q ' + lw.toFixed(2) + ' 0 0 ' + lh + ' ' + x.toFixed(2) + ' ' + Y(M + lh) + ' cm /Im' + (gi + 1) + ' Do Q');
+        const lh = gi === 0 ? 62 : 66, lw = g.w * lh / g.h;
+        const x = gi === 0 ? 53 : W - 50 - lw;
+        ops.push('q ' + lw.toFixed(2) + ' 0 0 ' + lh + ' ' + x.toFixed(2) + ' ' + Y(23 + lh) + ' cm /Im' + (gi + 1) + ' Do Q');
       });
-      ops.push(text('Republic of the Philippines', W / 2, M + 10, 9, false, 'center'));
-      ops.push(text(D.department || 'Department of Public Works and Highways', W / 2, M + 23, 10.5, true, 'center', NAVY));
-      ops.push(text(D.agency || 'Bureau of Equipment', W / 2, M + 36, 10, false, 'center'));
-      ops.push(NAVY + ' RG 1.4 w ' + M + ' ' + Y(M + 60) + ' m ' + (M + uw).toFixed(2) + ' ' + Y(M + 60) + ' l S');
-      ops.push(ORANGE + ' rg ' + M + ' ' + Y(M + 61.5) + ' 64 3 re f');
-      ops.push(text(spec.title, W / 2, M + 80, 14, true, 'center', NAVY));
-      let hy = M + 80;
+      letterLines().forEach((l, k) => ops.push(text(l[0], W / 2, 36 + k * 14.3, 11, !!l[1], 'center')));
+      ops.push(text(spec.title, W / 2, 122, spec.body ? 11 : 12, true, 'center'));
+      let hy = 122;
       if (spec.heading2) { hy += 16; ops.push(text(spec.heading2, W / 2, hy, 11, true, 'center', NAVY)); }
       if (spec.subtitle) ops.push(text(spec.subtitle, W / 2, hy + 13, 8.5, false, 'center', GREY));
       (spec.meta || []).forEach((m, k) => {
@@ -3533,12 +3599,12 @@ async function buildPdf(spec) {
         ops.push(txt(lb, mx, my, 9, true));
         ops.push(txt(fitText(m[1], uw / 2 - textW(lb, true, 9) - 8, false, 9), mx + textW(lb, true, 9), my, 9, false));
       });
-    } else ops.push(text(spec.title + (spec.heading2 ? ' · ' + spec.heading2 : '') + ' (continued)', M, M + 4, 9, true, 'left', NAVY));
+    } else ops.push(text(spec.title + (spec.heading2 ? ' · ' + spec.heading2 : '') + ' (continued)', M, 56, 9, true, 'left', NAVY));
     list.forEach(b => {
       const yy = b.y;
       if (b.t === 'sec') { ops.push(ORANGE + ' rg ' + M + ' ' + Y(yy + 16) + ' 4 12 re f'); ops.push(text(b.text, M + 10, yy + 15, 10.5, true, 'left', NAVY)); }
       if (b.t === 'thead') {
-        ops.push(NAVY + ' rg ' + M + ' ' + Y(yy + headH) + ' ' + uw.toFixed(2) + ' ' + headH + ' re f');
+        ops.push(HEADFILL + ' rg ' + M + ' ' + Y(yy + headH) + ' ' + uw.toFixed(2) + ' ' + headH + ' re f');
         let x = M;
         cols.forEach(c => { const hb = fitText(c.h, c.pw - 2 * pad, true, fs); ops.push(txt(hb, c.a === 'right' ? x + c.pw - pad - textW(hb, true, fs) : x + pad, yy + 12, fs, true, '1 1 1')); x += c.pw; });
       }
@@ -3566,7 +3632,10 @@ async function buildPdf(spec) {
       if (b.t === 'ltext') {
         b.lines.forEach((ln, li) => {
           let lx = M + (ln.indent || 0); const ly = yy + b.size * 0.9 + li * b.lineH;
-          ln.tokens.forEach((tk, ti) => { if (ti > 0 && tk.space) lx += ln.spaceW; ops.push(txt(tk.b, lx, ly, b.size, tk.bold)); lx += tk.w; });
+          // justified like the memoranda: every line but a paragraph's last is stretched to the right margin
+          const gaps = ln.tokens.filter((tk, ti) => ti > 0 && tk.space).length, used = ln.tokens.reduce((t, tk, ti) => t + tk.w + (ti > 0 && tk.space ? ln.spaceW : 0), 0);
+          const extra = b.just && li < b.lines.length - 1 && gaps ? Math.min(b.size * 0.7, (uw - (ln.indent || 0) - used) / gaps) : 0;
+          ln.tokens.forEach((tk, ti) => { if (ti > 0 && tk.space) lx += ln.spaceW + extra; ops.push(txt(tk.b, lx, ly, b.size, tk.bold)); lx += tk.w; });
         });
       }
       if (b.t === 'lkv') {
@@ -3585,16 +3654,18 @@ async function buildPdf(spec) {
         ops.push(text(b.title, M, yy + 44 + s * 1.35, s, false, 'left'));
       }
     });
-    ops.push(text('Printed ' + fmtDate(D.today) + ' · ' + (D.agency || 'Bureau of Equipment') + ' Employee System', M, H - 22, 7, false, 'left', GREY));
-    ops.push(text('Page ' + (pi + 1) + ' of ' + pages.length, W - M, H - 22, 7, false, 'right', GREY));
+    ops.push(text('Printed ' + fmtDate(D.today) + ' · ' + (D.agency || 'Bureau of Equipment') + ' Employee System', M, H - 40, 7, false, 'left', GREY));
+    ops.push(text('Page ' + (pi + 1) + ' of ' + pages.length, W - M, H - 40, 7, false, 'right', GREY));
     return ops.join('\n');
   });
   const enc = s => new TextEncoder().encode(s);
   const objs = [], firstPage = 5 + logos.length;
   objs.push(enc('<< /Type /Catalog /Pages 2 0 R >>'));
   objs.push(enc('<< /Type /Pages /Kids [' + pages.map((_, k) => (firstPage + k * 2) + ' 0 R').join(' ') + '] /Count ' + pages.length + ' >>'));
-  objs.push(enc('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'));
-  objs.push(enc('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'));
+  const F = PDFFONT, nBase = 4 + logos.length + pages.length * 2;      // the embedded font files go after the pages
+  const fontObj = (f, k) => '<< /Type /Font /Subtype /TrueType /BaseFont /' + f.tag + ' /FirstChar 32 /LastChar 255 /Widths [' + f.w.join(' ') + '] /FontDescriptor ' + (nBase + 1 + k * 2) + ' 0 R /Encoding /WinAnsiEncoding >>';
+  objs.push(enc(F ? fontObj(F.reg, 0) : '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'));
+  objs.push(enc(F ? fontObj(F.bold, 1) : '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'));
   logos.forEach(g => {
     const head = enc('<< /Type /XObject /Subtype /Image /Width ' + g.w + ' /Height ' + g.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + g.bytes.length + ' >>\nstream\n');
     const tail = enc('\nendstream');
@@ -3607,6 +3678,12 @@ async function buildPdf(spec) {
     objs.push(enc('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] ' + res + ' /Contents ' + (firstPage + k * 2 + 1) + ' 0 R >>'));
     const body = enc(st);
     objs.push(enc('<< /Length ' + body.length + ' >>\nstream\n' + st + '\nendstream'));
+  });
+  if (F) [F.reg, F.bold].forEach((f, k) => {
+    objs.push(enc('<< /Type /FontDescriptor /FontName /' + f.tag + ' /Flags 32 /FontBBox [' + f.bbox.join(' ') + '] /ItalicAngle 0 /Ascent ' + f.asc + ' /Descent ' + f.desc + ' /CapHeight ' + f.cap + ' /StemV ' + (k ? 140 : 80) + ' /FontFile2 ' + (nBase + 2 + k * 2) + ' 0 R >>'));
+    const data = f.z || f.bytes, head = enc('<< /Length ' + data.length + ' /Length1 ' + f.bytes.length + (f.z ? ' /Filter /FlateDecode' : '') + ' >>\nstream\n'), tail = enc('\nendstream');
+    const all = new Uint8Array(head.length + data.length + tail.length); all.set(head, 0); all.set(data, head.length); all.set(tail, head.length + data.length);
+    objs.push(all);
   });
   const parts = [enc('%PDF-1.4\n%âã\n')], offsets = [];
   let pos = parts[0].length;
@@ -3629,8 +3706,8 @@ const REPORTS = {
     return { file: 'service-record-' + id, title: 'SERVICE RECORD', subtitle: 'as of ' + fmtDate(D.today),
       meta: [['Name', [e['Last Name'] + ',', e['First Name'], e['Suffix'], e['Middle Name']].filter(Boolean).join(' ')], ['Employee No.', id],
         ['Birthday', e['Birthday'] ? fmtDate(e['Birthday']) : '—'], ['TIN', e['TIN'] || '—']],
-      columns: [{ h: 'From', w: 11.5 }, { h: 'To', w: 11.5 }, { h: 'Designation', w: 15, wrap: true }, { h: 'Status', w: 11, wrap: true }, { h: 'Salary', w: 14.5, a: 'right', wrap: true },
-        { h: 'Station / office', w: 14.5, wrap: true }, { h: 'Remarks', w: 15, wrap: true }],
+      columns: [{ h: 'From', w: 13.5, wrap: true }, { h: 'To', w: 13.5, wrap: true }, { h: 'Designation', w: 15, wrap: true }, { h: 'Status', w: 10, wrap: true }, { h: 'Salary', w: 13, a: 'right', wrap: true },
+        { h: 'Station / office', w: 14, wrap: true }, { h: 'Remarks', w: 14, wrap: true }],
       rows: h.map((x, i) => {
         const next = h[i + 1], off = IX.off[x['Office Code']];
         const to = next && next['Effective Date'] ? fmtDate(iso(new Date(toDate(next['Effective Date']).getTime() - 86400000))) : (x['Change Type'] === 'Separation' ? '—' : 'Present');
@@ -3770,15 +3847,12 @@ function coeBody(id, o) {
 function docCOE(id, o) {
   const b = coeBody(id, o);
   return `<div class="coe">
-    <div class="coeHead">${D.logo ? `<img src="${esc(D.logo)}" alt="">` : '<span></span>'}<div>
-      <div>Republic of the Philippines</div>
-      <div><b>${esc(D.department || 'Department of Public Works and Highways')}</b></div>
-      <div>${esc(D.agency || 'Bureau of Equipment')}</div></div>${D.logo2 ? `<img class="right" src="${esc(D.logo2)}" alt="">` : '<span></span>'}</div>
-    <h2 class="coeTitle">CERTIFICATE OF EMPLOYMENT</h2>
+    ${letterHead(o && o.img1, o && o.img2)}
+    <h2 class="coeTitle" align="center">CERTIFICATE OF EMPLOYMENT</h2>
     <p class="coeTo">TO WHOM IT MAY CONCERN:</p>
     ${b.body.map(t => `<p class="coeP">${t}</p>`).join('')}
-    ${b.salary ? `<table class="coeTable">${b.salary.rows.map(r => `<tr><td>${esc(r[0])}</td><td class="coeAmt">${esc(peso(r[1]))}</td></tr>`).join('')}
-      <tr class="coeTotal"><td><b>TOTAL</b></td><td class="coeAmt"><b>${esc(peso(b.salary.total))}</b></td></tr></table>` : ''}
+    ${b.salary ? `<table class="coeTable">${b.salary.rows.map(r => `<tr><td>${esc(r[0])}</td><td class="coeAmt" align="right">${esc(peso(r[1]))}</td></tr>`).join('')}
+      <tr class="coeTotal"><td><b>TOTAL</b></td><td class="coeAmt" align="right"><b>${esc(peso(b.salary.total))}</b></td></tr></table>` : ''}
     <div class="coeSign"><div class="coeSignLabel">${esc(b.sign.label)}</div>
       <div class="coeSignName"><b>${esc(b.sign.name)}</b></div>
       <div class="coeSignTitle">${esc(b.sign.title)}</div></div>
@@ -3788,14 +3862,14 @@ function docCOE(id, o) {
 /* The same letter as a real, downloadable A4 PDF, drawn by the app's own PDF engine (works offline). */
 function coePdf(id, o) {
   const b = coeBody(id, o), size = 11, blocks = [];
-  blocks.push({ t: 'ltext', runs: [{ s: 'TO WHOM IT MAY CONCERN:', bold: false }], indent: 0, size: size, gap: 12 });
-  b.body.forEach(p => blocks.push({ t: 'ltext', runs: coeRuns(p), indent: 40, size: size, gap: 11 }));
+  blocks.push({ t: 'ltext', runs: [{ s: 'TO WHOM IT MAY CONCERN:', bold: false }], indent: 0, size: size, gap: 12, just: false });
+  b.body.forEach(p => blocks.push({ t: 'ltext', runs: coeRuns(p), indent: 36, size: size, gap: 11 }));
   if (b.salary) {
     blocks.push({ t: 'lgap', h: 6 });
-    b.salary.rows.forEach(r => blocks.push({ t: 'lkv', label: r[0], amount: peso(r[1]), size: size, h: size * 1.5 }));
-    blocks.push({ t: 'ltot', label: 'TOTAL', amount: peso(b.salary.total), size: size, h: size * 1.5 + 10 });
+    b.salary.rows.forEach(r => blocks.push({ t: 'lkv', label: r[0], amount: peso(r[1]), size: size, h: size * 1.35 }));
+    blocks.push({ t: 'ltot', label: 'TOTAL', amount: peso(b.salary.total), size: size, h: size * 1.35 + 10 });
   }
-  blocks.push({ t: 'lgap', h: 46 });
+  blocks.push({ t: 'lgap', h: 34 });
   blocks.push({ t: 'lsign', label: b.sign.label, name: b.sign.name, title: b.sign.title, size: size, h: 60 });
   return buildPdf({ title: 'CERTIFICATE OF EMPLOYMENT', columns: [], body: blocks });
 }
@@ -3818,46 +3892,67 @@ function coeLines(f) {
   return { rows: rows.map(r => [r[0], Math.round(r[1] * 100) / 100]), total: Math.round(rows.reduce((t, r) => t + r[1], 0) * 100) / 100 };
 }
 
-/* Tahoma 11 for the page, the Word file and the printed page alike */
+/* Tahoma 11 for the page, the Word file and the printed page alike; A4 with one-inch margins, like the Bureau's memoranda */
+const LHEAD_CSS = [
+  '.lhead{border-collapse:collapse;table-layout:fixed;width:calc(100% + 38pt);margin:0 -19pt 18pt}',
+  '.lhead td{border:0!important;padding:0!important;vertical-align:top;background:none!important}',
+  '.lhead .lhL{width:70pt;text-align:left}',
+  '.lhead .lhR{width:70pt;text-align:right}',
+  '.lhead .lhC{text-align:center;font-family:Tahoma,Verdana,Geneva,sans-serif;font-size:11.0pt;line-height:1.3;color:#000;padding-top:1pt!important}'
+].join('\n');
 const COE_CSS = [
-  '.coe{font-family:Tahoma,Verdana,Geneva,sans-serif;font-size:11.0pt;line-height:1.5;color:#000;background:#fff;padding:72px 64px;max-width:8.5in;margin:0 auto;text-align:justify}',
+  '.coe{font-family:Tahoma,Verdana,Geneva,sans-serif;font-size:11.0pt;line-height:1.3;color:#000;background:#fff;padding:24pt 72pt 72pt;max-width:210mm;margin:0 auto;text-align:justify}',
   '.coe b{font-weight:bold}',
-  '.coeHead{display:flex;align-items:center;gap:14px;text-align:center;margin-bottom:26px}',
-  '.coeHead > div{flex:1}',
-  '.coeHead img{width:62px;height:62px;object-fit:contain}',
-  '.coeHead > div{line-height:1.35}',
-  '.coeTitle{font-family:Tahoma,Verdana,Geneva,sans-serif;font-size:11.0pt;font-weight:bold;text-align:center;text-transform:none;letter-spacing:.06em;color:#000;margin:26px 0 22px}',
-  '.coeTo{margin:0 0 16px;text-align:left}',
-  '.coeP{margin:0 0 14px;text-indent:40px}',
-  '.coeTable{border-collapse:collapse;width:100%;margin:4px 0 16px}',
-  '.coeTable td{padding:3px 0;vertical-align:top;border:0}',
-  '.coeTable td.coeAmt{text-align:right;white-space:nowrap;padding-left:18px}',
-  '.coeTable tr.coeTotal td{border-top:1px solid #000;padding-top:5px}',
-  '.coeHead img.right{margin-left:auto}',
-  '.coeSign{margin-top:46px;text-align:left}',
-  '.coeSignLabel{margin-bottom:34px}',
+  '.coeTitle{font-family:Tahoma,Verdana,Geneva,sans-serif;font-size:11.0pt;font-weight:bold;text-align:center;text-transform:none;letter-spacing:0;color:#000;margin:6pt 0 18pt}',
+  '.coeTo{margin:0 0 12pt;text-align:left}',
+  '.coeP{margin:0 0 11pt;text-indent:36pt}',
+  '.coeTable{border-collapse:collapse;width:100%;margin:4pt 0 12pt}',
+  '.coeTable td{padding:2pt 0;vertical-align:top;border:0}',
+  '.coeTable td.coeAmt{text-align:right;white-space:nowrap;padding-left:14pt}',
+  '.coeTable tr.coeTotal td{border-top:1px solid #000;padding-top:4pt}',
+  '.coeSign{margin-top:34pt;text-align:left}',
+  '.coeSignLabel{margin-bottom:26pt}',
   '.coeSignName{font-weight:bold}',
   '.coeSignTitle{}'
 ].join('\n');
 
-(function () {                      // one source of truth for the certificate's look
+(function () {                      // one source of truth for the letterhead and the certificate's look
   const st = document.createElement('style');
-  st.textContent = COE_CSS;
+  st.textContent = LHEAD_CSS + '\n' + COE_CSS;
   document.head.appendChild(st);
 })();
 
-/* A .doc file Word opens with real Tahoma. Not a fake PDF: it is a Word document they can edit before signing. */
-function coeWord(id, o) {
-  const f = coeFacts(id);
-  const inner = docCOE(id, o);
+/* A .doc file Word opens with real Tahoma. Not a fake PDF: it is a Word document they can edit before signing.
+   It is saved as a "single file web page" so the two seals travel inside the file. */
+async function coeWord(id, o) {
+  const logos = [await logoJpeg(1), await logoJpeg(2)];
+  const tag = (g, n) => g ? '<img src="logo' + n + '.jpg" width="' + Math.round(84 * g.w / g.h) + '" height="84" alt="">' : '';
+  const inner = docCOE(id, Object.assign({}, o, { img1: tag(logos[0], 1), img2: tag(logos[1], 2) }));
   const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' +
-    '<head><meta charset="utf-8"><title>Certificate of Employment<\/title>' +
+    '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Certificate of Employment<\/title>' +
     '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print<\/w:View><w:Zoom>100<\/w:Zoom><\/w:WordDocument><\/xml><![endif]-->' +
-    '<style>@page{size:8.5in 11.0in;margin:1.0in 1.0in 1.0in 1.0in}' +
-    'body,p,div,span,td{font-family:Tahoma,sans-serif;font-size:11.0pt;line-height:150%;color:#000}' +
-    COE_CSS.replace(/\.coe\{[^}]*\}/, '.coe{font-family:Tahoma,sans-serif;font-size:11.0pt;line-height:150%;text-align:justify}') +
-    '<\/style><\/head><body>' + inner + '<\/body><\/html>';
-  download('BOE-certificate-of-employment-' + id + '-' + (o && o.date ? o.date : D.today) + '.doc', 'application/msword', '﻿' + html);
+    '<style>@page WordSection1{size:595.3pt 841.9pt;margin:24.0pt 72.0pt 72.0pt 72.0pt;mso-header-margin:0;mso-footer-margin:36.0pt}div.WordSection1{page:WordSection1}' +
+    'body,p,div,span,td{font-family:Tahoma,sans-serif;font-size:11.0pt;line-height:130%;color:#000}' +
+    LHEAD_CSS.replace(/\.lhead\{[^}]*\}/, '.lhead{border-collapse:collapse;width:489.3pt;margin-left:-19.0pt}') + '\n' +
+    COE_CSS.replace(/\.coe\{[^}]*\}/, '.coe{font-family:Tahoma,sans-serif;font-size:11.0pt;line-height:130%;text-align:justify}') +
+    '<\/style><\/head><body><div class="WordSection1">' + inner.replace('<table class="lhead"', '<table class="lhead" width="652" style="width:489.3pt;margin-left:-19.0pt;margin-bottom:18.0pt"') + '<\/div><\/body><\/html>';
+  const name = 'BOE-certificate-of-employment-' + id + '-' + (o && o.date ? o.date : D.today) + '.doc';
+  download(name, 'application/msword', mhtDoc(html, logos.map((g, n) => g ? { name: 'logo' + (n + 1) + '.jpg', type: 'image/jpeg', bytes: g.bytes } : null).filter(Boolean)));
+}
+/* Pack a web page and its pictures into one file Word opens (MHTML). */
+function mhtDoc(html, parts) {
+  const B = '----=_NextPart_BOE_EDMS_000', root = 'file:///C:/BOE/', nl = '\r\n';
+  const b64 = bytes => { let t = ''; for (let i = 0; i < bytes.length; i += 0x8000) t += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(t).replace(/(.{76})/g, '$1' + nl); };
+  const qp = text => {                 // quoted-printable, the way Word itself saves the page part
+    const out = []; let line = '';
+    const put = tok => { if (line.length + tok.length > 75) { out.push(line + '='); line = ''; } line += tok; };
+    new TextEncoder().encode(text).forEach(c => { if (c === 10) { out.push(line); line = ''; } else if (c === 13) { /* dropped; lines end with CRLF below */ } else put((c === 61 || c < 32 || c > 126) ? '=' + (c < 16 ? '0' : '') + c.toString(16).toUpperCase() : String.fromCharCode(c)); });
+    out.push(line); return out.map(l => l.replace(/ $/, '=20')).join(nl);
+  };
+  let m = 'MIME-Version: 1.0' + nl + 'Content-Type: multipart/related; boundary="' + B + '"; type="text/html"' + nl + nl + 'This document is a Single File Web Page, also known as a Web Archive file.' + nl + nl;
+  m += '--' + B + nl + 'Content-Location: ' + root + 'certificate.htm' + nl + 'Content-Transfer-Encoding: quoted-printable' + nl + 'Content-Type: text/html; charset="utf-8"' + nl + nl + qp(html) + nl + nl;
+  parts.forEach(p => { m += '--' + B + nl + 'Content-Location: ' + root + p.name + nl + 'Content-Transfer-Encoding: base64' + nl + 'Content-Type: ' + p.type + nl + nl + b64(p.bytes) + nl + nl; });
+  return m + '--' + B + '--' + nl;
 }
 
 /* Print just the certificate, so the browser's "Save as PDF" also uses Tahoma */
