@@ -910,8 +910,8 @@ html.classic .statusbar:empty{display:none}
 .oc:hover{box-shadow:var(--shadow-card-hi);transform:translateY(-1px)}
 .oc .av{width:44px;height:44px}
 .ocT{display:grid;gap:1px;min-width:0}
-.ocT b{font-size:.8rem;line-height:1.2;color:var(--head);overflow-wrap:anywhere}
-.ocT > span{font-size:.73rem;color:var(--muted);line-height:1.25;overflow-wrap:anywhere}
+.ocT b{font-size:.76rem;line-height:1.2;color:var(--head);overflow-wrap:anywhere}
+.ocT > span{font-size:.7rem;color:var(--muted);line-height:1.25;overflow-wrap:anywhere}
 .ocT .ocR{color:var(--orange-2);font-weight:600}
 .ocTags{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px}
 .oc.head{width:auto;min-width:min(100%,250px);max-width:360px;border:1px solid var(--line);border-top:3px solid var(--orange);padding:10px 14px;box-shadow:var(--shadow-card)}
@@ -930,13 +930,19 @@ html.classic .statusbar:empty{display:none}
 .os.lead{justify-items:stretch}
 .os.lead > .oc.head{justify-self:start}
 .os.lead > .oNone{justify-self:start}
-.osU.under{width:auto;margin-left:26px;padding-left:12px;border-left:2px solid var(--line-2);grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
-.ou{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;min-width:0}
-.ouH{font:700 .86rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--head);text-align:center;padding:5px 6px;border-bottom:2px solid var(--orange);text-wrap:balance}
+.osU.under{width:auto;margin-left:26px;padding-left:12px;border-left:2px solid var(--line-2);grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.ou{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:subgrid;grid-row:span 2;gap:6px;align-content:start;min-width:0}
+.ouB{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;min-width:0}
+.ouH{font:700 .86rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--head);text-align:center;padding:5px 6px;border-bottom:2px solid var(--orange);text-wrap:balance;min-height:3.1em;display:flex;align-items:flex-end;justify-content:center;gap:4px;line-height:1.2}
 .oNone{font-size:.76rem;color:var(--muted);border:1px dashed var(--line-2);border-radius:10px;padding:6px 12px;text-align:center}
+.oVac{display:grid;align-content:center;gap:2px;min-width:min(100%,250px);min-height:100px;border-width:2px;border-radius:12px;background:var(--card)}
+.oVac b{font-size:.92rem;color:var(--head);letter-spacing:.04em;text-transform:uppercase}
+.oc{min-height:58px}
+.oc.head{min-height:100px}
+body.wide main{max-width:none}
 .oMore{width:100%}
 .oMore summary{cursor:pointer;font-weight:600;font-size:.85rem;color:var(--head);padding:4px 2px}
-.oGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-top:6px}
+.oGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-top:6px}
 .oOut{display:grid;gap:4px;align-content:start;font-size:.76rem}
 .oLegend{display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;font-size:.8rem;color:var(--muted)}
 .oLegend i{display:inline-block;width:4px;height:14px;border-radius:2px;margin-right:6px;vertical-align:-2px;background:var(--plantilla)}
@@ -966,8 +972,13 @@ html.classic .osH{margin:0 -6px;border-radius:0;background:#E9E9E9;color:#000;fo
 html.classic .osH small,html.classic .ouH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
 html.classic .osU{gap:6px}
 html.classic .osU.under{margin-left:20px;padding-left:8px;border-left:1px solid #A0A0A0}
-html.classic .ou{gap:4px}
+html.classic .ou,html.classic .ouB{gap:4px}
 html.classic .ouH{font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;color:#000;border-bottom:1px solid #A0A0A0;background:#F0F0F0;padding:2px 6px}
+html.classic .oVac{border-radius:0;min-height:80px;border-width:1px;background:#fff}
+html.classic .oVac b{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;color:#000;text-transform:none;letter-spacing:0}
+html.classic .oc{min-height:44px}
+html.classic .oc.head{min-height:80px}
+html.classic .ouH{min-height:2.9em}
 html.classic .oNone{border-radius:0;font:11px Tahoma,"Segoe UI",Arial,sans-serif;padding:3px 8px}
 html.classic .oMore summary{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;color:#000}
 html.classic .oLegend{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
@@ -1638,6 +1649,7 @@ const VIEWS = () => ({ dashboard: viewDashboard, employees: viewEmployees, profi
 function render(animate) {
   const v = $('#view'), html = VIEWS()[S.view]();
   LAST_HTML = html; v.innerHTML = html;
+  document.body.classList.toggle('wide', S.view === 'org');   // the chart uses the whole screen width
   if (animate) { v.classList.remove('anim'); void v.offsetWidth; v.classList.add('anim'); countUp(); }
   afterRender();
 }
@@ -1853,6 +1865,7 @@ function viewProfile() {
       </div>
       <div class="actions" style="align-items:flex-start">
         ${canEdit() ? `<button class="btn primary" data-act="jobChange" data-id="${esc(id)}" title="${c.separated ? 'Reemploy or record a new job' : 'Promotion, transfer, step increment, reassignment, renewal…'}">Change</button>
+        ${canEdit() && !c.separated ? `<button class="btn" data-act="jobReassign" data-id="${esc(id)}" title="Move this person to another office, section or unit">Reassign</button>` : ''}
           <div class="btnStack"><button class="btn" data-act="editPerson" data-id="${esc(id)}">Edit details</button><button class="subtle" data-act="nameChange" data-id="${esc(id)}">Name change</button></div>` : ''}
         <button class="btn" data-act="printSR" data-id="${esc(id)}">Service record</button>
         <button class="btn" data-act="coe" data-id="${esc(id)}">Certificate of employment</button>
@@ -2091,7 +2104,7 @@ function orgCard(e, isHead, role) {
 }
 const orgPeople = n => n + (n === 1 ? ' person' : ' people');
 function orgUnit(name, list, note) {
-  return `<div class="ou"><div class="ouH">${esc(name)} <small>${list.length}</small></div>${list.map(e => orgCard(e)).join('') || `<div class="oNone">${esc(note || 'No one assigned yet')}</div>`}</div>`;
+  return `<div class="ou"><div class="ouH">${esc(name)} <small>${list.length}</small></div><div class="ouB">${list.map(e => orgCard(e)).join('') || `<div class="oNone">${esc(note || 'No one assigned yet')}</div>`}</div></div>`;
 }
 /* One office and everything under it. Divisions and sections get a head; a unit is a plain column of people. */
 function orgNode(code, O) {
@@ -2100,7 +2113,7 @@ function orgNode(code, O) {
   if (lvl === 'Unit' && !kids.length) return orgUnit(off['Office Name'], O.at[code] || []);
   const head = O.head(code), seen = head && O.shown[head['Employee Number']];
   const rest = (O.at[code] || []).filter(e => e !== head);
-  const headHtml = seen ? '' : head ? orgCard(head, true) : `<div class="oNone">${rest.length || kids.length ? 'No head on record' : 'No one assigned yet'}</div>`;
+  const headHtml = seen ? '' : head ? orgCard(head, true) : `<div class="oNone oVac"><b>Vacant</b><span>${lvl === 'Division' ? 'Division chief' : 'Section chief'} not on record</span></div>`;
   if (lvl === 'Division') {
     const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
     const big = rest.length > 12;
@@ -2690,17 +2703,19 @@ function formNewHire(preItem) {
   window.__kindOf = wireJob();
   wireEdu();
 }
-function formJobChange(id) {
+function formJobChange(id, preset) {
   const e = IX.emp[id], cur = IX.cur[id];
-  openForm(cur.separated ? 'Change · bring back' : 'Change', fullName(e) + ' · ' + id, jobFields('change', cur), () => {
+  openForm(preset ? preset : cur.separated ? 'Change · bring back' : 'Change', fullName(e) + ' · ' + id, jobFields('change', cur), () => {
     const ok = checkRequired([['jDate', 'Pick the effective date'], ['jItem', 'Enter or pick an item number'], ['jOffice', 'Pick an office'], ['jPosition', 'Pick a position'],
       ['jDaily', 'Enter a daily rate above zero', x => Number(x) > 0]].concat(newSeatChecks()));
     if (!ok) return null;
     const r = readJob(window.__kindOf);
     return { fn: 'saveJobChange', payload: Object.assign({ employeeId: id }, r.j), done: r.j.changeType + ' recorded',
       wait: !!r.j.newSeat || hasFile('jFile'), after: hasFile('jFile') ? afterOrderFile('jFile') : null };
-  }, 'Save change');
+  }, preset ? 'Save ' + preset.toLowerCase() : 'Save change');
   window.__kindOf = wireJob();
+  const jt = $('#jType');
+  if (preset && jt && Array.from(jt.options).some(o => o.value === preset)) { jt.value = preset; jt.dispatchEvent(new Event('change')); }
 }
 function formNameChange(id) {
   const e = IX.emp[id];
@@ -4485,6 +4500,7 @@ document.addEventListener('click', ev => {
   if (act === 'rmOffice') return formRemoveOffice(a.dataset.code);
   if (act === 'editUser') return formUser(a.dataset.email);
   if (act === 'jobChange') return formJobChange(id);
+  if (act === 'jobReassign') return formJobChange(id, 'Reassignment');
   if (act === 'nameChange') return formNameChange(id);
   if (act === 'editPerson') return formEditPerson(id);
   if (act === 'coe') { if (id) formCOE(id); return; }
