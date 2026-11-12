@@ -2583,7 +2583,7 @@ async function xoCanvas(onStep) {
   document.body.appendChild(fr);
   let xml, H;
   try {
-    const d = fr.contentDocument; d.open(); d.write('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">' + built.html + '</body></html>'); d.close();
+    const d = fr.contentDocument; d.open(); d.write('<!doctype html><html><head><meta charset="utf-8"><' + '/head><body style="margin:0">' + built.html + '<' + '/body><' + '/html>'); d.close();
     const el = d.body.firstElementChild;
     try { await d.fonts.ready; } catch (e) { /* older browsers */ }
     await Promise.all(Array.from(d.images).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
@@ -2626,7 +2626,9 @@ function xoPrintView() {
   mk('Close', () => wrap.remove());
   bar.appendChild(t); bar.appendChild(btns); wrap.appendChild(bar); wrap.appendChild(fr); document.body.appendChild(wrap);
   const d = fr.contentDocument; d.open();
-  d.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=' + b.W + '"><style>@page{size:' + b.W + 'px ' + b.H + 'px;margin:0}html,body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>' + b.html + '</body></html>');
+  // closing tags are written in two pieces so the page's own HTML never sees them
+  const end = t => '<' + '/' + t + '>';
+  d.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=' + b.W + '"><style>@page{size:' + b.W + 'px ' + b.H + 'px;margin:0}html,body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}' + end('style') + end('head') + '<body>' + b.html + end('body') + end('html'));
   d.close();
   const fit = () => { try { d.body.style.zoom = String(Math.min(1, fr.clientWidth / b.W)); } catch (e) { /* not supported */ } };
   fit();
