@@ -2154,9 +2154,9 @@ function orgNode(code, O, top) {
   const head = O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
   const under = k => Object.keys(IX.offUnder[k] || {}).reduce((l, c) => l.concat(O.at[c] || []), []);
   if (lvl !== 'Division') {
-    const headHtml = head ? orgCard(head, true) : orgVac('Section chief');
+    const headHtml = head ? orgCard(head, true) : orgVac(lvl === 'Unit' ? 'Unit head' : 'Section chief');
     if (!kids.length) return orgLead(name, O.count(code), headHtml, rest);
-    const cols = (rest.length ? [orgUnit('Section staff', rest)] : []).concat(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k))));
+    const cols = (rest.length ? [orgUnit(lvl === 'Unit' ? 'Unit staff' : 'Section staff', rest)] : []).concat(kids.map(k => (IX.offKids[k] || []).length ? orgNode(k, O) : orgUnit(IX.off[k]['Office Name'], under(k))));
     return `<div class="ot"><div class="otSH">${esc(name)} <small>${O.count(code)}</small></div>${headHtml}${orgKids(cols)}</div>`;
   }
   const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
@@ -2318,7 +2318,7 @@ function xoLeaf(name, list, X, wide) {
 const xoKids = kids => kids.length ? `<i class="xstem"></i><div class="xkids">${kids.map(k => `<div class="xk">${k}</div>`).join('')}</div>` : '';
 function xoRole(code, h) {
   const name = IX.off[code]['Office Name'], lvl = orgLevel(IX.off[code]);
-  const base = /assistant/i.test(name) ? 'Assistant Bureau Director' : /director/i.test(name) ? 'Bureau Director' : lvl === 'Division' ? 'Division Chief' : 'Section Chief';
+  const base = /assistant/i.test(name) ? 'Assistant Bureau Director' : /director/i.test(name) ? 'Bureau Director' : lvl === 'Division' ? 'Division Chief' : lvl === 'Unit' ? 'Unit Head' : 'Section Chief';
   return (h && IX.cur[h['Employee Number']].type === 'Designation (OIC)' ? 'OIC · ' : '') + base;
 }
 function xoHead(code, O, X) {
@@ -2339,8 +2339,8 @@ function xoNode(code, O, X, root) {
     if (rest.length) below.push(xoLeaf('Division Staff', rest, X));
     kids.forEach(k => below.push(xoNode(k, O, X, false)));
   } else {
-    if (rest.length && kids.length) below.push(xoLeaf('Section Staff', rest, X));
-    kids.forEach(k => below.push(xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X)));
+    if (rest.length && kids.length) below.push(xoLeaf(lvl === 'Unit' ? 'Unit Staff' : 'Section Staff', rest, X));
+    kids.forEach(k => below.push((IX.offKids[k] || []).length ? xoNode(k, O, X, false) : xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X)));
   }
   const stack = !kids.length && lvl !== 'Division' && rest.length ? `<div class="xstack ind">${rest.map(e => xoCard(e, '', X)).join('')}</div>` : '';
   return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKids(below)}</div>`;
