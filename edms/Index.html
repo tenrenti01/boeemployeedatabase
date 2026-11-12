@@ -936,13 +936,41 @@ html.classic .statusbar:empty{display:none}
 .osU.under{width:auto;margin-left:26px;padding-left:12px;border-left:2px solid var(--line-2);grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
 .ou{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:subgrid;grid-row:span 2;gap:6px;align-content:start;min-width:0}
 .ouB{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;min-width:0}
-.ouH{font:700 .86rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--head);text-align:center;padding:5px 6px;border-bottom:2px solid var(--orange);text-wrap:balance;min-height:3.1em;display:flex;align-items:flex-end;justify-content:center;gap:4px;line-height:1.2}
+.ouH{background:var(--card);border-radius:8px 8px 0 0;font:700 .86rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--head);text-align:center;padding:5px 6px;border-bottom:2px solid var(--orange);text-wrap:balance;min-height:3.1em;display:flex;align-items:flex-end;justify-content:center;gap:4px;line-height:1.2}
 .oNone{font-size:.76rem;color:var(--muted);border:1px dashed var(--line-2);border-radius:10px;padding:6px 12px;text-align:center}
 .oVac{display:grid;align-content:center;gap:2px;min-width:min(100%,250px);min-height:100px;border-width:2px;border-radius:12px;background:var(--card)}
 .oVac b{font-size:.92rem;color:var(--head);letter-spacing:.04em;text-transform:uppercase}
 .oc{min-height:58px}
 .oc.head{min-height:100px}
 body.wide main{max-width:none}
+.ot{display:flex;flex-direction:column;align-items:center;min-width:0}
+.otFit{width:100%;overflow-x:auto;padding-bottom:4px}
+.ot.root{width:max-content;margin:0 auto}
+.otKids{display:flex;align-items:flex-start;justify-content:center}
+.otK{position:relative;padding:20px 7px 0;display:flex;justify-content:center;min-width:0}
+.otK::before{content:"";position:absolute;top:0;left:0;right:0;height:20px;border-top:2px solid var(--wire)}
+.otK::after{content:"";position:absolute;top:0;left:calc(50% - 1px);width:2px;height:20px;background:var(--wire)}
+.otK:first-child::before{left:calc(50% - 1px);border-left:2px solid var(--wire);border-top-left-radius:12px}
+.otK:last-child::before{right:calc(50% - 1px);border-right:2px solid var(--wire);border-top-right-radius:12px}
+.otK:first-child::after,.otK:last-child::after{display:none}
+.otK:only-child::before{display:none}
+.otK:only-child::after{display:block}
+.org{--wire:#9DB2D3}
+.org .oStem{background:var(--wire);flex:none}
+.otL{width:250px;display:grid;gap:6px;align-content:start}
+.otS{width:280px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.otSH{align-self:stretch;padding:7px 12px;background:var(--plantilla-soft);color:var(--head);font:700 1rem/1.15 var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:10px;border:1px solid var(--line-2);min-height:2.9em;display:flex;align-items:center;justify-content:center;gap:6px;text-wrap:balance}
+.otSH small{font:500 .72rem var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.ot > .otSH{margin-bottom:8px}
+.otUnder{align-self:stretch;margin-left:22px;padding-left:10px;border-left:2px solid var(--wire);display:grid;gap:6px}
+.oHeadGap{min-height:100px}
+.otS > .oc.head,.otS > .oVac{max-width:100%}
+@media (max-width:680px){.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oHeadGap{display:none}}
+html.classic .org{--wire:#808080}
+html.classic .otSH{border-radius:0;background:#E9E9E9;color:#000;font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;border:1px solid #A0A0A0}
+html.classic .otSH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .otUnder{border-left:1px solid #808080}
+html.classic .oHeadGap{min-height:80px}
 .oMore{width:100%}
 .oMore summary{cursor:pointer;font-weight:600;font-size:.85rem;color:var(--head);padding:4px 2px}
 .oGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-top:6px}
@@ -2107,60 +2135,71 @@ function orgCard(e, isHead, role) {
   return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b><span>${esc(c.position || 'Position not on record')}${c.sg !== '' ? ' (SG ' + esc(c.sg) + ')' : ''}</span>${c.item ? `<span class="mono">${esc(c.item)}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${tags ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
 }
 const orgPeople = n => n + (n === 1 ? ' person' : ' people');
+/* The chart is drawn as a tree: a head on top, a line down, and the offices under it side by side on one level. */
+const orgVac = what => `<div class="oNone oVac"><b>Vacant</b><span>${esc(what)} not on record</span></div>`;
+const orgKids = kids => kids.length ? `<i class="oStem"></i><div class="otKids">${kids.map(k => `<div class="otK">${k}</div>`).join('')}</div>` : '';
+/* A unit: a plain column of people */
 function orgUnit(name, list, note) {
-  return `<div class="ou"><div class="ouH">${esc(name)} <small>${list.length}</small></div><div class="ouB">${list.map(e => orgCard(e)).join('') || `<div class="oNone">${esc(note || 'No one assigned yet')}</div>`}</div></div>`;
+  return `<div class="otL"><div class="ouH">${esc(name)} <small>${list.length}</small></div><div class="ouB">${list.map(e => orgCard(e)).join('') || `<div class="oNone">${esc(note || 'No one assigned yet')}</div>`}</div></div>`;
 }
-/* One office and everything under it. Divisions and sections get a head; a unit is a plain column of people. */
-function orgNode(code, O) {
-  const off = IX.off[code], lvl = orgLevel(off);
-  let kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
-  if (lvl === 'Unit' && !kids.length) return orgUnit(off['Office Name'], O.at[code] || []);
-  const head = O.head(code), seen = head && O.shown[head['Employee Number']];
-  const rest = (O.at[code] || []).filter(e => e !== head);
-  const headHtml = seen ? '' : head ? orgCard(head, true) : `<div class="oNone oVac"><b>Vacant</b><span>${lvl === 'Division' ? 'Division chief' : 'Section chief'} not on record</span></div>`;
-  if (lvl === 'Division') {
-    const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
-    const big = rest.length > 12;
-    let direct = rest.length ? `<details class="oMore"${big ? '' : ' open'}><summary>Assigned straight to the ${esc(/division/i.test(off['Office Name']) ? 'division' : 'office')} · ${rest.length}</summary><div class="oGrid">${rest.map(e => orgCard(e)).join('')}</div></details>` : '';
-    if (code === O.apex) {
-      // The Director's own staff, shown as a technical group and an administrative group (a view only; nothing is stored)
-      const C = e => IX.cur[e['Employee Number']];
-      const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
-      const group = (name, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0], others = list.filter(e => e !== lead);
-        return `<div class="os lead" style="--cols:1"><div class="osH">${esc(name)} <small>${list.length}</small></div>${orgCard(lead, true)}${others.length ? `<div class="osU under">${others.map(e => orgCard(e)).join('')}</div>` : ''}</div>`; };
-      direct = rest.length ? `<div class="odS">${group('Technical', rest.filter(tech))}${group('Administrative', rest.filter(e => !tech(e)))}</div>` : '';
-      kids = kids.slice().sort((a, b) => (a === O.asst ? 0 : 1) - (b === O.asst ? 0 : 1));   // the Assistant Director's office first (left)
-    }
-    return `<section class="od"><div class="odH"><h2>${esc(off['Office Name'])}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
-      <div class="odB">${headHtml}
-        ${direct}
-        ${kids.length ? `<div class="odS">${kids.map(k => orgLevel(IX.off[k]) === 'Unit' && !(IX.offKids[k] || []).length
-          ? `<div class="os bare" style="--cols:1"><div class="osH" aria-hidden="true">&nbsp;</div><div class="oNone oVac" aria-hidden="true"><b>&nbsp;</b><span>&nbsp;</span></div><div class="osU">${orgNode(k, O)}</div></div>`   // a unit straight under the division sits at unit height, not section height
-          : orgNode(k, O)).join('')}</div>` : ''}
-      </div></section>`;
+/* A column led by one person, their staff straight below and a little indented. head '' = no lead (the staff sit lower). */
+function orgLead(name, count, head, staff) {
+  return `<div class="otS"><div class="otSH">${esc(name)} <small>${count}</small></div>${head || '<div class="oHeadGap"></div>'}${staff.length ? `<div class="otUnder">${staff.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+}
+/* One office and everything under it */
+function orgNode(code, O, top) {
+  const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
+  const kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
+  if (lvl === 'Unit' && !kids.length) return orgUnit(name, O.at[code] || []);
+  const head = O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
+  const under = k => Object.keys(IX.offUnder[k] || {}).reduce((l, c) => l.concat(O.at[c] || []), []);
+  if (lvl !== 'Division') {
+    const headHtml = head ? orgCard(head, true) : orgVac('Section chief');
+    if (!kids.length) return orgLead(name, O.count(code), headHtml, rest);
+    const cols = (rest.length ? [orgUnit('Section staff', rest)] : []).concat(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k))));
+    return `<div class="ot"><div class="otSH">${esc(name)} <small>${O.count(code)}</small></div>${headHtml}${orgKids(cols)}</div>`;
   }
-  const cols = kids.length + (rest.length && kids.length ? 1 : 0) || 1;
-  return `<div class="os${kids.length ? '' : ' lead'}" style="--cols:${cols}"><div class="osH">${esc(off['Office Name'])} <small>${O.count(code)}</small></div>${headHtml}
-    ${kids.length ? `<div class="osU">${rest.length ? orgUnit('Section staff', rest) : ''}${kids.map(k => orgNode(k, O)).join('')}</div>`
-      : rest.length ? `<div class="osU under">${rest.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+  const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
+  let tree;
+  if (code === O.apex) {
+    // Director, then the Assistant Director, then one level: the technical staff, the offices under the Director, the administrative staff
+    const C = e => IX.cur[e['Employee Number']];
+    const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
+    const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0]; return orgLead(label, list.length, orgCard(lead, true), list.filter(e => e !== lead)); };
+    const asstHead = O.asst ? O.head(O.asst) : null, asstRest = O.asst ? (O.at[O.asst] || []).filter(e => e !== asstHead) : [];
+    const level = [group('Technical', rest.filter(tech))]
+      .concat(kids.filter(k => k !== O.asst).map(k => orgNode(k, O)))
+      .concat([group('Administrative', rest.filter(e => !tech(e))), asstRest.length ? orgLead(IX.off[O.asst]['Office Name'] + ' · staff', asstRest.length, '', asstRest) : '']).filter(Boolean);
+    const asst = O.asst ? `<i class="oStem"></i>${asstHead ? orgCard(asstHead, true, IX.off[O.asst]['Office Name']) : orgVac('Assistant Director')}` : '';
+    tree = `${head ? orgCard(head, true, name) : orgVac('Director')}${asst}${orgKids(level)}`;
+  } else {
+    const cols = (rest.length ? [orgUnit(/division/i.test(name) ? 'Division staff' : 'Office staff', rest)] : []).concat(kids.map(k => orgNode(k, O)));
+    tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKids(cols)}`;
+  }
+  return `<section class="od"><div class="odH"><h2>${esc(name)}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
+      <div class="odB"><div class="otFit"><div class="ot root">${tree}</div></div></div></section>`;
 }
+/* Shrinks a wide tree a little so it fits the screen; past that it scrolls sideways */
+function fitOrg() {
+  document.querySelectorAll('.ot.root').forEach(t => {
+    t.style.zoom = '';
+    if (window.innerWidth <= 680) return;
+    const room = t.parentNode.clientWidth, need = t.scrollWidth;
+    if (need > room) t.style.zoom = String(Math.max(0.6, Math.floor(room / need * 100) / 100));
+  });
+}
+window.addEventListener('resize', () => { if (S.view === 'org') fitOrg(); });
 function viewOrg() {
   const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
   if (!roots.length) return '<p class="empty">No offices on record yet. Add divisions, sections and units on the Admin page.</p>';
   if (S.orgDiv && roots.indexOf(S.orgDiv) < 0) S.orgDiv = '';
   const O = orgIndex();
-  // The bureau's own head sits at the very top; the Assistant Director leads their own office, drawn first (left) under it
-  const apex = O.apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
-  O.asst = apex ? (IX.offKids[apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
-  const top = apex ? O.head(apex) : null;
-  let apexHtml = '';
-  if ((!S.orgDiv || S.orgDiv === apex) && top) {
-    O.shown[top['Employee Number']] = true;
-    apexHtml = `<div class="oApex"><div class="oBar">${esc(D.agency || 'Bureau')}</div>${orgCard(top, true, IX.off[apex]['Office Name'])}<i class="oStem"></i></div>`;
-  }
+  O.apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
+  O.asst = O.apex ? (IX.offKids[O.apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
   const seg = (act, cur, k, l) => `<button type="button" data-act="${act}" data-f="${esc(k)}" aria-pressed="${cur === k}">${esc(l)}</button>`;
   const total = Object.keys(O.at).reduce((n, k) => n + O.at[k].length, 0) + O.lost.length;
   const note = e => { const c = IX.cur[e['Employee Number']]; return (c.entry && c.entry['Remarks']) || (String(c.officeCode) === '' ? 'No office on record' : 'Office ' + c.officeCode + ' is not in the office list'); };
+  setTimeout(fitOrg, 0);
   return `
   <section style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap">
     <div style="display:grid;gap:4px"><span class="eyebrow">${orgPeople(total)} · as of ${esc(fmtDate(D.today))}</span><h1>Organizational chart</h1></div>
@@ -2169,7 +2208,7 @@ function viewOrg() {
       <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
   </section>
   <div class="oLegend"><span><i></i>Plantilla</span><span><i class="c"></i>CoS / JO</span><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
-  <div class="org">${apexHtml}${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
+  <div class="org">${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
     ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
       <div class="odB"><div class="oGrid" style="width:100%">${O.lost.map(e => `<div class="oOut">${orgCard(e)}<span class="muted">${esc(note(e))}</span></div>`).join('')}</div></div></section>` : ''}
   </div>`;
@@ -2178,7 +2217,7 @@ function viewOrg() {
 /* ═══════════════════════ org chart download (HD image / PDF) ═══════════════════════
    A separate, print-ready drawing of one office in the DPWH presentation style: dotted white sheet, white header box,
    gradient unit headers, plain white cards. It is drawn off-screen, turned into a picture, and saved as PNG or PDF. */
-const XO = { office: '', who: 'all', pos: true, sg: true, item: true, from: false, kind: true, date: true, hd: true, color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
+const XO = { office: '', who: 'all', pos: true, sg: false, item: false, from: false, kind: true, date: true, hd: true, color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
 const XO_CSS = `
 .xo{--navy:#0D47A1;--title:#0F2A5C;--orange:#F26522;--muted:#5A6B85;--wire:#A9BFE3;
  --gn:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%);--go:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%);
@@ -2217,6 +2256,8 @@ const XO_CSS = `
 .xo .xleaf.wide{width:100%}
 .xo .xleaf.wide .xub{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
 .xo .xstack{width:300px;display:grid;gap:10px}
+.xo .xstack.ind{width:330px;margin-top:12px;align-self:flex-end;padding-left:14px;border-left:3px solid var(--wire)}
+.xo .xgap{width:380px;height:136px}
 .xo .xarea{background:rgba(255,255,255,.7);border:1.5px solid #DCE4F0;border-radius:18px;padding:0 14px 14px;display:flex;flex-direction:column}
 .xo .xarea .xsh{margin:0 -14px;border-radius:16px 16px 0 0;box-shadow:none}
 .xo .xareaB{display:flex;gap:18px;align-items:flex-start;padding-top:14px}
@@ -2257,7 +2298,7 @@ function xoTitle(name) {
   if (rest.length < 2) return '<em>' + esc(rest[0]) + '</em> ' + esc(w[w.length - 1]);
   return esc(rest.slice(0, cut).join(' ')) + ' <em>' + esc(rest.slice(cut).join(' ')) + '</em> ' + esc(w[w.length - 1]);
 }
-function xoCard(e, role, X) {
+function xoCard(e, role, X, big) {
   const id = e['Employee Number'], c = IX.cur[id], local = (D._photoLocal || {})[id];
   X.ids[id] = 1;
   const src = (XO.hd ? (local !== undefined ? local : PHOTO[id]) : '') || (D.thumbs || {})[id] || '';
@@ -2266,7 +2307,7 @@ function xoCard(e, role, X) {
   const from = e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
   const tags = (XO.kind ? (c.kind === 'contract' ? `<i class="cos">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</i>` : `<i>${esc(c.status || 'Permanent')}</i>`) : '') +
     (XO.from && from ? `<i class="from">from ${esc(from)}</i>` : '');
-  return `<div class="xpc${role ? ' chief' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
+  return `<div class="xpc${role || big ? ' chief' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
 }
 /* One column: a gradient header and its people stacked top to bottom */
 function xoLeaf(name, list, X, wide) {
@@ -2301,7 +2342,7 @@ function xoNode(code, O, X, root) {
     if (rest.length && kids.length) below.push(xoLeaf('Section Staff', rest, X));
     kids.forEach(k => below.push(xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X)));
   }
-  const stack = !kids.length && lvl !== 'Division' && rest.length ? `<i class="xstem"></i><div class="xstack">${rest.map(e => xoCard(e, '', X)).join('')}</div>` : '';
+  const stack = !kids.length && lvl !== 'Division' && rest.length ? `<div class="xstack ind">${rest.map(e => xoCard(e, '', X)).join('')}</div>` : '';
   return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKids(below)}</div>`;
 }
 /* The top of the bureau: Director, then the Assistant Director, then one level holding the Director's own staff,
@@ -2311,15 +2352,14 @@ function xoApex(O, X, divs, root) {
   const top = O.head(apex), rest = (O.at[apex] || []).filter(e => e !== top);
   const asstHead = O.asst ? O.head(O.asst) : null, asstRest = O.asst ? (O.at[O.asst] || []).filter(e => e !== asstHead) : [];
   const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
-  const groups = [];
-  const t = rest.filter(tech), a = rest.filter(e => !tech(e));
-  if (t.length) groups.push(xoLeaf('Technical Staff', t, X));
-  if (a.length) groups.push(xoLeaf('Administrative Staff', a, X));
-  if (asstRest.length) groups.push(xoLeaf('Staff of the Assistant Director', asstRest, X));
-  const level = [];
-  if (groups.length) level.push(`<div class="xarea"><div class="xsh"><b>${esc(IX.off[apex]['Office Name'])} · Staff</b><i>${rest.length + asstRest.length}</i></div><div class="xareaB">${groups.join('')}</div></div>`);
-  (IX.offKids[apex] || []).map(o => String(o['Office Code'])).filter(k => k !== O.asst).forEach(k => level.push(xoNode(k, O, X, false)));
-  divs.filter(c => c !== apex).forEach(c => level.push(xoNode(c, O, X, false)));
+  // A column led by one person (first plantilla), the rest straight below and a little indented
+  const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0], others = list.filter(e => e !== lead);
+    return `<div class="xn"><div class="xsh"><b>${esc(label)}</b><i>${list.length}</i></div><div class="xtop">${xoCard(lead, '', X, true)}</div>${others.length ? `<div class="xstack ind">${others.map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`; };
+  const level = [group('Technical', rest.filter(tech))]
+    .concat((IX.offKids[apex] || []).map(o => String(o['Office Code'])).filter(k => k !== O.asst).map(k => xoNode(k, O, X, false)))
+    .concat([group('Administrative', rest.filter(e => !tech(e))),
+      asstRest.length ? `<div class="xn"><div class="xsh"><b>${esc(IX.off[O.asst]['Office Name'])} · Staff</b><i>${asstRest.length}</i></div><div class="xtop"><div class="xgap"></div></div><div class="xstack ind">${asstRest.map(e => xoCard(e, '', X)).join('')}</div></div>` : ''])
+    .concat(divs.filter(c => c !== apex).map(c => xoNode(c, O, X, false))).filter(Boolean);
   const asst = O.asst ? `<i class="xstem"></i><div class="xtop">${xoHead(O.asst, O, X)}</div>` : '';
   return `<div class="xn"><div class="xtop">${top ? xoCard(top, xoRole(apex, top), X) : xoHead(apex, O, X)}</div>${asst}${xoKids(level)}</div>`;
 }
