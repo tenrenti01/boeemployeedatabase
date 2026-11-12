@@ -936,7 +936,8 @@ html.classic .statusbar:empty{display:none}
 .osU.under{width:auto;margin-left:26px;padding-left:12px;border-left:2px solid var(--line-2);grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
 .ou{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:subgrid;grid-row:span 2;gap:6px;align-content:start;min-width:0}
 .ouB{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;min-width:0}
-.ouH{background:var(--card);border-radius:8px 8px 0 0;font:700 .86rem var(--cond);letter-spacing:.06em;text-transform:uppercase;color:var(--head);text-align:center;padding:5px 6px;border-bottom:2px solid var(--orange);text-wrap:balance;min-height:3.1em;display:flex;align-items:flex-end;justify-content:center;gap:4px;line-height:1.2}
+.ouH{background:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%);color:#fff;border-radius:10px;font:700 .8rem/1.12 var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;padding:4px 10px;height:56px;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;text-wrap:balance}
+.ouH.or{background:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%)}
 .oNone{font-size:.76rem;color:var(--muted);border:1px dashed var(--line-2);border-radius:10px;padding:6px 12px;text-align:center}
 .oVac{display:grid;align-content:center;gap:2px;min-width:min(100%,250px);min-height:100px;border-width:2px;border-radius:12px;background:var(--card)}
 .oVac b{font-size:.92rem;color:var(--head);letter-spacing:.04em;text-transform:uppercase}
@@ -957,20 +958,27 @@ body.wide main{max-width:none}
 .otK:only-child::after{display:block}
 .org{--wire:#9DB2D3}
 .org .oStem{background:var(--wire);flex:none}
-.otL{width:250px;display:grid;gap:6px;align-content:start}
+.otL{width:250px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}
+.otL > .oc.head,.otS > .oc.head,.ot > .oc.head{width:250px;min-width:0;max-width:none}
+.ot > .ouH{width:250px;margin-bottom:6px}
+.oSkip{display:block;height:40px;flex:none}
+.oc.ghost,.ouH.ghost,.otSH.ghost{visibility:hidden;pointer-events:none}
+.ocT b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+.ocT > .ocP{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.ocT .ocO{font-style:normal;font-weight:700;color:var(--orange-2)}
+.oc .ocTags{min-height:19px;flex-wrap:nowrap;overflow:hidden}
+.oc .ocTags .pill{font-size:.64rem;padding:1px 7px}
 .otS{width:280px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
-.otSH{align-self:stretch;padding:7px 12px;background:var(--plantilla-soft);color:var(--head);font:700 1rem/1.15 var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:10px;border:1px solid var(--line-2);min-height:2.9em;display:flex;align-items:center;justify-content:center;gap:6px;text-wrap:balance}
-.otSH small{font:500 .72rem var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+.otSH{align-self:stretch;padding:4px 12px;background:#0F2A5C;color:#fff;font:700 .88rem/1.12 var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:10px;height:48px;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;text-wrap:balance}
+.otSH small,.ouH small{font:700 .68rem var(--body);letter-spacing:0;background:rgba(255,255,255,.22);color:#fff;border-radius:999px;min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;flex:none;margin:0}
 .ot > .otSH{margin-bottom:8px}
 .otUnder{align-self:stretch;margin-left:22px;padding-left:10px;border-left:2px solid var(--wire);display:grid;gap:6px}
-.oHeadGap{min-height:100px}
 .otS > .oc.head,.otS > .oVac{max-width:100%}
-@media (max-width:680px){.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oHeadGap{display:none}}
+@media (max-width:680px){.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oc.ghost,.ouH.ghost,.otSH.ghost,.oSkip{display:none}.otL > .oc.head,.otS > .oc.head,.ot > .oc.head,.ot > .ouH{width:100%}}
 html.classic .org{--wire:#808080}
-html.classic .otSH{border-radius:0;background:#E9E9E9;color:#000;font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;border:1px solid #A0A0A0}
-html.classic .otSH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .otSH,html.classic .ouH{border-radius:0;font:bold 11px/1.15 Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0}
+html.classic .otSH small,html.classic .ouH small{font:bold 10px Tahoma,"Segoe UI",Arial,sans-serif;color:#fff}
 html.classic .otUnder{border-left:1px solid #808080}
-html.classic .oHeadGap{min-height:80px}
 .oMore{width:100%}
 .oMore summary{cursor:pointer;font-weight:600;font-size:.85rem;color:var(--head);padding:4px 2px}
 .oGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-top:6px}
@@ -1000,17 +1008,15 @@ html.classic .odB{padding:8px;gap:8px}
 html.classic .odS{gap:8px}
 html.classic .os{border-radius:0;border:1px solid #A0A0A0;background:#F7F7F7;padding:0 6px 6px;gap:6px}
 html.classic .osH{margin:0 -6px;border-radius:0;background:#E9E9E9;color:#000;font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;padding:3px 8px;border-bottom:1px solid #A0A0A0}
-html.classic .osH small,html.classic .ouH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .osH small{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
 html.classic .os.bare{border-color:transparent;background:none}
 html.classic .osU{gap:6px}
 html.classic .osU.under{margin-left:20px;padding-left:8px;border-left:1px solid #A0A0A0}
 html.classic .ou,html.classic .ouB{gap:4px}
-html.classic .ouH{font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0;color:#000;border-bottom:1px solid #A0A0A0;background:#F0F0F0;padding:2px 6px}
 html.classic .oVac{border-radius:0;min-height:80px;border-width:1px;background:#fff}
 html.classic .oVac b{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;color:#000;text-transform:none;letter-spacing:0}
 html.classic .oc{min-height:44px}
 html.classic .oc.head{min-height:80px}
-html.classic .ouH{min-height:2.9em}
 html.classic .oNone{border-radius:0;font:11px Tahoma,"Segoe UI",Arial,sans-serif;padding:3px 8px}
 html.classic .oMore summary{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;color:#000}
 html.classic .oLegend{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
@@ -2128,36 +2134,69 @@ function orgIndex() {
   const count = code => Object.keys(IX.offUnder[code] || {}).reduce((n, k) => n + (at[k] || []).length, 0);
   return { at: at, lost: lost, head: head, count: count, shown: {} };
 }
+/* Every card has the same rows (name on two lines, position, item number, tags) so cards of one kind are the same height.
+   What shows follows the chart settings (XO), the same ones the download uses. */
 function orgCard(e, isHead, role) {
   const id = e['Employee Number'], c = IX.cur[id];
-  const tags = (c.type === 'Designation (OIC)' ? '<span class="pill warn">OIC</span>' : '') +
-    (e['Mother Unit'] ? `<span class="pill warn" title="Mother unit">from ${esc(e['Mother Unit'])}</span>` : c.reassigned && String(c.officeCode) !== '' ? `<span class="pill warn" title="Plantilla office">from ${esc(c.seatOffice)}</span>` : '');
-  return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b><span>${esc(c.position || 'Position not on record')}${c.sg !== '' ? ' (SG ' + esc(c.sg) + ')' : ''}</span>${c.item ? `<span class="mono">${esc(c.item)}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${tags ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
+  const from = e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
+  const pos = (XO.pos ? String(c.position || 'Position not on record') : '') + (XO.sg && c.sg !== '' && c.sg !== undefined ? (XO.pos ? ' ' : '') + '(SG ' + c.sg + ')' : '');
+  const line = (c.type === 'Designation (OIC)' ? '<em class="ocO">OIC</em>' + (pos ? ' · ' : '') : '') + esc(pos);
+  const tags = (XO.kind ? (c.kind === 'contract' ? `<span class="pill contract">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</span>` : `<span class="pill plantilla">${esc(c.status || 'Permanent')}</span>`) : '') +
+    (XO.from && from ? `<span class="pill warn" title="${e['Mother Unit'] ? 'Mother unit' : 'Plantilla office'}">from ${esc(from)}</span>` : '');
+  return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b>${XO.pos || XO.sg ? `<span class="ocP" title="${esc(pos)}">${line || '&nbsp;'}</span>` : line ? `<span class="ocP">${line}</span>` : ''}${XO.item ? `<span class="mono ocP">${esc(c.item) || '&nbsp;'}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${XO.kind || XO.from ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
 }
+/* An empty, invisible card: keeps a level free so the people below line up with the same rank in the next column */
+const orgGhost = big => `<div class="oc${big ? ' head' : ''} ghost" aria-hidden="true"><div class="av"></div><span class="ocT"><b>&nbsp;</b>${XO.pos || XO.sg ? '<span class="ocP">&nbsp;</span>' : ''}${XO.item ? '<span class="mono ocP">&nbsp;</span>' : ''}${XO.kind || XO.from ? '<span class="ocTags"></span>' : ''}</span></div>`;
+const orgSg = e => Number(IX.cur[e['Employee Number']].sg) || 0;
+const orgBig = e => orgSg(e) >= 22;                      // section-chief rank (Engineer IV and up)
+const orgMid = e => orgSg(e) >= 19 && orgSg(e) < 22;     // unit-head rank (Engineer III)
 const orgPeople = n => n + (n === 1 ? ' person' : ' people');
 /* The chart is drawn as a tree: a head on top, a line down, and the offices under it side by side on one level. */
 const orgVac = what => `<div class="oNone oVac"><b>Vacant</b><span>${esc(what)} not on record</span></div>`;
 const orgKids = kids => kids.length ? `<i class="oStem"></i><div class="otKids">${kids.map(k => `<div class="otK">${k}</div>`).join('')}</div>` : '';
-/* A unit: a plain column of people */
-function orgUnit(name, list, note) {
-  return `<div class="otL"><div class="ouH">${esc(name)} <small>${list.length}</small></div><div class="ouB">${list.map(e => orgCard(e)).join('') || `<div class="oNone">${esc(note || 'No one assigned yet')}</div>`}</div></div>`;
+let ORG_K = 0;
+const orgUH = (name, n, ghost) => { const or = XO.color === 'orange' || (XO.color === 'alt' && !ghost && ORG_K++ % 2 === 1); return `<div class="ouH${or ? ' or' : ''}${ghost ? ' ghost' : ''}"${ghost ? ' aria-hidden="true"' : ''}><b>${esc(name)}</b>${ghost ? '' : `<small>${n}</small>`}</div>`; };
+const orgSH = (name, n, ghost) => `<div class="otSH${ghost ? ' ghost' : ''}"${ghost ? ' aria-hidden="true"' : ''}><b>${esc(name)}</b>${ghost ? '' : `<small>${n}</small>`}</div>`;
+/* A unit: its header, its head on the unit-head level (an empty slot when there is none), then its people.
+   plain = a sub-unit or other simple list: header and people only. */
+/* Who leads a unit: its OIC, else its highest-graded plantilla engineer (none = the slot stays empty) */
+const orgUnitHead = (code, O) => { const h = O.head(code); return h && (IX.cur[h['Employee Number']].type === 'Designation (OIC)' || /^engineer\b/i.test(String(IX.cur[h['Employee Number']].position))) ? h : null; };
+function orgUnit(name, list, head, plain) {
+  const heads = plain ? [] : head ? [head] : list.filter(e => orgMid(e) || orgBig(e));
+  const rest = list.filter(e => heads.indexOf(e) < 0);
+  return `<div class="otL">${orgUH(name, list.length + (head ? 1 : 0))}${plain ? '' : heads.length ? heads.map(e => orgCard(e, true)).join('') : orgGhost(true)}<div class="ouB">${rest.map(e => orgCard(e)).join('') || (list.length || head ? '' : '<div class="oNone">No one assigned yet</div>')}</div></div>`;
 }
 /* A column led by one person, their staff straight below and a little indented. head '' = no lead (the staff sit lower). */
 function orgLead(name, count, head, staff) {
-  return `<div class="otS"><div class="otSH">${esc(name)} <small>${count}</small></div>${head || '<div class="oHeadGap"></div>'}${staff.length ? `<div class="otUnder">${staff.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+  return `<div class="otS">${orgSH(name, count)}${head || orgGhost(true)}${staff.length ? `<div class="otUnder">${staff.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+}
+/* People assigned straight to a division, drawn beside its sections: section-chief rank on the chiefs' level,
+   unit-head rank on the unit heads' level, everyone else on the staff level. deep = the sections have units. */
+function orgDivStaff(name, list, deep) {
+  const big = list.filter(orgBig), mid = list.filter(orgMid), rest = list.filter(e => !orgBig(e) && !orgMid(e));
+  const top = big.length ? big.map(e => orgCard(e, true)).join('') : orgGhost(true);
+  if (!deep) return `<div class="otS">${orgSH(name, list.length)}${top}${mid.length + rest.length ? `<div class="otUnder">${mid.concat(rest).map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+  return `<div class="ot">${orgSH(name, list.length)}${top}<i class="oSkip"></i><div class="otL">${orgUH('', 0, true)}${mid.length ? mid.map(e => orgCard(e, true)).join('') : orgGhost(true)}<div class="ouB">${rest.map(e => orgCard(e)).join('')}</div></div></div>`;
 }
 /* One office and everything under it */
-function orgNode(code, O, top) {
+function orgNode(code, O, deepParent) {
   const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
   const kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
-  if (lvl === 'Unit' && !kids.length) return orgUnit(name, O.at[code] || []);
-  const head = O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
+  const head = lvl === 'Unit' ? orgUnitHead(code, O) : O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
   const under = k => Object.keys(IX.offUnder[k] || {}).reduce((l, c) => l.concat(O.at[c] || []), []);
+  const hasKids = k => (IX.offKids[k] || []).length > 0;
+  if (lvl === 'Unit') {
+    // a unit with sub-units: its head, then the sub-units side by side
+    if (kids.length) return `<div class="ot">${orgUH(name, O.count(code))}${head ? orgCard(head, true) : orgGhost(true)}${orgKids((rest.length ? [orgUnit('Sub-unit staff', rest, null, true)] : []).concat(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k), null, true))))}</div>`;
+    const col = orgUnit(name, rest, head);
+    // a unit straight under a division sits on the unit level, not the section level
+    return deepParent ? `<div class="ot">${orgSH('', 0, true)}${orgGhost(true)}<i class="oSkip"></i>${col}</div>` : col;
+  }
   if (lvl !== 'Division') {
-    const headHtml = head ? orgCard(head, true) : orgVac(lvl === 'Unit' ? 'Unit head' : 'Section chief');
+    const headHtml = head ? orgCard(head, true) : orgVac('Section chief');
     if (!kids.length) return orgLead(name, O.count(code), headHtml, rest);
-    const cols = (rest.length ? [orgUnit(lvl === 'Unit' ? 'Unit staff' : 'Section staff', rest)] : []).concat(kids.map(k => (IX.offKids[k] || []).length ? orgNode(k, O) : orgUnit(IX.off[k]['Office Name'], under(k))));
-    return `<div class="ot"><div class="otSH">${esc(name)} <small>${O.count(code)}</small></div>${headHtml}${orgKids(cols)}</div>`;
+    const cols = (rest.length ? [orgUnit('Section staff', rest)] : []).concat(kids.map(k => orgNode(k, O)));
+    return `<div class="ot">${orgSH(name, O.count(code))}${headHtml}${orgKids(cols)}</div>`;
   }
   const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
   let tree;
@@ -2173,11 +2212,12 @@ function orgNode(code, O, top) {
     const asst = O.asst ? `<i class="oStem"></i>${asstHead ? orgCard(asstHead, true, IX.off[O.asst]['Office Name']) : orgVac('Assistant Director')}` : '';
     tree = `${head ? orgCard(head, true, name) : orgVac('Director')}${asst}${orgKids(level)}`;
   } else {
-    const cols = (rest.length ? [orgUnit(/division/i.test(name) ? 'Division staff' : 'Office staff', rest)] : []).concat(kids.map(k => orgNode(k, O)));
+    const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && hasKids(k));
+    const cols = (rest.length ? [orgDivStaff(/division/i.test(name) ? 'Division staff' : 'Office staff', rest, deep)] : []).concat(kids.map(k => orgNode(k, O, deep)));
     tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKids(cols)}`;
   }
   return `<section class="od"><div class="odH"><h2>${esc(name)}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
-      <div class="odB"><div class="otFit"><div class="ot root">${tree}</div></div></div></section>`;
+      <div class="odB"><div class="otFit"><div class="ot root" style="--wire:${esc(XO.wire)}">${tree}</div></div></div></section>`;
 }
 /* Shrinks a wide tree a little so it fits the screen; past that it scrolls sideways */
 function fitOrg() {
@@ -2193,7 +2233,7 @@ function viewOrg() {
   const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
   if (!roots.length) return '<p class="empty">No offices on record yet. Add divisions, sections and units on the Admin page.</p>';
   if (S.orgDiv && roots.indexOf(S.orgDiv) < 0) S.orgDiv = '';
-  const O = orgIndex();
+  const O = orgIndex(); ORG_K = 0;
   O.apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
   O.asst = O.apex ? (IX.offKids[O.apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
   const seg = (act, cur, k, l) => `<button type="button" data-act="${act}" data-f="${esc(k)}" aria-pressed="${cur === k}">${esc(l)}</button>`;
@@ -2205,6 +2245,7 @@ function viewOrg() {
     <div style="display:grid;gap:4px"><span class="eyebrow">${orgPeople(total)} · as of ${esc(fmtDate(D.today))}</span><h1>Organizational chart</h1></div>
     <div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
       <div class="seg" role="group" aria-label="Who to show">${seg('orgKind', S.orgKind, 'all', 'Everyone')}${seg('orgKind', S.orgKind, 'plantilla', 'Plantilla only')}</div>
+      <button type="button" class="btn" data-act="orgLook" title="Choose what each box shows and the colours">Chart settings</button>
       <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
   </section>
   <div class="oLegend"><span><i></i>Plantilla</span><span><i class="c"></i>CoS / JO</span><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
@@ -2218,6 +2259,8 @@ function viewOrg() {
    A separate, print-ready drawing of one office in the DPWH presentation style: dotted white sheet, white header box,
    gradient unit headers, plain white cards. It is drawn off-screen, turned into a picture, and saved as PNG or PDF. */
 const XO = { office: '', who: 'all', pos: true, sg: false, item: false, from: false, kind: true, date: true, hd: true, color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
+try { Object.assign(XO, JSON.parse(localStorage.getItem('boe.orgLook') || '{}')); } catch (e) { /* first visit */ }
+const xoKeep = () => { try { const k = {}; ['pos', 'sg', 'item', 'from', 'kind', 'date', 'hd', 'color', 'wire', 'orient', 'fmt'].forEach(x => { k[x] = XO[x]; }); localStorage.setItem('boe.orgLook', JSON.stringify(k)); } catch (e) { /* private window */ } };
 const XO_CSS = `
 .xo{--navy:#0D47A1;--title:#0F2A5C;--orange:#F26522;--muted:#5A6B85;--wire:#A9BFE3;
  --gn:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%);--go:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%);
@@ -2258,6 +2301,15 @@ const XO_CSS = `
 .xo .xstack{width:300px;display:grid;gap:10px}
 .xo .xstack.ind{width:330px;margin-top:12px;align-self:flex-end;padding-left:14px;border-left:3px solid var(--wire)}
 .xo .xgap{width:380px;height:136px}
+.xo .xgapm{height:104px}
+.xo .xskip{display:block;height:52px;flex:none}
+.xo .ghost{visibility:hidden}
+.xo .xn > .xuh{width:300px;margin-bottom:10px}
+.xo .xpc.chief.mid{width:300px;height:104px;min-height:0;padding:10px 14px;gap:12px;border-radius:14px}
+.xo .xpc.chief.mid img,.xo .xpc.chief.mid .xav{width:64px;height:64px;border-radius:13px}
+.xo .xpc.chief.mid .xav{font-size:22px}
+.xo .xpc.chief.mid .xpt b{font:800 18px/1.08 var(--ft);letter-spacing:.03em}
+.xo .xpc.chief.mid .xpt span{font-size:12.5px}
 .xo .xarea{background:rgba(255,255,255,.7);border:1.5px solid #DCE4F0;border-radius:18px;padding:0 14px 14px;display:flex;flex-direction:column}
 .xo .xarea .xsh{margin:0 -14px;border-radius:16px 16px 0 0;box-shadow:none}
 .xo .xareaB{display:flex;gap:18px;align-items:flex-start;padding-top:14px}
@@ -2277,7 +2329,7 @@ const XO_CSS = `
 .xo .xtags i{font:600 10.5px var(--fb);letter-spacing:.03em;border-radius:999px;padding:2px 9px;color:#0D47A1;background:#E3EDFB}
 .xo .xtags i.cos{color:#B4480F;background:#FFE9DA}
 .xo .xtags i.from{color:#5A6B85;background:#EEF1F6}
-.xo .xpc.chief{padding:14px 20px;gap:16px;width:380px;min-height:136px;border-radius:16px}
+.xo .xpc.chief{padding:14px 20px;gap:16px;width:380px;height:136px;border-radius:16px}
 .xo .xpc.chief img,.xo .xpc.chief .xav{width:84px;height:84px;border-radius:16px}
 .xo .xpc.chief .xav{font-size:28px}
 .xo .xpc.chief .xpt b{font:800 24px/1.05 var(--ft);letter-spacing:.03em}
@@ -2298,7 +2350,7 @@ function xoTitle(name) {
   if (rest.length < 2) return '<em>' + esc(rest[0]) + '</em> ' + esc(w[w.length - 1]);
   return esc(rest.slice(0, cut).join(' ')) + ' <em>' + esc(rest.slice(cut).join(' ')) + '</em> ' + esc(w[w.length - 1]);
 }
-function xoCard(e, role, X, big) {
+function xoCard(e, role, X, big) {   // big: true = chief-size card, 'mid' = unit-head card
   const id = e['Employee Number'], c = IX.cur[id], local = (D._photoLocal || {})[id];
   X.ids[id] = 1;
   const src = (XO.hd ? (local !== undefined ? local : PHOTO[id]) : '') || (D.thumbs || {})[id] || '';
@@ -2307,12 +2359,25 @@ function xoCard(e, role, X, big) {
   const from = e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
   const tags = (XO.kind ? (c.kind === 'contract' ? `<i class="cos">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</i>` : `<i>${esc(c.status || 'Permanent')}</i>`) : '') +
     (XO.from && from ? `<i class="from">from ${esc(from)}</i>` : '');
-  return `<div class="xpc${role || big ? ' chief' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
+  return `<div class="xpc${role || big ? ' chief' : ''}${big === 'mid' ? ' mid' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
 }
-/* One column: a gradient header and its people stacked top to bottom */
-function xoLeaf(name, list, X, wide) {
+/* One column: a gradient header, the unit head on the unit-head level (an empty slot when there is none), then the people.
+   o.plain = a sub-unit or simple list (header and people only); o.wide = a single unit drawn across the page. */
+function xoLeaf(name, list, X, o) {
+  o = o || {};
   const or = XO.color === 'orange' || (XO.color === 'alt' && X.k++ % 2 === 1);
-  return `<div class="xleaf${wide ? ' wide' : ''}"><div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${list.length}</i></div><div class="xub">${list.map(e => xoCard(e, '', X)).join('') || '<div class="xnone">No one assigned yet</div>'}</div></div>`;
+  const heads = o.plain || o.wide ? [] : o.head ? [o.head] : list.filter(e => orgMid(e) || orgBig(e));
+  const rest = list.filter(e => heads.indexOf(e) < 0), n = list.length + (o.head ? 1 : 0);
+  const slot = o.plain || o.wide ? '' : heads.length ? heads.map(e => xoCard(e, '', X, 'mid')).join('') : '<div class="xgapm"></div>';
+  return `<div class="xleaf${o.wide ? ' wide' : ''}"><div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${n}</i></div>${slot}<div class="xub">${(o.wide && o.head ? [o.head] : []).concat(rest).map(e => xoCard(e, '', X)).join('') || (n ? '' : '<div class="xnone">No one assigned yet</div>')}</div></div>`;
+}
+/* People assigned straight to a division: chief rank on the chiefs' level, unit-head rank on the unit heads' level, the rest below */
+function xoDivStaff(name, list, X, deep) {
+  const big = list.filter(orgBig), mid = list.filter(orgMid), rest = list.filter(e => !orgBig(e) && !orgMid(e));
+  const top = `<div class="xtop">${big.length ? big.map(e => xoCard(e, '', X, true)).join('') : '<div class="xgap"></div>'}</div>`;
+  const bar = `<div class="xsh"><b>${esc(name)}</b><i>${list.length}</i></div>`;
+  if (!deep) return `<div class="xn">${bar}${top}${mid.length + rest.length ? `<div class="xstack ind">${mid.concat(rest).map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`;
+  return `<div class="xn">${bar}${top}<i class="xskip"></i><div class="xleaf"><div class="xuh ghost"></div>${mid.length ? mid.map(e => xoCard(e, '', X, 'mid')).join('') : '<div class="xgapm"></div>'}<div class="xub">${rest.map(e => xoCard(e, '', X)).join('')}</div></div></div>`;
 }
 /* Children side by side on one level, wired to the box above them */
 const xoKids = kids => kids.length ? `<i class="xstem"></i><div class="xkids">${kids.map(k => `<div class="xk">${k}</div>`).join('')}</div>` : '';
@@ -2328,19 +2393,30 @@ function xoHead(code, O, X) {
 const xoUnder = (code, O) => Object.keys(IX.offUnder[code] || {}).reduce((l, k) => l.concat(O.at[k] || []), []);
 const xoBar = (code, O) => `<div class="xsh"><b>${esc(IX.off[code]['Office Name'])}</b><i>${O.count(code)}</i></div>`;
 /* An office and everything under it, as a tree: its head on top, the offices under it on one level below */
-function xoNode(code, O, X, root) {
-  const off = IX.off[code], lvl = orgLevel(off);
+function xoNode(code, O, X, root, deepParent) {
+  const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
   const kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
-  if (lvl === 'Unit' && !kids.length) return root ? `<div class="xn full">${xoLeaf(off['Office Name'], O.at[code] || [], X, true)}</div>` : xoLeaf(off['Office Name'], O.at[code] || [], X);
   if (code === O.apex) return xoApex(O, X, [code], root);
-  const head = O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
+  const head = lvl === 'Unit' ? orgUnitHead(code, O) : O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
+  if (lvl === 'Unit') {
+    if (!kids.length) {
+      if (root) return `<div class="xn full">${xoLeaf(name, rest, X, { head: head, wide: true })}</div>`;
+      const col = xoLeaf(name, rest, X, { head: head });
+      return deepParent ? `<div class="xn"><div class="xsh ghost"></div><div class="xtop"><div class="xgap"></div></div><i class="xskip"></i>${col}</div>` : col;
+    }
+    // a unit with sub-units: its head, then its own staff and the sub-units side by side
+    const or = XO.color === 'orange' || (XO.color === 'alt' && X.k++ % 2 === 1);
+    const sub = (rest.length ? [xoLeaf('Sub-unit Staff', rest, X, { plain: true })] : []).concat(kids.map(k => xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X, { plain: true })));
+    return `<div class="xn">${root ? '' : `<div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${O.count(code)}</i></div>`}${head ? xoCard(head, '', X, 'mid') : '<div class="xgapm"></div>'}${xoKids(sub)}</div>`;
+  }
   const below = [];
   if (lvl === 'Division') {
-    if (rest.length) below.push(xoLeaf('Division Staff', rest, X));
-    kids.forEach(k => below.push(xoNode(k, O, X, false)));
+    const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && (IX.offKids[k] || []).length > 0);
+    if (rest.length) below.push(xoDivStaff('Division Staff', rest, X, deep));
+    kids.forEach(k => below.push(xoNode(k, O, X, false, deep)));
   } else {
-    if (rest.length && kids.length) below.push(xoLeaf(lvl === 'Unit' ? 'Unit Staff' : 'Section Staff', rest, X));
-    kids.forEach(k => below.push((IX.offKids[k] || []).length ? xoNode(k, O, X, false) : xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X)));
+    if (rest.length && kids.length) below.push(xoLeaf('Section Staff', rest, X));
+    kids.forEach(k => below.push(xoNode(k, O, X, false)));
   }
   const stack = !kids.length && lvl !== 'Division' && rest.length ? `<div class="xstack ind">${rest.map(e => xoCard(e, '', X)).join('')}</div>` : '';
   return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKids(below)}</div>`;
@@ -2469,36 +2545,41 @@ function xoPdf(jpeg, w, h) {
   const out = new Uint8Array(len); let p = 0; parts.forEach(b => { out.set(b, p); p += b.length; });
   return out;
 }
-function formOrgDownload() {
+function formOrgDownload(look) {
   XO.office = S.orgDiv || ''; XO.who = S.orgKind === 'plantilla' ? 'plantilla' : 'all';
   const chk = (k, l) => `<label style="display:flex;gap:8px;align-items:center;font-weight:400;cursor:pointer"><input type="checkbox" id="xo_${k}" ${XO[k] ? 'checked' : ''} style="width:16px;height:16px;flex:none"> ${l}</label>`;
-  openModal(`<header><div><span class="label">Organizational chart</span><h2>Download as picture or PDF</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
+  openModal(`<header><div><span class="label">Organizational chart</span><h2>${look ? 'Chart settings' : 'Download as picture or PDF'}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
     <div class="body">
       <div class="fgrid">
-        ${field('xoOffice', 'Which office', offSelect('xoOffice', XO.office, 'Whole bureau'), 'span2', 'A division, a section, or a single unit')}
-        ${field('xoWho', 'Who to include', sel('xoWho', [['all', 'Everyone'], ['plantilla', 'Plantilla only']], XO.who), 'span2')}
-        ${field('xoFmt', 'File type', sel('xoFmt', [['png', 'HD image (PNG)'], ['pdf', 'PDF']], XO.fmt))}
-        ${field('xoOrient', 'Page', sel('xoOrient', [['landscape', 'Landscape'], ['portrait', 'Portrait']], XO.orient), '', 'A wide chart makes the page wider')}
-        ${field('xoColor', 'Unit header colour', sel('xoColor', [['blue', 'Blue'], ['orange', 'Orange'], ['alt', 'Alternate']], XO.color))}
-        ${field('xoWire', 'Line colour', sel('xoWire', [['#A9BFE3', 'Light blue'], ['#0D47A1', 'Navy'], ['#F26522', 'Orange'], ['#9AA5B5', 'Grey']], XO.wire))}
+        ${look ? '' : field('xoOffice', 'Which office', offSelect('xoOffice', XO.office, 'Whole bureau'), 'span2', 'A division, a section, or a single unit')}
+        ${look ? '' : field('xoWho', 'Who to include', sel('xoWho', [['all', 'Everyone'], ['plantilla', 'Plantilla only']], XO.who), 'span2')}
+        ${look ? '' : field('xoFmt', 'File type', sel('xoFmt', [['png', 'HD image (PNG)'], ['pdf', 'PDF']], XO.fmt))}
+        ${look ? '' : field('xoOrient', 'Page', sel('xoOrient', [['landscape', 'Landscape'], ['portrait', 'Portrait']], XO.orient), '', 'A wide chart makes the page wider')}
+        ${field('xoColor', 'Unit header colour', sel('xoColor', [['blue', 'Blue'], ['orange', 'Orange'], ['alt', 'Alternate']], XO.color), look ? 'span2' : '')}
+        ${field('xoWire', 'Line colour', sel('xoWire', [['#A9BFE3', 'Light blue'], ['#0D47A1', 'Navy'], ['#F26522', 'Orange'], ['#9AA5B5', 'Grey']], XO.wire), look ? 'span2' : '')}
       </div>
       <div class="f"><label>Show on each person</label>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
           ${chk('pos', 'Position')}${chk('sg', 'Salary grade')}${chk('item', 'Item number')}${chk('kind', 'Permanent / CoS tag')}${chk('from', 'Parent office (e.g. "from EPD")')}
         </div></div>
-      <div class="f"><label>Other</label>
+      ${look ? '' : `<div class="f"><label>Other</label>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
           ${chk('date', 'Generation date')}${chk('hd', 'Full-size photos (sharper, slower)')}
-        </div></div>
+        </div></div>`}
       <div class="formErr" id="xoErr" hidden></div>
     </div>
-    <footer><span class="muted" style="font-size:.85rem" id="xoNote">A big chart can take a little while.</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="button" class="btn primary" id="xoGo" data-act="orgDlGo">${ICON.dl} Download</button></div></footer>`);
+    <footer><span class="muted" style="font-size:.85rem" id="xoNote">${look ? 'The same settings are used on screen and in the download.' : 'A big chart can take a little while.'}</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button>${look ? '<button type="button" class="btn primary" data-act="orgLookGo">Apply</button>' : `<button type="button" class="btn primary" id="xoGo" data-act="orgDlGo">${ICON.dl} Download</button>`}</div></footer>`);
 }
+function xoRead() {
+  ['pos', 'sg', 'item', 'kind', 'from', 'date', 'hd'].forEach(k => { const el = $('#xo_' + k); if (el) XO[k] = el.checked; });
+  [['office', 'xoOffice'], ['who', 'xoWho'], ['fmt', 'xoFmt'], ['orient', 'xoOrient'], ['color', 'xoColor'], ['wire', 'xoWire']].forEach(p => { const el = $('#' + p[1]); if (el) XO[p[0]] = el.value; });
+  xoKeep();
+}
+function orgLookGo() { xoRead(); closeModal(); render(); }
 async function orgDownloadGo() {
   const btn = $('#xoGo'), err = $('#xoErr'), note = $('#xoNote');
   if (!btn || btn.disabled) return;
-  ['pos', 'sg', 'item', 'kind', 'from', 'date', 'hd'].forEach(k => { XO[k] = $('#xo_' + k).checked; });
-  XO.office = $('#xoOffice').value; XO.who = $('#xoWho').value; XO.fmt = $('#xoFmt').value; XO.orient = $('#xoOrient').value; XO.color = $('#xoColor').value; XO.wire = $('#xoWire').value;
+  xoRead();
   err.hidden = true; btn.disabled = true;
   try {
     const cv = await xoCanvas(t => { if (note) note.textContent = t; });
@@ -2513,7 +2594,7 @@ async function orgDownloadGo() {
       if (!blob) throw new Error('The chart is too big to save as one picture. Pick a division or a section instead.');
       download(name + '.png', 'image/png', blob);
     }
-    closeModal();
+    closeModal(); if (S.view === 'org') render();
   } catch (e) {
     err.textContent = e.message || 'The chart could not be made.'; err.hidden = false; btn.disabled = false; if (note) note.textContent = '';
   }
@@ -4845,6 +4926,8 @@ document.addEventListener('click', ev => {
   if (act === 'orgDiv') { S.orgDiv = a.dataset.f; return render(); }
   if (act === 'orgKind') { S.orgKind = a.dataset.f; return render(); }
   if (act === 'orgDl') return formOrgDownload();
+  if (act === 'orgLook') return formOrgDownload(true);
+  if (act === 'orgLookGo') return orgLookGo();
   if (act === 'orgDlGo') return orgDownloadGo();
   if (act === 'newHire') return formNewHire(a.dataset.item);
   if (act === 'addUser') return formUser('');
