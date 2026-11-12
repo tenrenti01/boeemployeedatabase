@@ -24,6 +24,17 @@ def main():
     s = re.sub(r'(<style>)(.*?)(</style>)', lambda m: m.group(1) + strip_css(m.group(2)) + m.group(3), s, flags=re.S)
     s = re.sub(r'(<script>)(.*?)(</script>)', lambda m: m.group(1) + strip_js(m.group(2)) + m.group(3), s, flags=re.S)
     open(OUT, 'w', encoding='utf-8').write(s)
+    # Safety net: every script in the built page must still be valid JavaScript (needs node; skipped without it).
+    # A literal closing tag such as </style> or </script> inside a script string breaks the page - write it in two pieces.
+    import shutil, subprocess, tempfile
+    if shutil.which('node'):
+        for i, m in enumerate(re.finditer(r'<script>(.*?)</script>', s, flags=re.S)):
+            with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as f:
+                f.write(m.group(1))
+            r = subprocess.run(['node', '--check', f.name], capture_output=True, text=True)
+            os.unlink(f.name)
+            if r.returncode:
+                sys.exit('BUILD FAILED: script %d in index.html is not valid JavaScript. DO NOT PUSH.\n%s' % (i + 1, r.stderr[-600:]))
     print('index.html: %.1f KB (from %.1f KB)' % (os.path.getsize(OUT) / 1024, os.path.getsize(SRC) / 1024))
 
 
