@@ -2231,9 +2231,9 @@ function orgNode(code, O, deepParent) {
     const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
     const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0]; return orgLead(label, list.length, orgCard(lead, true), list.filter(e => e !== lead)); };
     const asstHead = O.asst ? O.head(O.asst) : null, asstRest = O.asst ? (O.at[O.asst] || []).filter(e => e !== asstHead) : [];
-    const level = [group('Technical', rest.filter(tech))]
+    const level = [group('OD-Technical', rest.filter(tech))]
       .concat(kids.filter(k => k !== O.asst).map(k => orgNode(k, O)))
-      .concat([group('Administrative', rest.filter(e => !tech(e))), asstRest.length ? orgLead(IX.off[O.asst]['Office Name'] + ' · staff', asstRest.length, '', asstRest) : '']).filter(Boolean);
+      .concat([group('OD-Clerical', rest.filter(e => !tech(e))), asstRest.length ? orgLead(IX.off[O.asst]['Office Name'] + ' · staff', asstRest.length, '', asstRest) : '']).filter(Boolean);
     const asst = O.asst ? `<i class="oStem"></i>${asstHead ? orgCard(asstHead, true, IX.off[O.asst]['Office Name']) : orgVac('Assistant Director')}` : '';
     tree = `${head ? orgCard(head, true, name) : orgVac('Director')}${asst}${orgKids(level)}`;
   } else {
@@ -2486,9 +2486,9 @@ function xoApex(O, X, divs, root) {
   // A column led by one person (first plantilla), the rest straight below and a little indented
   const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0], others = list.filter(e => e !== lead);
     return `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(label)}</b><i>${list.length}</i></div><div class="xtop">${xoCard(lead, '', X, true)}</div>${others.length ? `<div class="xstack ind">${others.map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`; };
-  const level = [group('Technical', rest.filter(tech))]
+  const level = [group('OD-Technical', rest.filter(tech))]
     .concat((IX.offKids[apex] || []).map(o => String(o['Office Code'])).filter(k => k !== O.asst).map(k => xoNode(k, O, X, false)))
-    .concat([group('Administrative', rest.filter(e => !tech(e))),
+    .concat([group('OD-Clerical', rest.filter(e => !tech(e))),
       asstRest.length ? `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(IX.off[O.asst]['Office Name'])} · Staff</b><i>${asstRest.length}</i></div><div class="xtop"><div class="xgap"></div></div><div class="xstack ind">${asstRest.map(e => xoCard(e, '', X)).join('')}</div></div>` : ''])
     .concat(divs.filter(c => c !== apex).map(c => xoNode(c, O, X, false))).filter(Boolean);
   const asst = O.asst ? `<i class="xstem"></i><div class="xtop">${xoHead(O.asst, O, X)}</div>` : '';
