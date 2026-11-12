@@ -986,6 +986,9 @@ body.wide main{max-width:none}
 .org .odB .ocT > .ocR{line-height:15px}
 .org .odB .oc .ocTags{height:18px;min-height:0;margin-top:1px;align-items:center}
 .org .odB .oVac{height:var(--chH,72px);min-height:0;width:var(--ocW,250px);min-width:0;padding:0 10px}
+/* The office picker, Chart settings and Download stay in view while the chart scrolls */
+.orgBar{position:sticky;top:var(--topH,64px);z-index:15;display:flex;justify-content:flex-end;padding:8px 0;margin:-8px 0;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.orgBar .toolbar{flex-wrap:wrap;justify-content:flex-end}
 .otSH.or{background:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%)}
 .otSH.bl{background:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%)}
 html.classic .org .oc,html.classic .org .oc.cos,html.classic .org .oc.head{border:1px solid #B8B8B8;box-shadow:none}
@@ -2265,6 +2268,7 @@ const orgVars = (nlS, nlH, w) => `--chS:${orgDim(nlS, false)}px;--chH:${orgDim(n
 /* Makes the columns as wide as the longest name needs when there is room, so names stay on one line.
    No room: names take two lines (every card of that kind). Still too wide: shrink a little, then scroll. */
 function fitOrg() {
+  const bar = document.querySelector('.top'); if (bar) document.documentElement.style.setProperty('--topH', bar.offsetHeight + 'px');
   document.querySelectorAll('.ot.root').forEach(t => {
     const set = (a, b, w) => { t.style.cssText = orgVars(a, b, w); t.classList.toggle('n2s', a === 2); t.classList.toggle('n2h', b === 2); };
     set(1, 1, 250);
@@ -2299,11 +2303,11 @@ function viewOrg() {
   return `
   <section style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap">
     <div style="display:grid;gap:4px"><span class="eyebrow">${orgPeople(total)} · as of ${esc(fmtDate(D.today))}</span><h1>Organizational chart</h1></div>
-    <div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
+  </section>
+  <div class="orgBar"><div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
       <div class="seg" role="group" aria-label="Who to show">${seg('orgKind', S.orgKind, 'all', 'Everyone')}${seg('orgKind', S.orgKind, 'plantilla', 'Plantilla only')}</div>
       <button type="button" class="btn" data-act="orgLook" title="Choose what each box shows and the colours">Chart settings</button>
-      <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
-  </section>
+      <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div></div>
   <div class="oLegend"><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
   <div class="org" style="${orgVars(1, 1, 250)}">${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
     ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
