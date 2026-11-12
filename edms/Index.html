@@ -2167,7 +2167,7 @@ function orgCard(e, isHead, role) {
   const pos = (XO.pos ? String(c.position || 'Position not on record') : '') + (XO.sg && c.sg !== '' && c.sg !== undefined ? (XO.pos ? ' ' : '') + '(SG ' + c.sg + ')' : '');
   const line = (c.type === 'Designation (OIC)' ? '<em class="ocO">OIC</em>' + (pos ? ' · ' : '') : '') + esc(pos);
   const tags = (XO.kind ? (c.kind === 'contract' ? `<span class="pill contract">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</span>` : `<span class="pill plantilla">${esc(c.status || 'Permanent')}</span>`) : '') +
-    (XO.from && from ? `<span class="pill warn" title="${e['Mother Unit'] ? 'Mother unit' : 'Plantilla office'}">from ${esc(from)}</span>` : '');
+    (XO.from && from ? `<span class="pill warn" title="${e['Mother Unit'] ? 'Mother unit' : 'Plantilla office'}: ${esc(from)}">(${esc(String(from).replace(/^DPWH\s+/i, ''))})</span>` : '');
   return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}${role ? ' r' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b>${XO.pos || XO.sg ? `<span class="ocP" title="${esc(pos)}">${line || '&nbsp;'}</span>` : ''}${XO.item ? `<span class="mono ocP">${esc(c.item) || '&nbsp;'}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${XO.kind || XO.from ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
 }
 /* An empty, invisible card: keeps a level free so the people below line up with the same rank in the next column */
@@ -2421,7 +2421,7 @@ function xoCard(e, role, X, big) {   // big: true = chief-size card, 'mid' = uni
   const line = [XO.pos ? esc(c.position || 'Position not on record') : '', XO.sg && c.sg !== '' && c.sg !== undefined ? 'SG ' + esc(c.sg) : ''].filter(Boolean).join(' · ');
   const from = e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
   const tags = (XO.kind ? (c.kind === 'contract' ? `<i class="cos">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</i>` : `<i>${esc(c.status || 'Permanent')}</i>`) : '') +
-    (XO.from && from ? `<i class="from">from ${esc(from)}</i>` : '');
+    (XO.from && from ? `<i class="from">(${esc(String(from).replace(/^DPWH\s+/i, ''))})</i>` : '');
   return `<div class="xpc${role || big ? ' chief' : ''}${big === 'mid' ? ' mid' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
 }
 const xoSec = () => XO.sec === 'orange' ? ' or' : XO.sec === 'blue' ? ' bl' : '';
@@ -2626,9 +2626,9 @@ function formOrgDownload(look) {
       </div>
       <div class="f"><label>Show on each person</label>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
-          ${chk('pos', 'Position')}${chk('sg', 'Salary grade')}${chk('item', 'Item number')}${chk('kind', 'Permanent / CoS tag')}${chk('from', 'Parent office (e.g. "from EPD")')}
+          ${chk('pos', 'Position')}${chk('sg', 'Salary grade')}${chk('item', 'Item number')}${chk('kind', 'Permanent / CoS tag')}${chk('from', 'Parent office, e.g. "(EPD)" or "(Region III)"')}
         </div></div>
-      <div class="f"><label>Leave out</label>
+      <div class="f"><label>Exclude:</label>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
           ${chk('hideField', 'Field workers (FED-Field)')}${chk('hideSec', 'Empty sections')}${chk('hideUnit', 'Empty units')}
         </div></div>
