@@ -2203,13 +2203,22 @@ function orgDivStaff(name, list, deep) {
   if (!deep) return `<div class="otS">${orgSH(name, list.length)}${top}${mid.length + rest.length ? `<div class="otUnder">${mid.concat(rest).map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
   return `<div class="ot">${orgSH(name, list.length)}${top}<i class="oSkip"></i><div class="otL">${orgUH('', 0, true)}${mid.length ? mid.map(e => orgCard(e, true)).join('') : orgGhost(true)}<div class="ouB">${rest.map(e => orgCard(e)).join('')}</div></div></div>`;
 }
+/* The offices drawn under an office, after the chart settings: field workers (FED-Field) and empty sections / units can be left out */
+const orgIsField = k => /-FIELD$/i.test(k) || /\bfield\b/i.test(String((IX.off[k] || {})['Office Name']));
+function orgKidsOf(code, O) {
+  return (IX.offKids[code] || []).map(o => String(o['Office Code'])).filter(k => {
+    if (XO.hideField && orgIsField(k)) return false;
+    if (O.count(k) > 0) return true;
+    return !(orgLevel(IX.off[k]) === 'Unit' ? XO.hideUnit : XO.hideSec);
+  });
+}
 /* One office and everything under it */
 function orgNode(code, O, deepParent) {
   const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
-  const kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
+  const kids = orgKidsOf(code, O);
   const head = lvl === 'Unit' ? orgUnitHead(code, O) : O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
   const under = k => Object.keys(IX.offUnder[k] || {}).reduce((l, c) => l.concat(O.at[c] || []), []);
-  const hasKids = k => (IX.offKids[k] || []).length > 0;
+  const hasKids = k => orgKidsOf(k, O).length > 0;
   if (lvl === 'Unit') {
     // a unit with sub-units: its head, then the sub-units side by side
     if (kids.length) return `<div class="ot">${orgUH(name, O.count(code))}${head ? orgCard(head, true) : orgGhost(true)}${orgKids((rest.length ? [orgUnit('Sub-unit staff', rest, null, true)] : []).concat(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k), null, true))))}</div>`;
@@ -2241,7 +2250,7 @@ function orgNode(code, O, deepParent) {
     const cols = (rest.length ? [orgDivStaff(/division/i.test(name) ? 'Division staff' : 'Office staff', rest, deep)] : []).concat(kids.map(k => orgNode(k, O, deep)));
     tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKids(cols)}`;
   }
-  return `<section class="od"><div class="odH"><h2>${esc(name)}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
+  return `<section class="od"><div class="odH"><h2>${esc(name)}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}${(() => { const f = XO.hideField ? (IX.offKids[code] || []).map(o => String(o['Office Code'])).filter(orgIsField).reduce((n, k) => n + O.count(k), 0) : 0; return f ? ' · ' + f + ' field workers not shown' : ''; })()}</span></div>
       <div class="odB"><div class="otFit"><div class="ot root" style="${orgVars(1, 1, 250)}">${tree}</div></div></div></section>`;
 }
 /* Card height in px from the rows it shows: name (nl lines), position, item number, tags */
@@ -2305,9 +2314,9 @@ function viewOrg() {
 /* ═══════════════════════ org chart download (HD image / PDF) ═══════════════════════
    A separate, print-ready drawing of one office in the DPWH presentation style: dotted white sheet, white header box,
    gradient unit headers, plain white cards. It is drawn off-screen, turned into a picture, and saved as PNG or PDF. */
-const XO = { office: '', who: 'all', pos: true, sg: false, item: false, from: false, kind: true, date: true, hd: true, sec: 'orange', color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
+const XO = { office: '', who: 'all', pos: true, sg: false, item: false, from: false, kind: true, date: true, hd: true, sec: 'orange', hideField: true, hideSec: false, hideUnit: false, color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
 try { Object.assign(XO, JSON.parse(localStorage.getItem('boe.orgLook') || '{}')); } catch (e) { /* first visit */ }
-const xoKeep = () => { try { const k = {}; ['pos', 'sg', 'item', 'from', 'kind', 'date', 'hd', 'sec', 'color', 'wire', 'orient', 'fmt'].forEach(x => { k[x] = XO[x]; }); localStorage.setItem('boe.orgLook', JSON.stringify(k)); } catch (e) { /* private window */ } };
+const xoKeep = () => { try { const k = {}; ['pos', 'sg', 'item', 'from', 'kind', 'date', 'hd', 'hideField', 'hideSec', 'hideUnit', 'sec', 'color', 'wire', 'orient', 'fmt'].forEach(x => { k[x] = XO[x]; }); localStorage.setItem('boe.orgLook', JSON.stringify(k)); } catch (e) { /* private window */ } };
 const XO_CSS = `
 .xo{--navy:#0D47A1;--title:#0F2A5C;--orange:#F26522;--muted:#5A6B85;--wire:#A9BFE3;
  --gn:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%);--go:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%);
@@ -2450,7 +2459,7 @@ const xoBar = (code, O) => `<div class="xsh${xoSec()}"><b>${esc(IX.off[code]['Of
 /* An office and everything under it, as a tree: its head on top, the offices under it on one level below */
 function xoNode(code, O, X, root, deepParent) {
   const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
-  const kids = (IX.offKids[code] || []).map(o => String(o['Office Code']));
+  const kids = orgKidsOf(code, O);
   if (code === O.apex) return xoApex(O, X, [code], root);
   const head = lvl === 'Unit' ? orgUnitHead(code, O) : O.head(code), rest = (O.at[code] || []).filter(e => e !== head);
   if (lvl === 'Unit') {
@@ -2466,7 +2475,7 @@ function xoNode(code, O, X, root, deepParent) {
   }
   const below = [];
   if (lvl === 'Division') {
-    const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && (IX.offKids[k] || []).length > 0);
+    const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && orgKidsOf(k, O).length > 0);
     if (rest.length) below.push(xoDivStaff('Division Staff', rest, X, deep));
     kids.forEach(k => below.push(xoNode(k, O, X, false, deep)));
   } else {
@@ -2487,7 +2496,7 @@ function xoApex(O, X, divs, root) {
   const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0], others = list.filter(e => e !== lead);
     return `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(label)}</b><i>${list.length}</i></div><div class="xtop">${xoCard(lead, '', X, true)}</div>${others.length ? `<div class="xstack ind">${others.map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`; };
   const level = [group('OD-Technical', rest.filter(tech))]
-    .concat((IX.offKids[apex] || []).map(o => String(o['Office Code'])).filter(k => k !== O.asst).map(k => xoNode(k, O, X, false)))
+    .concat(orgKidsOf(apex, O).filter(k => k !== O.asst).map(k => xoNode(k, O, X, false)))
     .concat([group('OD-Clerical', rest.filter(e => !tech(e))),
       asstRest.length ? `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(IX.off[O.asst]['Office Name'])} · Staff</b><i>${asstRest.length}</i></div><div class="xtop"><div class="xgap"></div></div><div class="xstack ind">${asstRest.map(e => xoCard(e, '', X)).join('')}</div></div>` : ''])
     .concat(divs.filter(c => c !== apex).map(c => xoNode(c, O, X, false))).filter(Boolean);
@@ -2514,11 +2523,12 @@ function xoBuild(X) {
     if (path.length > 1) headDiv = path[0]['Office Name'];
     if (lvl === 'Unit' && path.length > 2) sub = path[path.length - 2]['Office Name'] + ' · ';
   }
+  const hid = XO.hideField ? Object.keys(IX.off).filter(k => orgIsField(k) && k !== code && (!code || (IX.offUnder[code] || {})[k])).reduce((t, k) => t + (O.at[k] || []).length, 0) : 0;
   const W = XO.orient === 'portrait' ? 1100 : 1500, minH = Math.round(XO.orient === 'portrait' ? W * 1.4142 : W / 1.4142);
   const logo = src => /^data:image\//.test(String(src || '')) ? `<img src="${esc(src)}" alt="" />` : '';
   return { W, html: `<div class="xo" style="width:max-content;min-width:${W}px;min-height:${minH}px;--wire:${esc(XO.wire)}"><style>${X.fonts || ''}${XO_CSS}</style>
     <div class="xhd">${logo(D.logo || X.logo1)}${logo(D.logo2 || X.logo2)}<div class="xbrand"><b>${esc(aw.slice(0, -1).join(' '))} <em>${esc(aw[aw.length - 1])}</em></b><span>${esc(D.department || 'Department of Public Works and Highways')}${headDiv ? ' · ' + esc(headDiv) : ''}</span></div><div class="xas">Organizational Chart</div></div>
-    <h1>${title}</h1><div class="xsub">${esc(sub)}${n} personnel${XO.who === 'plantilla' ? ' (plantilla only)' : ''}</div>
+    <h1>${title}</h1><div class="xsub">${esc(sub)}${n - hid} personnel${XO.who === 'plantilla' ? ' (plantilla only)' : ''}${hid ? ' · ' + hid + ' field workers not shown' : ''}</div>
     <div class="xbody">${body}</div>
     ${XO.date ? `<div class="xft">Generated ${esc(fmtDate(D.today))}</div>` : ''}</div>` };
 }
@@ -2618,6 +2628,10 @@ function formOrgDownload(look) {
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
           ${chk('pos', 'Position')}${chk('sg', 'Salary grade')}${chk('item', 'Item number')}${chk('kind', 'Permanent / CoS tag')}${chk('from', 'Parent office (e.g. "from EPD")')}
         </div></div>
+      <div class="f"><label>Leave out</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
+          ${chk('hideField', 'Field workers (FED-Field)')}${chk('hideSec', 'Empty sections')}${chk('hideUnit', 'Empty units')}
+        </div></div>
       ${look ? '' : `<div class="f"><label>Other</label>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
           ${chk('date', 'Generation date')}${chk('hd', 'Full-size photos (sharper, slower)')}
@@ -2627,7 +2641,7 @@ function formOrgDownload(look) {
     <footer><span class="muted" style="font-size:.85rem" id="xoNote">${look ? 'The same settings are used on screen and in the download.' : 'A big chart can take a little while.'}</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button>${look ? '<button type="button" class="btn primary" data-act="orgLookGo">Apply</button>' : `<button type="button" class="btn primary" id="xoGo" data-act="orgDlGo">${ICON.dl} Download</button>`}</div></footer>`);
 }
 function xoRead() {
-  ['pos', 'sg', 'item', 'kind', 'from', 'date', 'hd'].forEach(k => { const el = $('#xo_' + k); if (el) XO[k] = el.checked; });
+  ['pos', 'sg', 'item', 'kind', 'from', 'date', 'hd', 'hideField', 'hideSec', 'hideUnit'].forEach(k => { const el = $('#xo_' + k); if (el) XO[k] = el.checked; });
   [['office', 'xoOffice'], ['who', 'xoWho'], ['fmt', 'xoFmt'], ['orient', 'xoOrient'], ['sec', 'xoSec'], ['color', 'xoColor'], ['wire', 'xoWire']].forEach(p => { const el = $('#' + p[1]); if (el) XO[p[0]] = el.value; });
   xoKeep();
 }
