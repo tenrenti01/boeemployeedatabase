@@ -961,24 +961,35 @@ body.wide main{max-width:none}
 .otL{width:250px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}
 .otL > .oc.head,.otS > .oc.head,.ot > .oc.head{width:250px;min-width:0;max-width:none}
 .ot > .ouH{width:250px;margin-bottom:6px}
-.oSkip{display:block;height:40px;flex:none}
-.oc.ghost,.ouH.ghost,.otSH.ghost{visibility:hidden;pointer-events:none}
+.oSkip{display:block;height:40px;flex:none;align-self:stretch}
+.oc.ghost,.ouH.ghost,.otSH.ghost{position:relative;background:none!important;border-color:transparent!important;box-shadow:none!important;pointer-events:none;cursor:default}
+.oc.ghost > *,.ouH.ghost > *,.otSH.ghost > *{visibility:hidden}
+.oc.ghost::before,.ouH.ghost::before,.otSH.ghost::before{content:"";position:absolute;left:calc(50% - 1px);top:-8px;bottom:-8px;width:2px;background:var(--wire)}
+.oSkip{position:relative}
+.oSkip::before{content:"";position:absolute;left:calc(50% - 1px);top:-8px;bottom:-8px;width:2px;background:var(--wire)}
+.otL > .oc.ghost:last-child::before,.otS > .oc.ghost:last-child::before{display:none}
+.org .odB{background-color:var(--card);background-image:radial-gradient(circle,rgba(13,71,161,.13) 1.2px,transparent 1.5px);background-size:22px 22px}
+.org .oc,.org .oc.cos,.org .oc.head{border:0;box-shadow:0 6px 16px rgba(16,41,90,.10),0 1px 4px rgba(16,41,90,.07)}
+.org .oc:hover{box-shadow:0 10px 24px rgba(16,41,90,.16),0 2px 6px rgba(16,41,90,.08)}
+.org .oVac{background:rgba(255,255,255,.85)}
+.otSH.or{background:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%)}
+.otSH.bl{background:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%)}
+html.classic .org .oc,html.classic .org .oc.cos,html.classic .org .oc.head{border:1px solid #B8B8B8;box-shadow:none}
 .ocT b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
 .ocT > .ocP{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .ocT .ocO{font-style:normal;font-weight:700;color:var(--orange-2)}
 .oc .ocTags{min-height:19px;flex-wrap:nowrap;overflow:hidden}
 .oc .ocTags .pill{font-size:.64rem;padding:1px 7px}
-.otS{width:280px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.otS{width:250px;display:flex;flex-direction:column;gap:8px;align-items:center}
 .otSH{align-self:stretch;padding:4px 12px;background:#0F2A5C;color:#fff;font:700 .88rem/1.12 var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:10px;height:48px;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;text-wrap:balance}
 .otSH small,.ouH small{font:700 .68rem var(--body);letter-spacing:0;background:rgba(255,255,255,.22);color:#fff;border-radius:999px;min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;flex:none;margin:0}
 .ot > .otSH{margin-bottom:8px}
-.otUnder{align-self:stretch;margin-left:22px;padding-left:10px;border-left:2px solid var(--wire);display:grid;gap:6px}
+.otUnder{width:250px;display:grid;gap:6px}
 .otS > .oc.head,.otS > .oVac{max-width:100%}
 @media (max-width:680px){.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oc.ghost,.ouH.ghost,.otSH.ghost,.oSkip{display:none}.otL > .oc.head,.otS > .oc.head,.ot > .oc.head,.ot > .ouH{width:100%}}
 html.classic .org{--wire:#808080}
 html.classic .otSH,html.classic .ouH{border-radius:0;font:bold 11px/1.15 Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0}
 html.classic .otSH small,html.classic .ouH small{font:bold 10px Tahoma,"Segoe UI",Arial,sans-serif;color:#fff}
-html.classic .otUnder{border-left:1px solid #808080}
 .oMore{width:100%}
 .oMore summary{cursor:pointer;font-weight:600;font-size:.85rem;color:var(--head);padding:4px 2px}
 .oGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-top:6px}
@@ -2156,7 +2167,7 @@ const orgVac = what => `<div class="oNone oVac"><b>Vacant</b><span>${esc(what)} 
 const orgKids = kids => kids.length ? `<i class="oStem"></i><div class="otKids">${kids.map(k => `<div class="otK">${k}</div>`).join('')}</div>` : '';
 let ORG_K = 0;
 const orgUH = (name, n, ghost) => { const or = XO.color === 'orange' || (XO.color === 'alt' && !ghost && ORG_K++ % 2 === 1); return `<div class="ouH${or ? ' or' : ''}${ghost ? ' ghost' : ''}"${ghost ? ' aria-hidden="true"' : ''}><b>${esc(name)}</b>${ghost ? '' : `<small>${n}</small>`}</div>`; };
-const orgSH = (name, n, ghost) => `<div class="otSH${ghost ? ' ghost' : ''}"${ghost ? ' aria-hidden="true"' : ''}><b>${esc(name)}</b>${ghost ? '' : `<small>${n}</small>`}</div>`;
+const orgSH = (name, n, ghost) => `<div class="otSH${XO.sec === 'orange' ? ' or' : XO.sec === 'blue' ? ' bl' : ''}${ghost ? ' ghost' : ''}"${ghost ? ' aria-hidden="true"' : ''}><b>${esc(name)}</b>${ghost ? '' : `<small>${n}</small>`}</div>`;
 /* A unit: its header, its head on the unit-head level (an empty slot when there is none), then its people.
    plain = a sub-unit or other simple list: header and people only. */
 /* Who leads a unit: its OIC, else its highest-graded plantilla engineer (none = the slot stays empty) */
@@ -2248,7 +2259,7 @@ function viewOrg() {
       <button type="button" class="btn" data-act="orgLook" title="Choose what each box shows and the colours">Chart settings</button>
       <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
   </section>
-  <div class="oLegend"><span><i></i>Plantilla</span><span><i class="c"></i>CoS / JO</span><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
+  <div class="oLegend"><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
   <div class="org">${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
     ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
       <div class="odB"><div class="oGrid" style="width:100%">${O.lost.map(e => `<div class="oOut">${orgCard(e)}<span class="muted">${esc(note(e))}</span></div>`).join('')}</div></div></section>` : ''}
@@ -2258,9 +2269,9 @@ function viewOrg() {
 /* ═══════════════════════ org chart download (HD image / PDF) ═══════════════════════
    A separate, print-ready drawing of one office in the DPWH presentation style: dotted white sheet, white header box,
    gradient unit headers, plain white cards. It is drawn off-screen, turned into a picture, and saved as PNG or PDF. */
-const XO = { office: '', who: 'all', pos: true, sg: false, item: false, from: false, kind: true, date: true, hd: true, color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
+const XO = { office: '', who: 'all', pos: true, sg: false, item: false, from: false, kind: true, date: true, hd: true, sec: 'orange', color: 'blue', wire: '#A9BFE3', orient: 'landscape', fmt: 'png' };
 try { Object.assign(XO, JSON.parse(localStorage.getItem('boe.orgLook') || '{}')); } catch (e) { /* first visit */ }
-const xoKeep = () => { try { const k = {}; ['pos', 'sg', 'item', 'from', 'kind', 'date', 'hd', 'color', 'wire', 'orient', 'fmt'].forEach(x => { k[x] = XO[x]; }); localStorage.setItem('boe.orgLook', JSON.stringify(k)); } catch (e) { /* private window */ } };
+const xoKeep = () => { try { const k = {}; ['pos', 'sg', 'item', 'from', 'kind', 'date', 'hd', 'sec', 'color', 'wire', 'orient', 'fmt'].forEach(x => { k[x] = XO[x]; }); localStorage.setItem('boe.orgLook', JSON.stringify(k)); } catch (e) { /* private window */ } };
 const XO_CSS = `
 .xo{--navy:#0D47A1;--title:#0F2A5C;--orange:#F26522;--muted:#5A6B85;--wire:#A9BFE3;
  --gn:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%);--go:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%);
@@ -2299,11 +2310,18 @@ const XO_CSS = `
 .xo .xleaf.wide{width:100%}
 .xo .xleaf.wide .xub{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
 .xo .xstack{width:300px;display:grid;gap:10px}
-.xo .xstack.ind{width:330px;margin-top:12px;align-self:flex-end;padding-left:14px;border-left:3px solid var(--wire)}
+.xo .xstack.ind{margin-top:12px}
 .xo .xgap{width:380px;height:136px}
 .xo .xgapm{height:104px}
-.xo .xskip{display:block;height:52px;flex:none}
-.xo .ghost{visibility:hidden}
+.xo .xskip{display:block;height:52px;flex:none;align-self:stretch}
+.xo .ghost,.xo .xgap,.xo .xgapm,.xo .xskip{position:relative;background:none!important;box-shadow:none!important}
+.xo .ghost > *{visibility:hidden}
+.xo .ghost::before,.xo .xgap::before,.xo .xgapm::before,.xo .xskip::before{content:"";position:absolute;left:calc(50% - 1.5px);top:-20px;bottom:-12px;width:3px;background:var(--wire)}
+.xo .xgapm::before,.xo .xuh.ghost::before{top:-10px;bottom:-10px}
+.xo .xskip::before{top:0;bottom:0}
+.xo .xleaf > .xgapm:last-child::before{display:none}
+.xo .xsh.or{background:var(--go)}
+.xo .xsh.bl{background:var(--gn)}
 .xo .xn > .xuh{width:300px;margin-bottom:10px}
 .xo .xpc.chief.mid{width:300px;height:104px;min-height:0;padding:10px 14px;gap:12px;border-radius:14px}
 .xo .xpc.chief.mid img,.xo .xpc.chief.mid .xav{width:64px;height:64px;border-radius:13px}
@@ -2361,6 +2379,7 @@ function xoCard(e, role, X, big) {   // big: true = chief-size card, 'mid' = uni
     (XO.from && from ? `<i class="from">from ${esc(from)}</i>` : '');
   return `<div class="xpc${role || big ? ' chief' : ''}${big === 'mid' ? ' mid' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
 }
+const xoSec = () => XO.sec === 'orange' ? ' or' : XO.sec === 'blue' ? ' bl' : '';
 /* One column: a gradient header, the unit head on the unit-head level (an empty slot when there is none), then the people.
    o.plain = a sub-unit or simple list (header and people only); o.wide = a single unit drawn across the page. */
 function xoLeaf(name, list, X, o) {
@@ -2375,7 +2394,7 @@ function xoLeaf(name, list, X, o) {
 function xoDivStaff(name, list, X, deep) {
   const big = list.filter(orgBig), mid = list.filter(orgMid), rest = list.filter(e => !orgBig(e) && !orgMid(e));
   const top = `<div class="xtop">${big.length ? big.map(e => xoCard(e, '', X, true)).join('') : '<div class="xgap"></div>'}</div>`;
-  const bar = `<div class="xsh"><b>${esc(name)}</b><i>${list.length}</i></div>`;
+  const bar = `<div class="xsh${xoSec()}"><b>${esc(name)}</b><i>${list.length}</i></div>`;
   if (!deep) return `<div class="xn">${bar}${top}${mid.length + rest.length ? `<div class="xstack ind">${mid.concat(rest).map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`;
   return `<div class="xn">${bar}${top}<i class="xskip"></i><div class="xleaf"><div class="xuh ghost"></div>${mid.length ? mid.map(e => xoCard(e, '', X, 'mid')).join('') : '<div class="xgapm"></div>'}<div class="xub">${rest.map(e => xoCard(e, '', X)).join('')}</div></div></div>`;
 }
@@ -2391,7 +2410,7 @@ function xoHead(code, O, X) {
   return h ? xoCard(h, xoRole(code, h), X) : `<div class="xvac"><b>Vacant</b><span>${esc(xoRole(code, null))} not on record</span></div>`;
 }
 const xoUnder = (code, O) => Object.keys(IX.offUnder[code] || {}).reduce((l, k) => l.concat(O.at[k] || []), []);
-const xoBar = (code, O) => `<div class="xsh"><b>${esc(IX.off[code]['Office Name'])}</b><i>${O.count(code)}</i></div>`;
+const xoBar = (code, O) => `<div class="xsh${xoSec()}"><b>${esc(IX.off[code]['Office Name'])}</b><i>${O.count(code)}</i></div>`;
 /* An office and everything under it, as a tree: its head on top, the offices under it on one level below */
 function xoNode(code, O, X, root, deepParent) {
   const off = IX.off[code], lvl = orgLevel(off), name = off['Office Name'];
@@ -2402,7 +2421,7 @@ function xoNode(code, O, X, root, deepParent) {
     if (!kids.length) {
       if (root) return `<div class="xn full">${xoLeaf(name, rest, X, { head: head, wide: true })}</div>`;
       const col = xoLeaf(name, rest, X, { head: head });
-      return deepParent ? `<div class="xn"><div class="xsh ghost"></div><div class="xtop"><div class="xgap"></div></div><i class="xskip"></i>${col}</div>` : col;
+      return deepParent ? `<div class="xn"><div class="xsh ghost${xoSec()}"></div><div class="xtop"><div class="xgap"></div></div><i class="xskip"></i>${col}</div>` : col;
     }
     // a unit with sub-units: its head, then its own staff and the sub-units side by side
     const or = XO.color === 'orange' || (XO.color === 'alt' && X.k++ % 2 === 1);
@@ -2430,11 +2449,11 @@ function xoApex(O, X, divs, root) {
   const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
   // A column led by one person (first plantilla), the rest straight below and a little indented
   const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0], others = list.filter(e => e !== lead);
-    return `<div class="xn"><div class="xsh"><b>${esc(label)}</b><i>${list.length}</i></div><div class="xtop">${xoCard(lead, '', X, true)}</div>${others.length ? `<div class="xstack ind">${others.map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`; };
+    return `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(label)}</b><i>${list.length}</i></div><div class="xtop">${xoCard(lead, '', X, true)}</div>${others.length ? `<div class="xstack ind">${others.map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`; };
   const level = [group('Technical', rest.filter(tech))]
     .concat((IX.offKids[apex] || []).map(o => String(o['Office Code'])).filter(k => k !== O.asst).map(k => xoNode(k, O, X, false)))
     .concat([group('Administrative', rest.filter(e => !tech(e))),
-      asstRest.length ? `<div class="xn"><div class="xsh"><b>${esc(IX.off[O.asst]['Office Name'])} · Staff</b><i>${asstRest.length}</i></div><div class="xtop"><div class="xgap"></div></div><div class="xstack ind">${asstRest.map(e => xoCard(e, '', X)).join('')}</div></div>` : ''])
+      asstRest.length ? `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(IX.off[O.asst]['Office Name'])} · Staff</b><i>${asstRest.length}</i></div><div class="xtop"><div class="xgap"></div></div><div class="xstack ind">${asstRest.map(e => xoCard(e, '', X)).join('')}</div></div>` : ''])
     .concat(divs.filter(c => c !== apex).map(c => xoNode(c, O, X, false))).filter(Boolean);
   const asst = O.asst ? `<i class="xstem"></i><div class="xtop">${xoHead(O.asst, O, X)}</div>` : '';
   return `<div class="xn"><div class="xtop">${top ? xoCard(top, xoRole(apex, top), X) : xoHead(apex, O, X)}</div>${asst}${xoKids(level)}</div>`;
@@ -2555,6 +2574,7 @@ function formOrgDownload(look) {
         ${look ? '' : field('xoWho', 'Who to include', sel('xoWho', [['all', 'Everyone'], ['plantilla', 'Plantilla only']], XO.who), 'span2')}
         ${look ? '' : field('xoFmt', 'File type', sel('xoFmt', [['png', 'HD image (PNG)'], ['pdf', 'PDF']], XO.fmt))}
         ${look ? '' : field('xoOrient', 'Page', sel('xoOrient', [['landscape', 'Landscape'], ['portrait', 'Portrait']], XO.orient), '', 'A wide chart makes the page wider')}
+        ${field('xoSec', 'Section header colour', sel('xoSec', [['orange', 'Orange'], ['blue', 'Blue'], ['navy', 'Navy']], XO.sec), 'span2', 'The labels on the level under a division chief')}
         ${field('xoColor', 'Unit header colour', sel('xoColor', [['blue', 'Blue'], ['orange', 'Orange'], ['alt', 'Alternate']], XO.color), look ? 'span2' : '')}
         ${field('xoWire', 'Line colour', sel('xoWire', [['#A9BFE3', 'Light blue'], ['#0D47A1', 'Navy'], ['#F26522', 'Orange'], ['#9AA5B5', 'Grey']], XO.wire), look ? 'span2' : '')}
       </div>
@@ -2572,7 +2592,7 @@ function formOrgDownload(look) {
 }
 function xoRead() {
   ['pos', 'sg', 'item', 'kind', 'from', 'date', 'hd'].forEach(k => { const el = $('#xo_' + k); if (el) XO[k] = el.checked; });
-  [['office', 'xoOffice'], ['who', 'xoWho'], ['fmt', 'xoFmt'], ['orient', 'xoOrient'], ['color', 'xoColor'], ['wire', 'xoWire']].forEach(p => { const el = $('#' + p[1]); if (el) XO[p[0]] = el.value; });
+  [['office', 'xoOffice'], ['who', 'xoWho'], ['fmt', 'xoFmt'], ['orient', 'xoOrient'], ['sec', 'xoSec'], ['color', 'xoColor'], ['wire', 'xoWire']].forEach(p => { const el = $('#' + p[1]); if (el) XO[p[0]] = el.value; });
   xoKeep();
 }
 function orgLookGo() { xoRead(); closeModal(); render(); }
