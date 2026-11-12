@@ -958,9 +958,9 @@ body.wide main{max-width:none}
 .otK:only-child::after{display:block}
 .org{--wire:#9DB2D3}
 .org .oStem{background:var(--wire);flex:none}
-.otL{width:250px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}
-.otL > .oc.head,.otS > .oc.head,.ot > .oc.head{width:250px;min-width:0;max-width:none}
-.ot > .ouH{width:250px;margin-bottom:6px}
+.otL{width:var(--ocW,250px);display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}
+.otL > .oc.head,.otS > .oc.head,.ot > .oc.head{width:var(--ocW,250px);min-width:0;max-width:none}
+.ot > .ouH{width:var(--ocW,250px);margin-bottom:6px}
 .oSkip{display:block;height:40px;flex:none;align-self:stretch}
 .oc.ghost,.ouH.ghost,.otSH.ghost{position:relative;background:none!important;border-color:transparent!important;box-shadow:none!important;pointer-events:none;cursor:default}
 .oc.ghost > *,.ouH.ghost > *,.otSH.ghost > *{visibility:hidden}
@@ -972,6 +972,20 @@ body.wide main{max-width:none}
 .org .oc,.org .oc.cos,.org .oc.head{border:0;box-shadow:0 6px 16px rgba(16,41,90,.10),0 1px 4px rgba(16,41,90,.07)}
 .org .oc:hover{box-shadow:0 10px 24px rgba(16,41,90,.16),0 2px 6px rgba(16,41,90,.08)}
 .org .oVac{background:rgba(255,255,255,.85)}
+/* Cards: fixed heights worked out from the rows shown (see orgDim), photo = 90% of the card height with the same margin left as top */
+.org .odB .oc{--h:var(--chS,63px);height:var(--h);min-height:0;padding:0 10px 0 0;gap:0;align-items:center}
+.org .odB .oc.head{--h:var(--chH,72px)}
+.org .odB .oc.head.r{--h:calc(var(--chH,72px) + 16px)}
+.org .odB .oc .av{height:calc(var(--h) * .9);width:calc(var(--h) * .9);margin:0 calc(var(--h) * .05 + 6px) 0 calc(var(--h) * .05);border-radius:10px;box-shadow:none}
+.org .odB .ocT{gap:1px;align-content:center}
+.org .odB .ocT b{display:block;font-size:12.2px;line-height:16px;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.org .odB .oc.head .ocT b{font-size:14.4px;line-height:18px}
+.org .odB .n2s .oc:not(.head) .ocT b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;height:32px}
+.org .odB .n2h .oc.head .ocT b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal;height:36px}
+.org .odB .ocT > .ocP,.org .odB .ocT > .ocR{font-size:11.2px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.org .odB .ocT > .ocR{line-height:15px}
+.org .odB .oc .ocTags{height:18px;min-height:0;margin-top:1px;align-items:center}
+.org .odB .oVac{height:var(--chH,72px);min-height:0;width:var(--ocW,250px);min-width:0;padding:0 10px}
 .otSH.or{background:linear-gradient(140deg,#F9A13A 0%,#F26522 58%,#E2541A 100%)}
 .otSH.bl{background:linear-gradient(140deg,#1E63C9 0%,#0D47A1 42%,#0A2E6E 100%)}
 html.classic .org .oc,html.classic .org .oc.cos,html.classic .org .oc.head{border:1px solid #B8B8B8;box-shadow:none}
@@ -980,11 +994,11 @@ html.classic .org .oc,html.classic .org .oc.cos,html.classic .org .oc.head{borde
 .ocT .ocO{font-style:normal;font-weight:700;color:var(--orange-2)}
 .oc .ocTags{min-height:19px;flex-wrap:nowrap;overflow:hidden}
 .oc .ocTags .pill{font-size:.64rem;padding:1px 7px}
-.otS{width:250px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.otS{width:var(--ocW,250px);display:flex;flex-direction:column;gap:8px;align-items:center}
 .otSH{align-self:stretch;padding:4px 12px;background:#0F2A5C;color:#fff;font:700 .88rem/1.12 var(--cond);letter-spacing:.05em;text-transform:uppercase;text-align:center;border-radius:10px;height:48px;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;text-wrap:balance}
 .otSH small,.ouH small{font:700 .68rem var(--body);letter-spacing:0;background:rgba(255,255,255,.22);color:#fff;border-radius:999px;min-width:20px;height:20px;padding:0 6px;display:flex;align-items:center;justify-content:center;flex:none;margin:0}
 .ot > .otSH{margin-bottom:8px}
-.otUnder{width:250px;display:grid;gap:6px}
+.otUnder{width:var(--ocW,250px);display:grid;gap:6px}
 .otS > .oc.head,.otS > .oVac{max-width:100%}
 @media (max-width:680px){.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oc.ghost,.ouH.ghost,.otSH.ghost,.oSkip{display:none}.otL > .oc.head,.otS > .oc.head,.ot > .oc.head,.ot > .ouH{width:100%}}
 html.classic .org{--wire:#808080}
@@ -2154,7 +2168,7 @@ function orgCard(e, isHead, role) {
   const line = (c.type === 'Designation (OIC)' ? '<em class="ocO">OIC</em>' + (pos ? ' · ' : '') : '') + esc(pos);
   const tags = (XO.kind ? (c.kind === 'contract' ? `<span class="pill contract">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</span>` : `<span class="pill plantilla">${esc(c.status || 'Permanent')}</span>`) : '') +
     (XO.from && from ? `<span class="pill warn" title="${e['Mother Unit'] ? 'Mother unit' : 'Plantilla office'}">from ${esc(from)}</span>` : '');
-  return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b>${XO.pos || XO.sg ? `<span class="ocP" title="${esc(pos)}">${line || '&nbsp;'}</span>` : line ? `<span class="ocP">${line}</span>` : ''}${XO.item ? `<span class="mono ocP">${esc(c.item) || '&nbsp;'}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${XO.kind || XO.from ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
+  return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}${role ? ' r' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b>${XO.pos || XO.sg ? `<span class="ocP" title="${esc(pos)}">${line || '&nbsp;'}</span>` : ''}${XO.item ? `<span class="mono ocP">${esc(c.item) || '&nbsp;'}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${XO.kind || XO.from ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
 }
 /* An empty, invisible card: keeps a level free so the people below line up with the same rank in the next column */
 const orgGhost = big => `<div class="oc${big ? ' head' : ''} ghost" aria-hidden="true"><div class="av"></div><span class="ocT"><b>&nbsp;</b>${XO.pos || XO.sg ? '<span class="ocP">&nbsp;</span>' : ''}${XO.item ? '<span class="mono ocP">&nbsp;</span>' : ''}${XO.kind || XO.from ? '<span class="ocTags"></span>' : ''}</span></div>`;
@@ -2228,15 +2242,37 @@ function orgNode(code, O, deepParent) {
     tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKids(cols)}`;
   }
   return `<section class="od"><div class="odH"><h2>${esc(name)}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}</span></div>
-      <div class="odB"><div class="otFit"><div class="ot root" style="--wire:${esc(XO.wire)}">${tree}</div></div></div></section>`;
+      <div class="odB"><div class="otFit"><div class="ot root" style="${orgVars(1, 1, 250)}">${tree}</div></div></div></section>`;
 }
-/* Shrinks a wide tree a little so it fits the screen; past that it scrolls sideways */
+/* Card height in px from the rows it shows: name (nl lines), position, item number, tags */
+function orgDim(nl, head) {
+  const rows = [(head ? 18 : 16) * nl];
+  if (XO.pos || XO.sg) rows.push(14);
+  if (XO.item) rows.push(14);
+  if (XO.kind || XO.from) rows.push(19);
+  return Math.max(head ? 54 : 42, rows.reduce((a, b) => a + b, 0) + rows.length - 1 + (head ? 18 : 12));
+}
+const orgVars = (nlS, nlH, w) => `--chS:${orgDim(nlS, false)}px;--chH:${orgDim(nlH, true)}px;--ocW:${w}px;--wire:${XO.wire}`;
+/* Makes the columns as wide as the longest name needs when there is room, so names stay on one line.
+   No room: names take two lines (every card of that kind). Still too wide: shrink a little, then scroll. */
 function fitOrg() {
   document.querySelectorAll('.ot.root').forEach(t => {
-    t.style.zoom = '';
+    const set = (a, b, w) => { t.style.cssText = orgVars(a, b, w); t.classList.toggle('n2s', a === 2); t.classList.toggle('n2h', b === 2); };
+    set(1, 1, 250);
     if (window.innerWidth <= 680) return;
-    const room = t.parentNode.clientWidth, need = t.scrollWidth;
-    if (need > room) t.style.zoom = String(Math.max(0.6, Math.floor(room / need * 100) / 100));
+    const room = t.parentNode.clientWidth, wide = () => t.getBoundingClientRect().width;
+    const over = sel => Array.from(t.querySelectorAll(sel)).reduce((m, b) => Math.max(m, b.scrollWidth - b.clientWidth), 0);
+    const small = '.oc:not(.head):not(.ghost) .ocT b', big = '.oc.head:not(.ghost) .ocT b';
+    const extra = Math.max(over(small), over(big));
+    if (extra > 0) {
+      const w0 = wide(); let want = Math.min(250 + extra + 4, 420);
+      set(1, 1, want);
+      if (wide() > room) { const n = (wide() - w0) / (want - 250) || 1; want = Math.max(250, Math.floor(250 + (room - w0) / n)); set(1, 1, want); }
+      const a = over(small) > 0 ? 2 : 1, b = over(big) > 0 ? 2 : 1;
+      if (a + b > 2) set(a, b, want);
+    }
+    const need = wide();
+    if (need > room + 1) t.style.zoom = String(Math.max(0.6, Math.floor(room / need * 100) / 100));
   });
 }
 window.addEventListener('resize', () => { if (S.view === 'org') fitOrg(); });
@@ -2260,7 +2296,7 @@ function viewOrg() {
       <button type="button" class="btn" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
   </section>
   <div class="oLegend"><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
-  <div class="org">${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
+  <div class="org" style="${orgVars(1, 1, 250)}">${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
     ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
       <div class="odB"><div class="oGrid" style="width:100%">${O.lost.map(e => `<div class="oOut">${orgCard(e)}<span class="muted">${esc(note(e))}</span></div>`).join('')}</div></div></section>` : ''}
   </div>`;
