@@ -490,8 +490,8 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
 .mvSplit{display:grid;grid-template-columns:minmax(0,1fr) 0 0;align-items:start}
 .mvSplit:not(.drag){transition:grid-template-columns .45s var(--io)}
 .mvSplit.open{grid-template-columns:minmax(0,calc(var(--mvP) * 1%)) 18px minmax(0,1fr)}
-.mvLeft{min-width:0;display:grid;gap:0;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
-.mvGroup{position:sticky;top:64px;z-index:2;display:flex;justify-content:space-between;align-items:center;margin:0;padding:7px 14px;background:var(--soft);border-bottom:1px solid var(--line);font:700 .78rem var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mvLeft{min-width:0;display:grid;gap:0;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:clip}
+.mvGroup{position:sticky;top:var(--mvStick,0px);z-index:2;display:flex;justify-content:space-between;align-items:center;margin:0;padding:7px 14px;background:var(--soft);border-bottom:1px solid var(--line);font:700 .78rem var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .mvGroup em{font-style:normal;font-weight:600}
 .mvRow{display:grid;grid-template-columns:62px minmax(0,1fr);gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);position:relative;transition:background .2s}
 .mvRow:last-child{border-bottom:0}
@@ -525,7 +525,7 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
 .mvSplit.drag iframe{pointer-events:none}
 .mvSplit:not(.open) .mvRight{height:0;border:0;visibility:hidden}
 .mvSplit.open .mvRight{opacity:1;transform:none}
-.mvSplit.open .mvRight{position:sticky;top:72px;height:calc(100vh - 92px);min-height:360px}
+.mvSplit.open .mvRight{position:sticky;top:calc(var(--mvStick,0px) + 8px);height:calc(100vh - var(--mvStick,0px) - 20px);min-height:360px}
 .mvRight .svcViewer{min-height:0}
 .mvRight .svcViewer iframe{position:absolute;inset:0;min-height:0;height:100%}
 .mvSizes{display:inline-flex;gap:3px;flex:none}
@@ -534,7 +534,6 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
 .mvSizes i{position:absolute;right:0;top:0;bottom:0;width:var(--w);background:rgba(255,255,255,.75)}
 @media (max-width:780px){
   .mvCount{margin-left:0}
-  .mvGroup{top:0}
   .mvFilters select{flex:1 1 40%}
   .mvSplit.open{grid-template-columns:minmax(0,1fr) 0 0;padding-bottom:var(--mvH)}
   .mvSplit.open .mvRight{position:fixed;left:0;right:0;bottom:0;top:auto;height:var(--mvH);min-height:0;z-index:45;border-radius:16px 16px 0 0;border-bottom:0;box-shadow:0 -10px 30px rgba(6,30,69,.25);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -2390,8 +2389,15 @@ function viewMovements() {
     </aside>
   </div>`;
 }
+/* Sticky headings and the order viewer sit just under the top bar, whatever its height in this look and window size */
+function mvStick() {
+  const t = $('#top'), cs = t ? getComputedStyle(t) : null;
+  const h = cs && !t.hidden && /sticky|fixed/.test(cs.position) ? Math.round(t.getBoundingClientRect().height) : 0;
+  document.documentElement.style.setProperty('--mvStick', h + 'px');
+}
+window.addEventListener('resize', () => { if (S.view === 'movements') mvStick(); });
 function wireMovements() {
-  mvCount();
+  mvCount(); mvStick();
   const q = $('#mvQ'); let t = null;
   if (q) q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { S.mvQ = q.value; S.mvLimit = 0; mvRedraw(); }, 160); });
   const g = $('#mvGrip'), sp = $('#svcSplit');
