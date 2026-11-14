@@ -3947,6 +3947,9 @@ const isOutside = code => { const p = (IX.offPath || {})[String(code)]; return !
    Central Office or region, then the office itself. The chosen code sits in a hidden input with the field's id. */
 const outOpts = (grp, picked) => {
   const kids = (IX.outTree || []).filter(t => t.depth === 2 && sv(t.row['Parent Code']) === String(grp));
+  // Central Office: the Secretary, then Undersecretaries, then Assistant Secretaries, then bureaus and services
+  const rank = n => /^Office of the Secretary/.test(n) ? 0 : /^Office of the Undersecretary/.test(n) ? 1 : /^Office of the Assistant Secretary/.test(n) ? 2 : 3;
+  kids.sort((a, b) => rank(a.name) - rank(b.name));
   return `<option value="">${grp ? 'Pick the office…' : 'Pick Central Office or a region first'}</option>` +
     kids.map(t => `<option value="${esc(t.code)}" ${String(picked) === t.code ? 'selected' : ''}>${esc(t.name)}</option>`).join('');
 };
