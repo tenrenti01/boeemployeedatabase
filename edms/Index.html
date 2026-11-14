@@ -546,6 +546,26 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
   .mvDate b{font-size:1.15rem}
   .mvTools{opacity:1}
 }
+/* Profile: the page slides left and the order viewer takes the right side */
+main:has(.mvSplit.open){max-width:none}
+.pfMain{min-width:0;display:flex;flex-direction:column;gap:22px;min-height:calc(100vh - var(--mvStick,0px) - 150px)}
+.pfMain > .svcPanel{flex:1 0 auto}
+.pfSplit.open .pfMain .profileHead{flex-wrap:wrap}
+/* Org chart profile peek */
+.peek{position:fixed;top:var(--mvStick,0px);right:0;bottom:0;width:50vw;z-index:30;background:var(--bg);border-left:1px solid var(--line-2);box-shadow:-14px 0 34px rgba(6,30,69,.16);display:flex;flex-direction:column}
+.peek.enter{animation:peekIn .4s var(--io)}
+@keyframes peekIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+.peekBar{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;background:var(--grad);color:#fff;flex:none}
+.peekTitle{flex:1;font:700 .88rem var(--cond);letter-spacing:.06em;text-transform:uppercase}
+.peekBody{flex:1;overflow:auto;padding:18px 18px 60px;display:flex;flex-direction:column;gap:18px;overscroll-behavior:contain}
+.peekBody .profileHead{flex-wrap:wrap}
+html.peeking main{max-width:none;margin:0 50vw 0 0;transition:margin .4s var(--io)}
+.oc.peekOn{outline:3px solid var(--orange);outline-offset:2px}
+@media (max-width:780px){
+  .peek{width:100vw;top:0}
+  html.peeking main{margin:0}
+  .pfMain{min-height:0}
+}
 /* Photo crop */
 .photoPick{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 .cropBox{position:relative;width:280px;height:280px;border-radius:20px;overflow:hidden;background:var(--soft);box-shadow:var(--shadow-card-hi);display:grid;place-items:center}
@@ -933,6 +953,14 @@ html.classic .svcRightBar{background:linear-gradient(#FFFFFF,#E9E9E9);color:#000
 html.classic .svcRightTitle{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none}
 html.classic .svcRightBar .svcOpenNew{color:#0066CC}
 html.classic .svcClose{color:#000;border-radius:2px;width:22px;height:20px;font-size:15px}
+html.classic .pfMain,html.classic .peekBody{gap:8px}
+html.classic .mvSplit.open .mvRight{height:calc(100vh - var(--mvStick,0px) - 44px)}
+@media (max-width:780px){html.classic .mvSplit.open .mvRight{height:var(--mvH)}}
+html.classic .peek{border-color:#A0A0A0;box-shadow:-4px 0 10px rgba(0,0,0,.15)}
+html.classic .peekBar{background:linear-gradient(#FFFFFF,#E9E9E9);color:#000;border-bottom:1px solid #A0A0A0;padding:3px 6px 3px 8px}
+html.classic .peekTitle{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none}
+html.classic .peekBody{padding:8px 8px 50px}
+html.classic .oc.peekOn{outline:2px solid #3399FF;outline-offset:1px}
 html.classic .mvChip{border-radius:0;font:12px Tahoma,"Segoe UI",Arial,sans-serif;padding:2px 8px;background:#fff;color:#000;border-color:#A0A0A0;box-shadow:none}
 html.classic .mvChip:hover{transform:none;background:#E5F3FB}
 html.classic .mvChip[aria-pressed="true"]{background:#CCE8FF;color:#000;box-shadow:inset 0 0 0 1px #3399FF;font-weight:bold}
@@ -1195,6 +1223,7 @@ html.classic .oOut{font:11px Tahoma,"Segoe UI",Arial,sans-serif}
 <button type="button" class="pubBadge" id="pubBadge" data-act="pubBadge" hidden><i></i><span>Public test link is ON</span></button>
 <main id="view"><div class="loading"><div class="spin"></div><span class="label">Loading the masterlist…</span></div></main>
 <div class="statusbar" id="statusbar" aria-live="polite"></div>
+<div id="peekRoot"></div>
 <div id="modalRoot"></div>
 <div id="printArea"></div>
 
@@ -1833,12 +1862,13 @@ function afterRender() {
   if (S.view === 'admin') wireAdmin();
   if (S.view === 'reports') wireEmpPicker('srEmp');
   if (S.view === 'movements') wireMovements();
-  if (S.view === 'profile' && S.id) loadPhoto(S.id);
+  if (S.view === 'profile' && S.id) { loadPhoto(S.id); wireSplit(); }
+  renderPeek();
 }
 /* Redraw after background data arrives, unless nothing changed or the person is typing on the page */
 function softRender() {
   if (!D || !$('#top') || $('#top').hidden) return;
-  if (S.view === 'movements' && $('#svcSplit.open')) return;           // keep the open order in view
+  if ((S.view === 'movements' || S.view === 'profile') && $('#svcSplit.open')) return;           // keep the open order in view
   const html = VIEWS()[S.view]();
   if (html === LAST_HTML) return;
   const dirty = Array.from(document.querySelectorAll('#view input, #view select, #view textarea')).some(el =>
@@ -2021,8 +2051,8 @@ function viewEmployees() {
 }
 
 /* ═══════════════════════ profile ═══════════════════════ */
-function viewProfile() {
-  const e = IX.emp[S.id];
+function viewProfile(pid, peek) {
+  const e = IX.emp[pid || S.id];
   if (!e) return '<p class="empty">Employee not found. <button class="btn small" data-go="employees">Back to the list</button></p>';
   const id = e['Employee Number'], c = IX.cur[id], h = IX.hist[id] || [];
   const ids = IX.ids[id] || [], el = IX.elig[id] || [], ed = IX.edu[id] || [], pw = (IX.pwd[id] || [])[0], nm = (IX.names[id] || []).slice().sort((a, b) => String(b['Date Effective']).localeCompare(String(a['Date Effective'])));
@@ -2030,8 +2060,8 @@ function viewProfile() {
   const retireOn = e['Birthday'] ? (b => new Date(b.getFullYear() + D.retireAge, b.getMonth(), b.getDate()))(toDate(e['Birthday'])) : null;
   const soon = retireOn && (retireOn - toDate(D.today)) / 86400000 <= 366 && !c.separated;
   const sp = c.separated && c.entry ? IX.sepd[c.entry['Entry ID']] : null;
-  return `
-  <div><button class="btn small" data-go="employees">← All employees</button></div>
+  const timeline = `<div class="timeline">${h.map((x, i) => histItem(x, i === 0)).join('') || '<p class="empty">No service history yet.</p>'}</div>`;
+  const body = `
   <section class="panel hero">${WAVES}
     <div class="profileHead">
       <div class="avWrap"><button type="button" class="avBtn" data-act="photoView" data-id="${esc(id)}" aria-label="View photo" title="View photo">${avatar(e, true)}</button>${canEdit() ? `<button class="penBtn" data-act="photo" data-id="${esc(id)}" aria-label="Update photo" title="Update photo">${ICON.pen}</button>` : ''}</div>
@@ -2084,18 +2114,19 @@ function viewProfile() {
     </section>
   </div>
   ${ra1080 ? licensePanel(id, lic) : ''}
-  <section class="panel" id="svcPanel">
+  <section class="panel${peek ? '' : ' svcPanel'}">
     <div class="panelHead"><h3>${hi('history')}Service history</h3><span class="label">${h.length} ${h.length === 1 ? 'entry' : 'entries'} · newest first</span></div>
-    <div class="svcSplit" id="svcSplit">
-      <div class="svcLeft">
-        <div class="timeline">${h.map((x, i) => histItem(x, i === 0)).join('') || '<p class="empty">No service history yet.</p>'}</div>
-      </div>
-      <aside class="svcRight" id="svcRight" aria-hidden="true">
-        <div class="svcRightBar"><span class="svcRightTitle" id="svcRefTitle">Reference</span><a class="svcOpenNew" id="svcRefOpen" href="#" target="_blank" rel="noopener" title="Open in a new tab">Open ↗</a><button class="svcClose" data-act="orderClose" aria-label="Close preview">×</button></div>
-        <div class="svcViewer" id="svcViewer"></div>
-      </aside>
-    </div>
+    ${timeline}
   </section>`;
+  if (peek) return body;
+  /* The whole profile slides left and the scanned order takes the right side, full height under the top bar.
+     Drag the divider to resize; on a phone the order comes up from the bottom instead. */
+  return `
+  <div><button class="btn small" data-go="employees">← All employees</button></div>
+  <div class="mvSplit pfSplit" id="svcSplit" style="--mvP:${MV_SIZE.P};--mvH:${MV_SIZE.H}vh">
+    <div class="pfMain">${body}</div>
+    ${splitSide()}
+  </div>`;
 }
 /* The "Order: ..." line. With a scanned order on Drive it is an orange link that opens the file;
    with a file but no reference number it still links, labelled "Scanned order"; otherwise plain grey. */
@@ -2348,6 +2379,19 @@ function mvMark(row) {
   if (row) row.classList.add('on');
   if (row && mvPhone()) setTimeout(() => window.scrollBy({ top: row.getBoundingClientRect().top - 70, behavior: 'smooth' }), 80);   // keep the row above the sheet
 }
+function splitSide() {
+  return `<div class="mvGrip" id="mvGrip" role="separator" aria-label="Drag to resize the order view" tabindex="0" title="Drag to resize · double-click to reset"><span></span></div>
+    <aside class="svcRight mvRight" id="svcRight" aria-hidden="true">
+      <div class="svcRightBar"><span class="svcRightTitle" id="svcRefTitle">Scanned order</span>
+        <span class="mvSizes" role="group" aria-label="Viewer size">
+          <button type="button" data-act="mvSize" data-s="s" title="Small viewer"><i style="--w:30%"></i></button>
+          <button type="button" data-act="mvSize" data-s="m" title="Half and half"><i style="--w:50%"></i></button>
+          <button type="button" data-act="mvSize" data-s="l" title="Large viewer"><i style="--w:72%"></i></button></span>
+        <a class="svcOpenNew" id="svcRefOpen" href="#" target="_blank" rel="noopener">Open ↗</a>
+        <button type="button" class="svcClose" data-act="orderClose" aria-label="Close the order">×</button></div>
+      <div class="svcViewer" id="svcViewer"></div>
+    </aside>`;
+}
 function viewMovements() {
   const all = D.hist, rows = mvRows(), cnt = {};
   all.forEach(x => { const t = sv(x['Change Type']) || 'Entry'; cnt[t] = (cnt[t] || 0) + 1; });
@@ -2376,17 +2420,7 @@ function viewMovements() {
   </div>
   <div class="mvSplit" id="svcSplit" style="--mvP:${MV_SIZE.P};--mvH:${MV_SIZE.H}vh">
     <div class="mvLeft" id="mvList">${mvListHtml(rows)}</div>
-    <div class="mvGrip" id="mvGrip" role="separator" aria-label="Drag to resize the order view" tabindex="0" title="Drag to resize · double-click to reset"><span></span></div>
-    <aside class="svcRight mvRight" id="svcRight" aria-hidden="true">
-      <div class="svcRightBar"><span class="svcRightTitle" id="svcRefTitle">Scanned order</span>
-        <span class="mvSizes" role="group" aria-label="Viewer size">
-          <button type="button" data-act="mvSize" data-s="s" title="Small viewer"><i style="--w:30%"></i></button>
-          <button type="button" data-act="mvSize" data-s="m" title="Half and half"><i style="--w:50%"></i></button>
-          <button type="button" data-act="mvSize" data-s="l" title="Large viewer"><i style="--w:72%"></i></button></span>
-        <a class="svcOpenNew" id="svcRefOpen" href="#" target="_blank" rel="noopener">Open ↗</a>
-        <button type="button" class="svcClose" data-act="orderClose" aria-label="Close the order">×</button></div>
-      <div class="svcViewer" id="svcViewer"></div>
-    </aside>
+    ${splitSide()}
   </div>`;
 }
 /* Sticky headings and the order viewer sit just under the top bar, whatever its height in this look and window size */
@@ -2395,11 +2429,15 @@ function mvStick() {
   const h = cs && !t.hidden && /sticky|fixed/.test(cs.position) ? Math.round(t.getBoundingClientRect().height) : 0;
   document.documentElement.style.setProperty('--mvStick', h + 'px');
 }
-window.addEventListener('resize', () => { if (S.view === 'movements') mvStick(); });
+window.addEventListener('resize', () => { if (S.view === 'movements' || S.view === 'profile' || S.peek) mvStick(); });
 function wireMovements() {
-  mvCount(); mvStick();
+  mvCount();
   const q = $('#mvQ'); let t = null;
   if (q) q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { S.mvQ = q.value; S.mvLimit = 0; mvRedraw(); }, 160); });
+  wireSplit();
+}
+function wireSplit() {
+  mvStick();
   const g = $('#mvGrip'), sp = $('#svcSplit');
   if (!g || !sp) return;
   g.addEventListener('pointerdown', ev => {
@@ -2438,6 +2476,28 @@ function mvAddGo() {
   return formJobChange(id, type);
 }
 
+/* Org chart: clicking a person opens their profile in the right half; the chart stays put on the left. */
+let PEEK_HTML = '';
+function renderPeek() {
+  const r = $('#peekRoot'); if (!r) return;
+  const on = !!(S.peek && S.view === 'org' && IX.emp[S.peek]);
+  document.documentElement.classList.toggle('peeking', on);
+  document.querySelectorAll('.oc.peekOn').forEach(b => b.classList.remove('peekOn'));
+  if (!on) { S.peek = null; PEEK_HTML = ''; r.innerHTML = ''; return; }
+  mvStick();
+  document.querySelectorAll('.oc[data-id="' + S.peek + '"]').forEach(b => b.classList.add('peekOn'));
+  const e = IX.emp[S.peek];
+  const html = `<aside class="peek" role="dialog" aria-label="Profile of ${esc(fullName(e))}">
+    <div class="peekBar"><span class="peekTitle">Employee profile</span>
+      <button type="button" class="btn small" data-act="peekFull">Open full page</button>
+      <button type="button" class="svcClose" data-act="peekClose" aria-label="Close the profile" title="Close (Esc)">×</button></div>
+    <div class="peekBody">${viewProfile(S.peek, true)}</div></aside>`;
+  if (html === PEEK_HTML) return;
+  const fresh = !PEEK_HTML || r.dataset.id !== S.peek, body = r.querySelector('.peekBody'), y = body && !fresh ? body.scrollTop : 0;
+  PEEK_HTML = html; r.dataset.id = S.peek; r.innerHTML = html;
+  if (fresh) r.querySelector('.peek').classList.add('enter'); else r.querySelector('.peekBody').scrollTop = y;
+  loadPhoto(S.peek);
+}
 /* ═══════════════════════ organizational chart ═══════════════════════ */
 /* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
    designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone:
@@ -3661,7 +3721,7 @@ function loadImg(file) {
 async function loadPhoto(id) {
   if (PHOTO[id] !== undefined || !(D.thumbs || {})[id]) return;
   try { PHOTO[id] = await call('getPhoto', id); } catch (e) { PHOTO[id] = ''; }
-  if (S.view === 'profile' && S.id === id && PHOTO[id]) { const av = $('#bigAv'); if (av) av.innerHTML = '<img src="' + esc(PHOTO[id]) + '" alt="">'; }
+  if (((S.view === 'profile' && S.id === id) || S.peek === id) && PHOTO[id]) { const av = $('#bigAv'); if (av) av.innerHTML = '<img src="' + esc(PHOTO[id]) + '" alt="">'; }
 }
 function photoNow(id) {
   const local = (D._photoLocal || {})[id];
@@ -5384,6 +5444,9 @@ document.addEventListener('click', ev => {
     if (PENDING.length || SYNCING) return toast('Wait a moment: your changes are still saving.', 'err', 4000);
     return signOut('You are signed out.');
   }
+  if (act === 'profile' && S.view === 'org') { S.peek = id; return renderPeek(); }
+  if (act === 'peekClose') { S.peek = null; return renderPeek(); }
+  if (act === 'peekFull') { const p = S.peek; S.peek = null; renderPeek(); return go('profile', p); }
   if (act === 'profile') return go('profile', id);
   if (act === 'kind') { S.kind = a.dataset.kind; return render(); }
   if (act === 'more') {
@@ -5495,6 +5558,7 @@ document.addEventListener('contextmenu', ev => {
 });
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape' && $('#modalRoot').innerHTML) closeModal();
+  else if (ev.key === 'Escape' && S.peek) { S.peek = null; renderPeek(); }
   else if (ev.key === 'Escape' && ev.target.id === 'q' && ev.target.value) $('#qClear').click();
   if (ev.key === 'Enter' && ev.target.matches('tr[data-act="profile"]')) go('profile', ev.target.dataset.id);
   if (ev.target.id === 'q') {
