@@ -566,6 +566,11 @@ html.peeking main{max-width:none;margin:0 50vw 0 0;transition:margin .4s var(--i
   html.peeking main{margin:0}
   .pfMain{min-height:0}
 }
+.offPick{display:grid;gap:6px;min-width:0}
+.offPick select{width:100%;min-width:0}
+.fgrid:has(.offPick){align-items:start}
+.offOut{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:8px;border:1px dashed var(--line-2);border-radius:10px;background:var(--soft)}
+html.classic .offOut{border-radius:0;padding:4px}
 /* Photo crop */
 .photoPick{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 .cropBox{position:relative;width:280px;height:280px;border-radius:20px;overflow:hidden;background:var(--soft);box-shadow:var(--shadow-card-hi);display:grid;place-items:center}
@@ -1454,6 +1459,11 @@ function index(d) {
     const c = sv(a['Office Code']);
     (ix.offUnder[c] = ix.offUnder[c] || {})[t.code] = true;
   }));
+  // Other DPWH offices (Central Office bureaus, regional offices, DEOs) sit under OUTSIDE. They are only for
+  // reassignments out of BOE, so they stay out of the org chart, filters and office lists.
+  const isOut = t => { const p0 = (ix.offPath[t.code] || [])[0]; return !!p0 && sv(p0['Office Code']) === OUT_ROOT; };
+  ix.outTree = ix.offTree.filter(isOut);
+  ix.offTree = ix.offTree.filter(t => !isOut(t));
   Object.keys(ix.hist).forEach(k => ix.hist[k].sort((a, b) => {
     const da = a['Effective Date'] || '', db = b['Effective Date'] || '';
     if (!da && db) return 1; if (da && !db) return -1;
@@ -2088,7 +2098,7 @@ function viewProfile(pid, peek) {
       <dt>Status</dt><dd>${esc(c.status || '—')}</dd>
       ${c.kind === 'plantilla' ? `<dt>Grade / step</dt><dd>SG ${esc(c.sg)} · step ${esc(c.step === '' ? '?' : c.step)}</dd><dt>Item no.</dt><dd class="mono">${esc(c.item || '—')}</dd>`
         : c.kind === 'contract' ? `<dt>Grade</dt><dd>SG ${esc(c.sg)}</dd><dt>Daily rate</dt><dd>${peso(c.daily)}</dd>` : '<dt>Grade</dt><dd>—</dd><dt>Item no.</dt><dd>—</dd>'}
-      <dt>Assigned to</dt><dd class="w">${esc(c.officeCode === '' ? '—' : offLetterName(c.officeCode))}${c.officeCode !== '' ? ` <span class="tag">${esc(c.officeCode)}</span>` : ''}</dd>
+      <dt>Assigned to</dt><dd class="w">${esc(c.officeCode === '' ? '—' : offLetterName(c.officeCode))}${c.officeCode !== '' ? ` <span class="tag">${esc(c.officeCode)}</span>` : ''}${isOutside(c.officeCode) ? ' <span class="pill warn">Outside BOE</span>' : ''}</dd>
       ${c.kind === 'plantilla' ? `<dt>Monthly salary</dt><dd>${peso(c.monthly)}${c.monthlyYear ? ` <span class="muted" style="font-size:.8rem">${c.monthlyYear} rates</span>` : ''}</dd>`
         : c.kind === 'contract' ? `<dt>Fund</dt><dd>${esc(c.fund || '—')}</dd>` : '<dt>Pay</dt><dd>—</dd>'}
       ${e['Mother Unit'] ? `<dt>Mother unit</dt><dd class="w">${esc(e['Mother Unit'])} <span class="pill warn">Detailed in</span></dd>` : ''}
@@ -2412,7 +2422,7 @@ function viewMovements() {
   <div class="mvFilters">
     <label class="mvSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="mvQ" type="search" placeholder="Search name, position, office, order no." value="${esc(S.mvQ || '')}" autocomplete="off" aria-label="Search movements"></label>
-    <select id="mvDiv" aria-label="Division">${opt('', 'All divisions', S.mvDiv)}${divs.map(t => opt(t.code, t.name, S.mvDiv)).join('')}</select>
+    <select id="mvDiv" aria-label="Division">${opt('', 'All divisions', S.mvDiv)}${divs.map(t => opt(t.code, t.name, S.mvDiv)).join('')}${(IX.outTree || []).length ? opt(OUT_ROOT, 'Outside BOE', S.mvDiv) : ''}</select>
     <select id="mvYear" aria-label="Year">${opt('', 'All years', S.mvYear)}${years.map(y => opt(y, y, S.mvYear)).join('')}</select>
     <select id="mvSort" aria-label="Sort">${MV_SORTS.map(s => opt(s[0], 'Sort: ' + s[1], S.mvSort || 'new')).join('')}</select>
     <label class="mvChk"><input type="checkbox" id="mvDoc" ${S.mvDoc ? 'checked' : ''}> With scanned order</label>
@@ -3460,13 +3470,13 @@ function jobFields(mode, cur, preItem) {
       ${field('jItem', 'Plantilla item *', itemInput('jItem', preItem || (cur && cur.item) || ''), 'span2', 'Type or pick any item — vacant, filled, or brand-new. A number not yet in the registry opens the fields below to add it.')}
       ${field('jStep', 'Salary step *', sel('jStep', [1, 2, 3, 4, 5, 6, 7, 8], cur && cur.step ? cur.step : 1), '')}
       ${field('jStatus', 'Appointment status', sel('jStatus', ['Permanent', 'Temporary', 'Coterminous'], cur && cur.kind === 'plantilla' ? cur.status : 'Permanent'), '')}
-      ${field('jAssign', 'Assigned to (where they work)', sel('jAssign', offOpts(), '', mode === 'first' ? 'Same as the seat\'s office' : 'Automatic (see note)'), 'span2',
+      ${field('jAssign_pick', 'Assigned to (where they work)', offPicker('jAssign', '', mode === 'first' ? 'Same as the seat\'s office' : 'Automatic (see note)'), 'span2',
         mode === 'first' ? 'Pick another office only if they start out reassigned' : 'Automatic = the new seat\'s office for promotions and transfers; their current assignment for step increments, reclassification, retitling')}
       <div class="span2 muted" id="jPayHint" style="font-size:.85rem;align-self:center"></div>
       ${newSeatFields(false, true)}
     </div>
     <div class="fgrid" data-show="contract">
-      ${field('jOffice', 'Office *', sel('jOffice', offOpts(), cur ? cur.officeCode : '', 'Pick an office'), 'span2')}
+      ${field('jOffice_pick', 'Office *', offPicker('jOffice', cur ? cur.officeCode : '', 'Pick an office'), 'span2')}
       ${field('jPosition', 'Position *', sel('jPosition', posOpts(), cur ? cur.position : '', 'Pick a position'), 'span2')}
       ${field('jDaily', 'Daily rate (₱) *', `<input type="number" step="0.01" min="0" id="jDaily" value="${esc(cur && cur.daily ? cur.daily : '')}">`, '', 'Filled from Pay Rates; change if needed')}
       ${field('jWork', 'Nature of work', txt('jWork', cur ? cur.work : '', 'list="workList"') + `<datalist id="workList">${Array.from(new Set(D.cd.map(x => x['Nature of Work']).filter(Boolean))).map(x => `<option value="${esc(x)}">`).join('')}</datalist>`, '')}
@@ -3474,7 +3484,7 @@ function jobFields(mode, cur, preItem) {
       ${field('jTech', 'Technical?', sel('jTech', ['Technical', 'Non-Technical'], cur ? cur.tech : 'Non-Technical', '—'), '', '<span id="jTechHint"></span>')}
     </div>
     <div class="fgrid" data-show="move">
-      ${field('mOffice', 'New office', sel('mOffice', offOpts(), cur ? cur.officeCode : ''), 'span2', 'The person keeps their seat or contract; only the assignment changes')}
+      ${field('mOffice_pick', 'New office', offPicker('mOffice', cur ? cur.officeCode : ''), 'span2', 'The person keeps their seat or contract; only the assignment changes. For another DPWH office pick “Outside BOE…”')}
       ${field('mPosition', 'Position (keep unless designated)', sel('mPosition', posOpts(), cur ? cur.position : ''), 'span2')}
     </div>
     <div class="fgrid">${field('jRemarks', 'Remarks', txt('jRemarks', ''), 'span4')}</div>
@@ -3551,7 +3561,7 @@ function checkRequired(list) {
   list.forEach(([id, msg, test]) => {
     const el = $('#' + id); if (!el || el.closest('[hidden]')) return;
     const bad = test ? !test(el.value.trim()) : !el.value.trim();
-    if (bad) { ok = false; const er = $('#' + id + '_err'); if (er) { er.textContent = msg; er.hidden = false; } }
+    if (bad) { ok = false; const er = $('#' + id + '_err') || $('#' + id + '_pick_err'); if (er) { er.textContent = msg; er.hidden = false; } }
   });
   return ok;
 }
@@ -3848,7 +3858,7 @@ function formEditEntry(entryId) {
       ${field('eDate', 'Effective date', dt('eDate', x['Effective Date']), '')}
       ${field('eType', 'Change type', sel('eType', types, x['Change Type']), '')}
       ${field('eStatus', 'Appointment status', sel('eStatus', L.statuses, x['Appointment Status'], '—'), 'span2')}
-      ${field('eOffice', 'Office (assigned to)', sel('eOffice', offOpts(), x['Office Code'], '—'), 'span2')}
+      ${field('eOffice_pick', 'Office (assigned to)', offPicker('eOffice', x['Office Code'], '—'), 'span2')}
       ${field('ePos', 'Position', sel('ePos', posOpts(), x['Position Title'], '—'), 'span2')}
       ${p ? field('eItem', 'Item number', itemInput('eItem', p['Item Number']), 'span2', 'Type or pick any item — for a past job it can be one someone holds now. A number not in the registry is added (uses the Position above) when you save.')
         + field('eStep', 'Salary step', sel('eStep', [1, 2, 3, 4, 5, 6, 7, 8], p['Salary Step']), '') : ''}
@@ -3923,15 +3933,49 @@ const orgLevel = o => { const v = String((o || {})['Level'] || '').trim(); retur
 /* True when this office is the one picked, or sits under it */
 const inOffice = (code, picked) => !picked || String(code) === String(picked) || !!((IX.offUnder || {})[picked] || {})[String(code)];
 /* "Floating Equipment Division › Plant and Ports Section" */
-const offPathName = code => { const p = (IX.offPath || {})[String(code)]; return p && p.length ? p.map(o => o['Office Name']).join(' › ') : offName(code); };
+/* An office's path without the OUTSIDE root, so outside offices read "X DEO, Region Y" */
+const offPathIn = code => ((IX.offPath || {})[String(code)] || []).filter(o => sv(o['Office Code']) !== OUT_ROOT);
+const offPathName = code => { const p = offPathIn(code); return p.length ? p.map(o => o['Office Name']).join(' › ') : offName(code); };
 /* The division an office belongs to */
 const offDivision = code => { const p = (IX.offPath || {})[String(code)]; return p && p.length ? String(p[0]['Office Code']) : String(code); };
 /* Office choices, indented to show the levels. Pass a test to narrow them (seats take divisions only). */
 const offTreeOpts = keep => (IX.offTree || []).filter(t => !keep || keep(t))
   .map(t => [t.code, '\u2007\u2007\u2007'.repeat(t.depth) + (t.depth ? '└ ' : '') + t.code + ' — ' + t.name]);
+const OUT_ROOT = 'OUTSIDE';
+const isOutside = code => { const p = (IX.offPath || {})[String(code)]; return !!(p && p.length && sv(p[0]['Office Code']) === OUT_ROOT && String(code) !== OUT_ROOT); };
+/* Office picker for assignments: BOE offices first; "Outside BOE…" opens two more boxes,
+   Central Office or region, then the office itself. The chosen code sits in a hidden input with the field's id. */
+const outOpts = (grp, picked) => {
+  const kids = (IX.outTree || []).filter(t => t.depth === 2 && sv(t.row['Parent Code']) === String(grp));
+  return `<option value="">${grp ? 'Pick the office…' : 'Pick Central Office or a region first'}</option>` +
+    kids.map(t => `<option value="${esc(t.code)}" ${String(picked) === t.code ? 'selected' : ''}>${esc(t.name)}</option>`).join('');
+};
+function offPicker(id, picked, blank) {
+  picked = picked === undefined || picked === null ? '' : String(picked);
+  const groups = (IX.outTree || []).filter(t => t.depth === 1);
+  if (!groups.length) return sel(id, offOpts(), picked, blank);
+  const out = isOutside(picked), grp = out ? sv((IX.offPath[picked][1] || {})['Office Code']) : '';
+  const o = (v, l, on) => `<option value="${esc(v)}" ${on ? 'selected' : ''}>${esc(l)}</option>`;
+  return `<div class="offPick">
+    <select id="${id}_pick" data-op="pick" aria-label="Office">${blank !== undefined ? o('', blank, !out && picked === '') : ''}${offOpts().map(x => o(x[0], x[1], !out && String(x[0]) === picked)).join('')}
+      <option value="__out" ${out ? 'selected' : ''}>Outside BOE (another DPWH office)…</option></select>
+    <input type="hidden" id="${id}" value="${esc(picked)}">
+    <div class="offOut" ${out ? '' : 'hidden'}>
+      <select id="${id}_grp" data-op="grp" aria-label="Central Office or region"><option value="">Central Office or region…</option>${groups.map(g => o(g.code, g.name, g.code === grp)).join('')}</select>
+      <select id="${id}_out" data-op="out" aria-label="Office outside BOE" ${grp ? '' : 'disabled'}>${outOpts(grp, picked)}</select>
+    </div></div>`;
+}
+function offPickChange(box, op) {
+  const pick = box.querySelector('[data-op="pick"]'), g = box.querySelector('[data-op="grp"]'), o = box.querySelector('[data-op="out"]');
+  const hid = box.querySelector('input[type="hidden"]'), wrap = box.querySelector('.offOut');
+  if (op === 'pick') { wrap.hidden = pick.value !== '__out'; hid.value = pick.value === '__out' ? o.value : pick.value; if (!wrap.hidden && !g.value) g.focus(); }
+  if (op === 'grp') { o.innerHTML = outOpts(g.value, ''); o.disabled = !g.value; hid.value = ''; if (g.value) o.focus(); }
+  if (op === 'out') hid.value = o.value;
+  hid.dispatchEvent(new Event('change', { bubbles: true }));
+}
 const offSelect = (id, picked, blank) => `<select id="${id}" aria-label="Office"><option value="">${esc(blank)}</option>` +
   (IX.offTree || []).map(t => `<option value="${esc(t.code)}" ${String(picked) === String(t.code) ? 'selected' : ''}>` +
-    '\u2007\u2007\u2007'.repeat(t.depth) + (t.depth ? '└ ' : '') + esc(t.name) + '</option>').join('') + '</select>';
+    '\u2007\u2007\u2007'.repeat(t.depth) + (t.depth ? '└ ' : '') + esc(t.name) + '</option>').join('') + ((id === 'officeSel' || id === 'mlOff') && (IX.outTree || []).length ? `<option value="${OUT_ROOT}" ${String(picked) === OUT_ROOT ? 'selected' : ''}>Outside BOE (reassigned out)</option>` : '') + '</select>';
 const numOrNull = v => v === '' || v === undefined || v === null || isNaN(Number(v)) ? null : Number(v);
 const statusText = c => c.separated ? 'Separated' : c.kind === 'contract' ? 'CoS / JO' : c.kind === 'plantilla' ? (c.status || 'Plantilla') : 'No job on record';
 const FIELDS = {
@@ -4708,7 +4752,7 @@ const COE_PURPOSES = ['whatever legal purpose it may serve', 'loan application',
 /* "DELA CRUZ" → "Dela Cruz", for sentences inside a certificate */
 const titleCase = v => sv(v).toLowerCase().replace(/(^|[\s'-])([a-z])/g, (m, a, b) => a + b.toUpperCase());
 /* For a letter: most specific first, e.g. "Plant and Ports Section, Floating Equipment Division" */
-const offLetterName = code => { const p = (IX.offPath || {})[String(code)]; return p && p.length ? p.slice().reverse().map(o => o['Office Name']).join(', ') : offName(code); };
+const offLetterName = code => { const p = offPathIn(code); return p.length ? p.slice().reverse().map(o => o['Office Name']).join(', ') : offName(code); };
 const ordinal = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : { 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
 const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const longDate = s => { const d = toDate(s); return MONTHS_LONG[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear(); };
@@ -5589,6 +5633,7 @@ document.addEventListener('change', ev => {
   if (ev.target && ev.target.id === 'phImp') return void photoImportRead(ev.target);
   if (ev.target.id === 'officeSel') { S.office = ev.target.value; render(); }
   if (ev.target.id === 'seatOfficeSel') { S.seatOffice = ev.target.value; render(); }
+  if (ev.target.dataset && ev.target.dataset.op && ev.target.closest('.offPick')) offPickChange(ev.target.closest('.offPick'), ev.target.dataset.op);
   if (['mvDiv', 'mvYear', 'mvSort'].includes(ev.target.id)) { S[ev.target.id] = ev.target.value; S.mvLimit = 0; mvRedraw(); }
   if (ev.target.id === 'mvDoc') { S.mvDoc = ev.target.checked; S.mvLimit = 0; mvRedraw(); }
 });
