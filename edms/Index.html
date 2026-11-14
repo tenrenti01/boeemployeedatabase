@@ -345,6 +345,16 @@ th.num .sortBtn{flex-direction:row-reverse}
 .avWrap{position:relative;flex:none}
 .penBtn{position:absolute;right:-8px;bottom:-8px;width:34px;height:34px;border-radius:50%;border:3px solid #fff;background:var(--grad-o);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0;box-shadow:0 4px 12px rgba(0,0,0,.25);transition:transform .3s var(--ease)}
 .penBtn svg{width:14px;height:14px}
+.avBtn{all:unset;display:block;cursor:zoom-in;border-radius:20px;transition:transform .3s var(--ease)}
+.avBtn:hover{transform:scale(1.03)}
+.avBtn:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
+.phView{width:min(560px,100%) !important}
+.phView .body{padding:0;gap:0}
+.phView .body{min-width:0}
+.phBig{background:#0c1424;display:block;width:100%;max-width:100%;aspect-ratio:1;position:relative;overflow:hidden}
+.phBig img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.phBig .cropEmpty{position:absolute;inset:0;display:grid;place-items:center;color:#c9d3e3;font-size:5rem}
+.phBig .phNote{position:absolute;left:0;right:0;bottom:10px;text-align:center;color:#c9d3e3;font-size:.85rem}
 .penBtn:hover{transform:scale(1.12) rotate(-8deg)}
 .photoPick{display:grid;grid-template-columns:140px minmax(0,1fr);gap:18px}
 .photoPrev{width:140px;height:140px;border-radius:18px;background:var(--grad);color:#fff;display:grid;place-items:center;font:700 2.4rem var(--cond);overflow:hidden;box-shadow:var(--shadow-card-hi)}
@@ -1927,7 +1937,7 @@ function viewProfile() {
   <div><button class="btn small" data-go="employees">← All employees</button></div>
   <section class="panel hero">${WAVES}
     <div class="profileHead">
-      <div class="avWrap">${avatar(e, true)}${canEdit() ? `<button class="penBtn" data-act="photo" data-id="${esc(id)}" aria-label="Update photo" title="Update photo">${ICON.pen}</button>` : ''}</div>
+      <div class="avWrap"><button type="button" class="avBtn" data-act="photoView" data-id="${esc(id)}" aria-label="View photo" title="View photo">${avatar(e, true)}</button>${canEdit() ? `<button class="penBtn" data-act="photo" data-id="${esc(id)}" aria-label="Update photo" title="Update photo">${ICON.pen}</button>` : ''}</div>
       <div class="who3">
         <h1>${esc(e['Last Name'])}, ${esc(e['First Name'])}${e['Suffix'] ? ' ' + esc(e['Suffix']) : ''} <span class="muted" style="font-weight:500">${esc(e['Middle Name'])}</span></h1>
         <div class="chips"><span class="tag" title="Employee Number">No. ${esc(id)}</span>${e['Old Record ID'] ? `<span class="tag" title="Old record ID">${esc(e['Old Record ID'])}</span>` : ''}${statusPill(c)}
@@ -3366,61 +3376,85 @@ async function loadPhoto(id) {
   try { PHOTO[id] = await call('getPhoto', id); } catch (e) { PHOTO[id] = ''; }
   if (S.view === 'profile' && S.id === id && PHOTO[id]) { const av = $('#bigAv'); if (av) av.innerHTML = '<img src="' + esc(PHOTO[id]) + '" alt="">'; }
 }
-function formPhoto(id) {
-  const e = IX.emp[id], has = !!(D.thumbs || {})[id], cur = PHOTO[id] || (D.thumbs || {})[id];
-  let st = null;
-  openModal(`<header><div><span class="label">${esc(fullName(e))} · No. ${esc(id)}</span><h2>Update photo</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
+function photoNow(id) {
+  const local = (D._photoLocal || {})[id];
+  return (local !== undefined ? local : PHOTO[id]) || (D.thumbs || {})[id] || '';
+}
+function viewPhoto(id) {
+  const e = IX.emp[id]; if (!e) return;
+  const has = !!(D.thumbs || {})[id], c = IX.cur[id] || {};
+  const u = photoNow(id) || photoUrl(e['Photo Link']);
+  const pic = u ? `<img id="phBigImg" src="${esc(u)}" alt="Photo of ${esc(fullName(e))}">` : `<span class="cropEmpty">${esc(initials(e))}</span><span class="phNote">No photo on file yet</span>`;
+  openModal(`<header><div><span class="label">No. ${esc(id)}${c.position ? ' · ' + esc(c.position) : ''}</span><h2>${esc(fullName(e))}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
+    <div class="body"><div class="phBig">${pic}</div></div>
+    <footer><div class="actions">${canEdit() ? (has ? `<button class="btn primary" data-act="photoAdjust" data-id="${esc(id)}">Adjust frame</button><button class="btn" data-act="photo" data-id="${esc(id)}">Replace photo</button>` : `<button class="btn primary" data-act="photo" data-id="${esc(id)}">Add photo</button>`) : ''}</div>
+      <button class="btn" data-act="close">Close</button></footer>`);
+  $('#modalRoot .modal').classList.add('phView');
+  if (has && PHOTO[id] === undefined && (D._photoLocal || {})[id] === undefined) loadPhoto(id).then(() => { const im = $('#phBigImg'); if (im && PHOTO[id]) im.src = PHOTO[id]; });
+}
+async function formPhoto(id, adjust) {
+  const e = IX.emp[id], has = !!(D.thumbs || {})[id];
+  if (has && PHOTO[id] === undefined && (D._photoLocal || {})[id] === undefined) { toast('Loading the photo…'); await loadPhoto(id); }
+  const cur = photoNow(id);
+  let st = null, dirty = false;
+  openModal(`<header><div><span class="label">${esc(fullName(e))} · No. ${esc(id)}</span><h2>${adjust ? 'Adjust photo frame' : 'Update photo'}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
     <div class="body"><div class="photoPick">
       <div class="cropBox" id="cropBox">${cur ? `<img src="${esc(cur)}" alt="">` : `<span class="cropEmpty">${esc(initials(e))}</span>`}<canvas id="phCanvas" width="560" height="560" hidden></canvas></div>
       <div class="cropSide">
         <div class="actions"><label class="btn ${cur ? '' : 'primary'}" for="phFile">${cur ? 'Choose another picture…' : 'Choose a picture…'}</label></div>
         <input type="file" id="phFile" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp" hidden>
         <div id="phTools" class="cropTools" hidden>
-          <div class="f"><label for="phZoom">Zoom</label><input type="range" id="phZoom" min="1" max="4" step="0.01" value="1"></div>
+          <div class="f"><label for="phZoom">Zoom</label><input type="range" id="phZoom" min="0.5" max="4" step="0.01" value="1"></div>
           <div class="actions"><button type="button" class="btn small" id="phRotL" title="Turn left">⟲ Turn left</button><button type="button" class="btn small" id="phRotR" title="Turn right">⟳ Turn right</button><button type="button" class="btn small" id="phReset">Reset</button></div>
           <div class="cropMinis"><span class="label">Preview</span><canvas id="phMiniBig" width="152" height="152"></canvas><canvas id="phMiniSmall" width="80" height="80"></canvas></div>
         </div>
-        <span class="muted" id="phHint" style="font-size:.85rem">${cur ? 'Pick a new picture to replace this one.' : 'JPG or PNG.'} After choosing, drag the picture to move it, and use the slider or mouse wheel to zoom. Only what's inside the square is saved.</span>
+        <span class="muted" id="phHint" style="font-size:.85rem">${cur ? 'Loading the photo on file so you can adjust it, or pick a new picture to replace it.' : 'JPG or PNG.'} After choosing, drag the picture to move it, and use the slider or mouse wheel to zoom. Only what's inside the square is saved.</span>
         <span class="err" id="phErr" hidden></span>
       </div></div></div>
     <footer><span>${has ? '<button class="subtle danger" data-act="photoRemove">Remove photo</button>' : ''}</span>
       <div class="actions"><button class="btn" data-act="close">Cancel</button><button class="btn primary" id="phSave" disabled>Save photo</button></div></footer>`, true);
   const cv = $('#phCanvas'), ctx = cv.getContext('2d');
-  const redraw = () => {
+  const redraw = (changed) => {
     if (!st) return;
     cropClamp(st); cropDraw(st, ctx, 560);
     [['#phMiniBig', 152], ['#phMiniSmall', 80]].forEach(([s, n]) => cropDraw(st, $(s).getContext('2d'), n));
     $('#phZoom').value = st.zoom;
+    if (changed) { dirty = true; $('#phSave').disabled = false; }
+  };
+  const start = (img, fresh) => {
+    st = { img: img, rot: 0, zoom: 1, ox: 0, oy: 0 };
+    const box = $('#cropBox'); box.querySelectorAll('img,.cropEmpty').forEach(x => x.remove()); cv.hidden = false; box.classList.add('live');
+    $('#phTools').hidden = false; $('#phSave').disabled = !fresh; dirty = !!fresh;
+    $('#phHint').textContent = (fresh ? '' : 'This is the photo on file. ') + 'Drag to move · slider or mouse wheel to zoom (zoom out below 1 to show more, the edges fill with white) · only what is inside the square is saved.';
+    redraw();
   };
   $('#phFile').addEventListener('change', async ev => {
     const f = ev.target.files[0]; if (!f) return;
     $('#phErr').hidden = true;
-    try {
-      const img = await loadImg(f);
-      st = { img: img, rot: 0, zoom: 1, ox: 0, oy: 0 };
-      const box = $('#cropBox'); box.querySelectorAll('img,.cropEmpty').forEach(x => x.remove()); cv.hidden = false; box.classList.add('live');
-      $('#phTools').hidden = false; $('#phSave').disabled = false; $('#phHint').textContent = 'Drag to move · slider or mouse wheel to zoom · only what is inside the square is saved.';
-      redraw();
-    } catch (err) { $('#phErr').textContent = err.message; $('#phErr').hidden = false; }
+    try { start(await loadImg(f), true); }
+    catch (err) { $('#phErr').textContent = err.message; $('#phErr').hidden = false; }
   });
+  if (cur && /^data:image\//.test(cur)) {
+    const im = new Image(); im.onload = () => { if ($('#phCanvas') === cv) start(im, false); }; im.src = cur;
+  }
   // drag to move
   let drag = null;
   cv.addEventListener('pointerdown', ev => { if (!st) return; drag = { x: ev.clientX, y: ev.clientY, ox: st.ox, oy: st.oy }; cv.setPointerCapture(ev.pointerId); $('#cropBox').classList.add('dragging'); });
-  cv.addEventListener('pointermove', ev => { if (!drag) return; const k = VIEW / cv.getBoundingClientRect().width; st.ox = drag.ox + (ev.clientX - drag.x) * k; st.oy = drag.oy + (ev.clientY - drag.y) * k; redraw(); });
+  cv.addEventListener('pointermove', ev => { if (!drag) return; const k = VIEW / cv.getBoundingClientRect().width; st.ox = drag.ox + (ev.clientX - drag.x) * k; st.oy = drag.oy + (ev.clientY - drag.y) * k; redraw(true); });
   const stop = () => { drag = null; $('#cropBox') && $('#cropBox').classList.remove('dragging'); };
   cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
-  cv.addEventListener('wheel', ev => { if (!st) return; ev.preventDefault(); st.zoom = Math.max(1, Math.min(4, st.zoom * (ev.deltaY < 0 ? 1.08 : 1 / 1.08))); redraw(); }, { passive: false });
-  $('#phZoom').addEventListener('input', ev => { if (!st) return; st.zoom = Number(ev.target.value); redraw(); });
-  $('#phRotL').addEventListener('click', () => { st.rot = (st.rot + 270) % 360; redraw(); });
-  $('#phRotR').addEventListener('click', () => { st.rot = (st.rot + 90) % 360; redraw(); });
-  $('#phReset').addEventListener('click', () => { Object.assign(st, { rot: 0, zoom: 1, ox: 0, oy: 0 }); redraw(); });
+  cv.addEventListener('wheel', ev => { if (!st) return; ev.preventDefault(); st.zoom = Math.max(0.5, Math.min(4, st.zoom * (ev.deltaY < 0 ? 1.08 : 1 / 1.08))); redraw(true); }, { passive: false });
+  $('#phZoom').addEventListener('input', ev => { if (!st) return; st.zoom = Number(ev.target.value); redraw(true); });
+  $('#phRotL').addEventListener('click', () => { st.rot = (st.rot + 270) % 360; redraw(true); });
+  $('#phRotR').addEventListener('click', () => { st.rot = (st.rot + 90) % 360; redraw(true); });
+  $('#phReset').addEventListener('click', () => { Object.assign(st, { rot: 0, zoom: 1, ox: 0, oy: 0 }); redraw(true); });
   const send = (payload) => {
     try { queueSave('savePhoto', Object.assign({ employeeId: id }, payload)); }
     catch (err) { $('#phErr').textContent = err.message; $('#phErr').hidden = false; return; }
     closeModal(); toast(payload.photo ? 'Photo saved' : 'Photo removed'); render();
   };
   $('#phSave').addEventListener('click', () => {
-    if (!st) return;
+    if (!st || !dirty) return;
     try { send({ photo: cropJpeg(st, 320, 45000), thumb: cropJpeg(st, 96, 9000) }); }
     catch (err) { $('#phErr').textContent = err.message; $('#phErr').hidden = false; }
   });
@@ -4841,7 +4875,7 @@ const VIEW = 280;
 function cropGeom(st) {
   const turned = st.rot % 180 !== 0, iw = turned ? st.img.height : st.img.width, ih = turned ? st.img.width : st.img.height;
   const sc = VIEW / Math.min(iw, ih) * st.zoom;
-  return { sc: sc, maxX: Math.max(0, (iw * sc - VIEW) / 2), maxY: Math.max(0, (ih * sc - VIEW) / 2) };
+  return { sc: sc, maxX: Math.abs(iw * sc - VIEW) / 2, maxY: Math.abs(ih * sc - VIEW) / 2 };
 }
 function cropClamp(st) { const g = cropGeom(st); st.ox = Math.max(-g.maxX, Math.min(g.maxX, st.ox)); st.oy = Math.max(-g.maxY, Math.min(g.maxY, st.oy)); }
 function cropDraw(st, ctx, size) {
@@ -5124,6 +5158,8 @@ document.addEventListener('click', ev => {
   if (act === 'xlsx') return downloadXlsx(a.dataset.list);
   if (act === 'pdf') return formPdf(pdfCtx(a.dataset.list));
   if (act === 'photo') return formPhoto(id);
+  if (act === 'photoView') return viewPhoto(id);
+  if (act === 'photoAdjust') return formPhoto(id, true);
   if (act === 'remove') return formRemove(id);
   if (act === 'deleteEmp') return formDeleteEmployee(id);
   if (act === 'editEntry') return formEditEntry(a.dataset.entry);
