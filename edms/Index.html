@@ -469,6 +469,84 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
   .svcSplit.open{grid-template-columns:1fr;gap:14px}
   .svcViewer,.svcViewer iframe{min-height:62vh}
 }
+/* Movements tab */
+.mvTop{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.mvChips{display:flex;gap:6px;flex-wrap:wrap}
+.mvChip{--mvc:var(--muted);border:1px solid var(--line);background:var(--card);color:var(--head);border-radius:999px;padding:5px 12px 5px 10px;font:600 .84rem/1.2 inherit;font-family:inherit;cursor:pointer;display:inline-flex;gap:6px;align-items:center;transition:background .25s,color .25s,border-color .25s,transform .2s}
+.mvChip:hover{border-color:var(--mvc);transform:translateY(-1px)}
+.mvChip[data-k]::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mvc);flex:none}
+.mvChip em{font-style:normal;color:var(--muted);font-weight:500;font-size:.76rem}
+.mvChip[aria-pressed="true"]{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(6,30,69,.22)}
+.mvChip[aria-pressed="true"]::before{background:#fff}
+.mvChip[aria-pressed="true"] em{color:rgba(255,255,255,.8)}
+.mvFilters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mvSearch{flex:1 1 260px;position:relative;display:flex;align-items:center;min-width:0}
+.mvSearch svg{position:absolute;left:11px;width:17px;height:17px;color:var(--muted);pointer-events:none}
+.mvSearch input{width:100%;padding-left:34px}
+.mvFilters select{width:auto;max-width:100%;flex:0 1 auto}
+.mvChk{display:inline-flex;gap:6px;align-items:center;font-size:.88rem;white-space:nowrap;cursor:pointer}
+.mvChk input{width:auto}
+.mvCount{font-size:.85rem;margin-left:auto;white-space:nowrap}
+.mvSplit{display:grid;grid-template-columns:minmax(0,1fr) 0 0;align-items:start}
+.mvSplit:not(.drag){transition:grid-template-columns .45s var(--io)}
+.mvSplit.open{grid-template-columns:minmax(0,calc(var(--mvP) * 1%)) 18px minmax(0,1fr)}
+.mvLeft{min-width:0;display:grid;gap:0;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.mvGroup{position:sticky;top:64px;z-index:2;display:flex;justify-content:space-between;align-items:center;margin:0;padding:7px 14px;background:var(--soft);border-bottom:1px solid var(--line);font:700 .78rem var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mvGroup em{font-style:normal;font-weight:600}
+.mvRow{display:grid;grid-template-columns:62px minmax(0,1fr);gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);position:relative;transition:background .2s}
+.mvRow:last-child{border-bottom:0}
+.mvRow.hasDoc{cursor:pointer}
+.mvRow:hover{background:var(--soft)}
+.mvRow.on{background:var(--accent-soft)}
+.mvRow.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--orange)}
+.mvDate{display:grid;align-content:start;justify-items:center;text-align:center;line-height:1.1;padding-top:2px}
+.mvDate b{font:700 1.35rem var(--cond);color:var(--head)}
+.mvDate span{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.mvMain{display:grid;gap:3px;min-width:0}
+.mvHead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.mvWho{display:inline-flex;gap:8px;align-items:center;min-width:0;text-align:left}
+.mvWho .av{width:26px;height:26px;font-size:.7rem;flex:none}
+.mvT{--mvc:var(--muted);display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:.74rem;font-weight:700;color:var(--mvc);background:color-mix(in srgb,var(--mvc) 13%,transparent);white-space:nowrap}
+.mvChip[data-k="move"],.mvT[data-k="move"]{--mvc:#2F6FDC}.mvChip[data-k="up"],.mvT[data-k="up"]{--mvc:#1E9A5E}.mvChip[data-k="in"],.mvT[data-k="in"]{--mvc:#0E8C99}.mvChip[data-k="contract"],.mvT[data-k="contract"]{--mvc:#C1850C}.mvChip[data-k="end"],.mvT[data-k="end"]{--mvc:#D0473F}
+.mvTools{margin-left:auto;display:inline-flex;gap:2px;opacity:.55;transition:opacity .2s}
+.mvRow:hover .mvTools,.mvTools:focus-within{opacity:1}
+.mvWhat{font-size:.9rem;overflow-wrap:anywhere}
+.mvFoot{display:flex;gap:4px 10px;flex-wrap:wrap;font-size:.82rem;min-width:0}
+.mvFoot .orderLink{font-weight:600}
+.mvRem{overflow-wrap:anywhere}
+.mvMore{margin:12px auto;display:flex}
+.mvLeft > .empty{padding:24px 14px}
+.mvGrip{display:none;align-self:stretch;cursor:col-resize;touch-action:none;position:relative}
+.mvSplit.open .mvGrip{display:block}
+.mvGrip span{position:sticky;top:calc(50vh - 28px);display:block;margin:0 auto;width:6px;height:56px;border-radius:9px;background:var(--line);transition:background .2s,height .2s}
+.mvGrip:hover span,.mvGrip:focus-visible span,.mvSplit.drag .mvGrip span{background:var(--orange);height:72px}
+.mvGrip:focus-visible{outline:none}
+.mvSplit.drag,.mvSplit.drag *{user-select:none}
+.mvSplit.drag iframe{pointer-events:none}
+.mvSplit:not(.open) .mvRight{height:0;border:0;visibility:hidden}
+.mvSplit.open .mvRight{opacity:1;transform:none}
+.mvSplit.open .mvRight{position:sticky;top:72px;height:calc(100vh - 92px);min-height:360px}
+.mvRight .svcViewer{min-height:0}
+.mvRight .svcViewer iframe{position:absolute;inset:0;min-height:0;height:100%}
+.mvSizes{display:inline-flex;gap:3px;flex:none}
+.mvSizes button{all:unset;cursor:pointer;width:24px;height:18px;border:1.5px solid rgba(255,255,255,.75);border-radius:4px;position:relative;overflow:hidden;opacity:.8}
+.mvSizes button:hover{opacity:1;background:rgba(255,255,255,.15)}
+.mvSizes i{position:absolute;right:0;top:0;bottom:0;width:var(--w);background:rgba(255,255,255,.75)}
+@media (max-width:780px){
+  .mvCount{margin-left:0}
+  .mvGroup{top:0}
+  .mvFilters select{flex:1 1 40%}
+  .mvSplit.open{grid-template-columns:minmax(0,1fr) 0 0;padding-bottom:var(--mvH)}
+  .mvSplit.open .mvRight{position:fixed;left:0;right:0;bottom:0;top:auto;height:var(--mvH);min-height:0;z-index:45;border-radius:16px 16px 0 0;border-bottom:0;box-shadow:0 -10px 30px rgba(6,30,69,.25);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .mvSplit .mvRight{transform:translateY(40px)}
+  .mvSplit.open .mvRight .svcRightBar{padding-top:16px}
+  .mvSplit.open .mvGrip{position:fixed;left:0;right:0;bottom:calc(var(--mvH) - 16px);height:18px;z-index:46;cursor:row-resize}
+  .mvGrip span{position:absolute;left:50%;top:6px;width:44px;height:5px;margin-left:-22px;background:rgba(255,255,255,.8)}
+  .mvGrip:hover span,.mvGrip:focus-visible span,.mvSplit.drag .mvGrip span{height:5px;background:#fff}
+  .mvRow{grid-template-columns:48px minmax(0,1fr);gap:10px;padding:10px 12px}
+  .mvDate b{font-size:1.15rem}
+  .mvTools{opacity:1}
+}
 /* Photo crop */
 .photoPick{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 .cropBox{position:relative;width:280px;height:280px;border-radius:20px;overflow:hidden;background:var(--soft);box-shadow:var(--shadow-card-hi);display:grid;place-items:center}
@@ -856,6 +934,23 @@ html.classic .svcRightBar{background:linear-gradient(#FFFFFF,#E9E9E9);color:#000
 html.classic .svcRightTitle{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none}
 html.classic .svcRightBar .svcOpenNew{color:#0066CC}
 html.classic .svcClose{color:#000;border-radius:2px;width:22px;height:20px;font-size:15px}
+html.classic .mvChip{border-radius:0;font:12px Tahoma,"Segoe UI",Arial,sans-serif;padding:2px 8px;background:#fff;color:#000;border-color:#A0A0A0;box-shadow:none}
+html.classic .mvChip:hover{transform:none;background:#E5F3FB}
+html.classic .mvChip[aria-pressed="true"]{background:#CCE8FF;color:#000;box-shadow:inset 0 0 0 1px #3399FF;font-weight:bold}
+html.classic .mvChip[aria-pressed="true"] em{color:#333}
+html.classic .mvChip[aria-pressed="true"][data-k]::before{background:var(--mvc)}
+html.classic .mvLeft{border-radius:0;border-color:#A0A0A0;background:#fff}
+html.classic .mvGroup{background:linear-gradient(#FFFFFF,#E9E9E9);font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none;color:#000;border-color:#A0A0A0}
+html.classic .mvRow{border-color:#D9D9D9;font:12px Tahoma,"Segoe UI",Arial,sans-serif}
+html.classic .mvRow:hover{background:#E5F3FB}
+html.classic .mvRow.on{background:#CCE8FF}
+html.classic .mvRow.on::before{background:#3399FF;width:3px}
+html.classic .mvDate b{font:bold 15px Tahoma,"Segoe UI",Arial,sans-serif;color:#000}
+html.classic .mvT{border-radius:0;font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;padding:0 5px}
+html.classic .mvGrip span{border-radius:0;width:4px;background:#C0C0C0}
+html.classic .mvSizes button{border-color:#606060;border-radius:0}
+html.classic .mvSizes i{background:#606060}
+@media (max-width:780px){ html.classic .mvSplit.open .mvRight{border-radius:0} html.classic .mvGrip span{background:#808080;width:44px;height:4px} }
 html.classic .svcClose:hover{background:#E81123;color:#fff}
 /* dialogs */
 html.classic .overlay{backdrop-filter:none;-webkit-backdrop-filter:none}
@@ -1081,6 +1176,7 @@ html.classic .oOut{font:11px Tahoma,"Segoe UI",Arial,sans-serif}
     <nav class="tabs" id="tabs" aria-label="Sections">
       <button type="button" data-go="dashboard">Dashboard</button>
       <button type="button" data-go="employees">Employees</button>
+      <button type="button" data-go="movements">Movements</button>
       <button type="button" data-go="seats">Plantilla Seats</button>
       <button type="button" data-go="org">Org Chart</button>
       <button type="button" data-go="reports">Reports</button>
@@ -1718,7 +1814,7 @@ function go(view, id) {
   const parts = String(view).split('/');
   S.view = parts[0] || 'dashboard'; S.id = id || parts[1] || null;
   if (S.view === 'users') S.view = 'admin';
-  if (!['dashboard', 'employees', 'profile', 'seats', 'org', 'reports', 'admin'].includes(S.view)) S.view = 'dashboard';
+  if (!['dashboard', 'employees', 'profile', 'movements', 'seats', 'org', 'reports', 'admin'].includes(S.view)) S.view = 'dashboard';
   if ($('#modalRoot').innerHTML) closeModal();
   if (S.view === 'profile' && S.id) { rememberProfile(S.id); if (S.q) rememberSearch(S.q); }
   try { history.replaceState(null, '', '#' + S.view + (S.id ? '/' + S.id : '')); } catch (e) { /* some frames block this */ }
@@ -1726,7 +1822,7 @@ function go(view, id) {
   render(true); window.scrollTo(0, 0);
 }
 let LAST_HTML = '';
-const VIEWS = () => ({ dashboard: viewDashboard, employees: viewEmployees, profile: viewProfile, seats: viewSeats, org: viewOrg, reports: viewReports, admin: viewAdmin });
+const VIEWS = () => ({ dashboard: viewDashboard, employees: viewEmployees, profile: viewProfile, movements: viewMovements, seats: viewSeats, org: viewOrg, reports: viewReports, admin: viewAdmin });
 function render(animate) {
   const v = $('#view'), html = VIEWS()[S.view]();
   LAST_HTML = html; v.innerHTML = html;
@@ -1737,11 +1833,13 @@ function render(animate) {
 function afterRender() {
   if (S.view === 'admin') wireAdmin();
   if (S.view === 'reports') wireEmpPicker('srEmp');
+  if (S.view === 'movements') wireMovements();
   if (S.view === 'profile' && S.id) loadPhoto(S.id);
 }
 /* Redraw after background data arrives, unless nothing changed or the person is typing on the page */
 function softRender() {
   if (!D || !$('#top') || $('#top').hidden) return;
+  if (S.view === 'movements' && $('#svcSplit.open')) return;           // keep the open order in view
   const html = VIEWS()[S.view]();
   if (html === LAST_HTML) return;
   const dirty = Array.from(document.querySelectorAll('#view input, #view select, #view textarea')).some(el =>
@@ -2024,7 +2122,7 @@ function openOrderPreview(file, ref) {
   ifr.addEventListener('load', () => { const l = viewer.querySelector('.svcLoad'); if (l) l.remove(); });
   viewer.appendChild(ifr);
   split.classList.add('open'); right.setAttribute('aria-hidden', 'false');
-  if (window.matchMedia && window.matchMedia('(max-width:780px)').matches) setTimeout(() => right.scrollIntoView({ behavior: 'smooth', block: 'start' }), 140);
+  if (!right.classList.contains('mvRight') && window.matchMedia && window.matchMedia('(max-width:780px)').matches) setTimeout(() => right.scrollIntoView({ behavior: 'smooth', block: 'start' }), 140);
 }
 function closeOrderPreview() {
   const split = $('#svcSplit'), right = $('#svcRight'), viewer = $('#svcViewer');
@@ -2149,6 +2247,189 @@ function viewSeats() {
         <td>${holder ? `<button class="linkish" data-act="profile" data-id="${esc(holder['Employee Number'])}"><b>${esc(fullName(holder))}</b></button>` : '—'}</td>
         <td>${!holder && canEdit() ? `<button class="btn small" data-act="newHire" data-item="${esc(s['Item Number'])}">Hire into seat</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="6" class="empty">No seats match.</td></tr>'}
     </tbody></table></div>`;
+}
+
+/* ═══════════════════════ movements ═══════════════════════ */
+/* Every service-history entry of every employee in one list. Filter by type, division, year; sort by date, division,
+   type or name. The scanned order opens beside the list (in a sheet at the bottom on a phone); drag the divider to resize. */
+const MV_SORTS = [['new', 'Newest first'], ['old', 'Oldest first'], ['div', 'By division'], ['type', 'By type of change'], ['name', 'By employee name']];
+const MV_KINDS = ['move', 'up', 'in', 'contract', 'end'];
+function mvKind(t) {
+  const L = D.lists || {}; t = String(t || '');
+  if ((L.endTypes || []).includes(t) || /separat/i.test(t)) return 'end';
+  if ((L.moveTypes || []).includes(t) || /reassign|designat|detail/i.test(t)) return 'move';
+  if ((L.contractTypes || []).includes(t) || /contract/i.test(t)) return 'contract';
+  if (/promot|step|reclass|retitl/i.test(t)) return 'up';
+  return 'in';
+}
+const mvDivOf = code => { const p = IX.offPath[sv(code)]; return p && p.length ? sv(p[0]['Office Code']) : ''; };
+const mvTime = x => { const t = toDate(x['Effective Date']).getTime(); return isNaN(t) ? 0 : t; };
+const mvYearOf = x => { const t = mvTime(x); return t ? String(new Date(t).getFullYear()) : ''; };
+const mvEmpKey = x => { const e = IX.emp[sv(x['Employee Number'])]; return e ? (sv(e['Last Name']) + ' ' + sv(e['First Name'])).toLowerCase() : '~'; };
+function mvRows() {
+  const q = String(S.mvQ || '').trim().toLowerCase();
+  const rows = D.hist.filter(x => {
+    if (S.mvType && (sv(x['Change Type']) || 'Entry') !== S.mvType) return false;
+    if (S.mvDiv && mvDivOf(x['Office Code']) !== S.mvDiv) return false;
+    if (S.mvYear && mvYearOf(x) !== S.mvYear) return false;
+    if (S.mvDoc && !sv(x['Order File'])) return false;
+    if (!q) return true;
+    const e = IX.emp[sv(x['Employee Number'])], off = IX.off[sv(x['Office Code'])];
+    return [e ? fullName(e) : '', x['Employee Number'], x['Position Title'], x['Change Type'], x['Order / Reference'], x['Remarks'], x['Office Code'],
+      off ? offLetterName(x['Office Code']) : ''].join(' ').toLowerCase().includes(q);
+  });
+  const byDate = (a, b) => mvTime(b) - mvTime(a) || String(b['Entry ID']).localeCompare(String(a['Entry ID']), undefined, { numeric: true });
+  const divName = x => { const d = IX.off[mvDivOf(x['Office Code'])]; return d ? sv(d['Office Name']) : '~'; };
+  const s = S.mvSort || 'new';
+  rows.sort(s === 'old' ? (a, b) => -byDate(a, b)
+    : s === 'div' ? (a, b) => divName(a).localeCompare(divName(b)) || byDate(a, b)
+    : s === 'type' ? (a, b) => MV_KINDS.indexOf(mvKind(a['Change Type'])) - MV_KINDS.indexOf(mvKind(b['Change Type'])) || String(a['Change Type']).localeCompare(String(b['Change Type'])) || byDate(a, b)
+    : s === 'name' ? (a, b) => mvEmpKey(a).localeCompare(mvEmpKey(b)) || byDate(a, b)
+    : byDate);
+  return rows;
+}
+function mvGroupOf(x) {
+  const s = S.mvSort || 'new';
+  if (s === 'div') { const d = IX.off[mvDivOf(x['Office Code'])]; return d ? sv(d['Office Name']) : 'No office on record'; }
+  if (s === 'type') return sv(x['Change Type']) || 'Entry';
+  if (s === 'name') return '';
+  return mvYearOf(x) || 'No date';
+}
+function mvRow(x) {
+  const id = sv(x['Employee Number']), e = IX.emp[id], file = sv(x['Order File']), ref = sv(x['Order / Reference']);
+  const off = IX.off[sv(x['Office Code'])], t = mvTime(x), d = t ? new Date(t) : null, eid = sv(x['Entry ID']);
+  const tools = PENDING_ENTRIES.has(eid) ? '<span class="pill saving">Saving…</span>' : canEdit() ? `<span class="mvTools">
+    <button class="iconBtn" data-act="editEntry" data-entry="${esc(eid)}" aria-label="Edit entry ${esc(eid)}" title="Edit">${ICON.pen}</button>
+    <button class="iconBtn" data-act="deleteEntry" data-entry="${esc(eid)}" aria-label="Delete entry ${esc(eid)}" title="Delete">${ICON.trash}</button></span>` : '';
+  return `<article class="mvRow${file ? ' hasDoc' : ''}${S.mvOn === eid ? ' on' : ''}" data-entry="${esc(eid)}"${file ? ` data-act="mvRow" data-file="${esc(file)}" data-ref="${esc(ref || 'Scanned order')}"` : ''}>
+    <div class="mvDate">${d ? `<b>${d.getDate()}</b><span>${MONTHS[d.getMonth()]} ${d.getFullYear()}</span>` : '<span>no date</span>'}</div>
+    <div class="mvMain">
+      <div class="mvHead">${e ? `<button class="linkish mvWho" data-act="profile" data-id="${esc(id)}">${avatar(e)}<b>${esc(fullName(e))}</b></button>` : `<b>${esc(id)}</b>`}
+        <span class="mvT" data-k="${mvKind(x['Change Type'])}">${esc(x['Change Type'] || 'Entry')}</span>${tools}</div>
+      <div class="mvWhat">${esc(x['Position Title'] || '—')}${off ? ` <span class="muted">· ${esc(offLetterName(x['Office Code']))}</span>` : ''}</div>
+      <div class="mvFoot">${file ? `<a class="orderLink" href="${esc(file)}" target="_blank" rel="noopener" data-act="orderPreview" data-file="${esc(file)}" data-ref="${esc(ref || 'Scanned order')}">${ICON.clip} ${esc(ref || 'Scanned order')}</a>`
+        : ref ? `<span class="muted">Order: ${esc(ref)} · no scan yet</span>` : '<span class="muted">No order on file</span>'}${x['Remarks'] ? `<span class="muted mvRem">${esc(x['Remarks'])}</span>` : ''}</div>
+    </div></article>`;
+}
+function mvListHtml(rows) {
+  if (!rows.length) return `<p class="empty">No movements match these filters. <button class="btn small" data-act="mvClear">Clear filters</button></p>`;
+  const lim = S.mvLimit || 150, n = {};
+  rows.forEach(x => { const g = mvGroupOf(x); n[g] = (n[g] || 0) + 1; });
+  let last = null, out = '';
+  rows.slice(0, lim).forEach(x => {
+    const g = mvGroupOf(x);
+    if (g && g !== last) out += `<h3 class="mvGroup"><span>${esc(g)}</span><em>${n[g]}</em></h3>`;
+    last = g; out += mvRow(x);
+  });
+  if (rows.length > lim) out += `<button class="btn mvMore" data-act="mvMore">Show ${Math.min(150, rows.length - lim)} more · ${rows.length - lim} not shown yet</button>`;
+  return out;
+}
+function mvCount(rows) {
+  const c = $('#mvCount'); if (!c) return;
+  rows = rows || mvRows();
+  c.textContent = rows.length + (rows.length === 1 ? ' entry' : ' entries') + (rows.length === D.hist.length ? '' : ' match');
+}
+function mvRedraw() {
+  const box = $('#mvList'); if (!box) return render();
+  const rows = mvRows(); box.innerHTML = mvListHtml(rows); mvCount(rows);
+  document.querySelectorAll('.mvChip').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.t || '') === (S.mvType || ''))));
+}
+const mvPhone = () => !!(window.matchMedia && window.matchMedia('(max-width:780px)').matches);
+const MV_SIZE = { P: 46, H: 55 };
+try { MV_SIZE.P = Number(localStorage.getItem('boe.mvP')) || 46; MV_SIZE.H = Number(localStorage.getItem('boe.mvH')) || 55; } catch (e) { /* storage blocked */ }
+function mvSetSize(k, v) {
+  v = Math.round(Math.min(k === 'P' ? 78 : 90, Math.max(k === 'P' ? 22 : 25, v)));
+  MV_SIZE[k] = v;
+  const sp = $('#svcSplit'); if (sp) sp.style.setProperty(k === 'P' ? '--mvP' : '--mvH', k === 'P' ? String(v) : v + 'vh');
+  try { localStorage.setItem('boe.mv' + k, String(v)); } catch (e) { /* storage blocked */ }
+}
+function mvMark(row) {
+  document.querySelectorAll('.mvRow.on').forEach(r => r.classList.remove('on'));
+  S.mvOn = row ? row.dataset.entry : null;
+  if (row) row.classList.add('on');
+  if (row && mvPhone()) setTimeout(() => window.scrollBy({ top: row.getBoundingClientRect().top - 70, behavior: 'smooth' }), 80);   // keep the row above the sheet
+}
+function viewMovements() {
+  const all = D.hist, rows = mvRows(), cnt = {};
+  all.forEach(x => { const t = sv(x['Change Type']) || 'Entry'; cnt[t] = (cnt[t] || 0) + 1; });
+  const types = Object.keys(cnt).sort((a, b) => MV_KINDS.indexOf(mvKind(a)) - MV_KINDS.indexOf(mvKind(b)) || cnt[b] - cnt[a]);
+  const years = Array.from(new Set(all.map(mvYearOf).filter(Boolean))).sort((a, b) => b - a);
+  const divs = (IX.offTree || []).filter(t => t.depth === 0);
+  const docs = all.filter(x => sv(x['Order File'])).length;
+  const opt = (v, l, cur) => `<option value="${esc(v)}" ${String(cur || '') === String(v) ? 'selected' : ''}>${esc(l)}</option>`;
+  return `
+  <section class="mvTop">
+    <div style="display:grid;gap:4px"><span class="eyebrow">${all.length} entries · ${docs} with scanned orders</span><h1>Movements</h1></div>
+    ${canEdit() ? '<button class="btn primary" data-act="mvAdd">＋ Add movement or change</button>' : ''}
+  </section>
+  <div class="mvChips" role="group" aria-label="Type of change">
+    <button type="button" class="mvChip" data-act="mvType" data-t="" aria-pressed="${!S.mvType}">All <em>${all.length}</em></button>
+    ${types.map(t => `<button type="button" class="mvChip" data-k="${mvKind(t)}" data-act="mvType" data-t="${esc(t)}" aria-pressed="${S.mvType === t}">${esc(t)} <em>${cnt[t]}</em></button>`).join('')}
+  </div>
+  <div class="mvFilters">
+    <label class="mvSearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="mvQ" type="search" placeholder="Search name, position, office, order no." value="${esc(S.mvQ || '')}" autocomplete="off" aria-label="Search movements"></label>
+    <select id="mvDiv" aria-label="Division">${opt('', 'All divisions', S.mvDiv)}${divs.map(t => opt(t.code, t.name, S.mvDiv)).join('')}</select>
+    <select id="mvYear" aria-label="Year">${opt('', 'All years', S.mvYear)}${years.map(y => opt(y, y, S.mvYear)).join('')}</select>
+    <select id="mvSort" aria-label="Sort">${MV_SORTS.map(s => opt(s[0], 'Sort: ' + s[1], S.mvSort || 'new')).join('')}</select>
+    <label class="mvChk"><input type="checkbox" id="mvDoc" ${S.mvDoc ? 'checked' : ''}> With scanned order</label>
+    <span class="muted mvCount" id="mvCount"></span>
+  </div>
+  <div class="mvSplit" id="svcSplit" style="--mvP:${MV_SIZE.P};--mvH:${MV_SIZE.H}vh">
+    <div class="mvLeft" id="mvList">${mvListHtml(rows)}</div>
+    <div class="mvGrip" id="mvGrip" role="separator" aria-label="Drag to resize the order view" tabindex="0" title="Drag to resize · double-click to reset"><span></span></div>
+    <aside class="svcRight mvRight" id="svcRight" aria-hidden="true">
+      <div class="svcRightBar"><span class="svcRightTitle" id="svcRefTitle">Scanned order</span>
+        <span class="mvSizes" role="group" aria-label="Viewer size">
+          <button type="button" data-act="mvSize" data-s="s" title="Small viewer"><i style="--w:30%"></i></button>
+          <button type="button" data-act="mvSize" data-s="m" title="Half and half"><i style="--w:50%"></i></button>
+          <button type="button" data-act="mvSize" data-s="l" title="Large viewer"><i style="--w:72%"></i></button></span>
+        <a class="svcOpenNew" id="svcRefOpen" href="#" target="_blank" rel="noopener">Open ↗</a>
+        <button type="button" class="svcClose" data-act="orderClose" aria-label="Close the order">×</button></div>
+      <div class="svcViewer" id="svcViewer"></div>
+    </aside>
+  </div>`;
+}
+function wireMovements() {
+  mvCount();
+  const q = $('#mvQ'); let t = null;
+  if (q) q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { S.mvQ = q.value; S.mvLimit = 0; mvRedraw(); }, 160); });
+  const g = $('#mvGrip'), sp = $('#svcSplit');
+  if (!g || !sp) return;
+  g.addEventListener('pointerdown', ev => {
+    ev.preventDefault();
+    try { g.setPointerCapture(ev.pointerId); } catch (e) { /* older browsers */ }
+    sp.classList.add('drag');
+    const phone = mvPhone(), box = sp.getBoundingClientRect();
+    const move = e => phone ? mvSetSize('H', (window.innerHeight - e.clientY) / window.innerHeight * 100) : mvSetSize('P', (e.clientX - box.left) / box.width * 100);
+    const up = () => { sp.classList.remove('drag'); g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up); };
+    g.addEventListener('pointermove', move); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+  });
+  g.addEventListener('dblclick', () => mvPhone() ? mvSetSize('H', 55) : mvSetSize('P', 46));
+  g.addEventListener('keydown', ev => {
+    const d = { ArrowLeft: -3, ArrowRight: 3, ArrowUp: 3, ArrowDown: -3 }[ev.key]; if (!d) return;
+    ev.preventDefault(); const k = mvPhone() ? 'H' : 'P'; mvSetSize(k, MV_SIZE[k] + d);
+  });
+}
+function formMvAdd() {
+  const L = D.lists, grp = (label, list) => list.length ? `<optgroup label="${esc(label)}">${list.map(t => `<option ${t === (S.mvType || 'Reassignment') ? 'selected' : ''}>${esc(t)}</option>`).join('')}</optgroup>` : '';
+  openModal(`<header><div><span class="label">Movements</span><h2>Add a movement or change</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
+    <div class="body"><div class="fgrid">
+      ${field('mvEmp_q', 'Employee *', empPicker('mvEmp'), 'span4')}
+      ${field('mvAddType', 'Type of change *', `<select id="mvAddType">${grp('Movement', L.moveTypes || [])}${grp('Plantilla', L.plantillaTypes || [])}${grp('Contract', L.contractTypes || [])}${grp('End of service', ['Separation'])}</select>`, 'span4')}
+    </div><div class="formErr" id="mvAddErr" hidden></div></div>
+    <footer><span class="muted" style="font-size:.85rem">Next: date, office, position and the scanned order</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="button" class="btn primary" data-act="mvAddGo">Continue</button></div></footer>`);
+  wireEmpPicker('mvEmp');
+  setTimeout(() => { const q = $('#mvEmp_q'); if (q) q.focus(); }, 60);
+}
+function mvAddGo() {
+  const id = ($('#mvEmp') || {}).value, type = ($('#mvAddType') || {}).value, err = $('#mvAddErr');
+  if (!id || !IX.emp[id]) { err.textContent = 'Pick an employee first.'; err.hidden = false; return; }
+  const cur = IX.cur[id] || {};
+  closeModal();
+  if (type === 'Separation') { if (cur.separated) return toast(fullName(IX.emp[id]) + ' is already separated.'); return formRemove(id); }
+  if (cur.separated) return formJobChange(id);
+  return formJobChange(id, type);
 }
 
 /* ═══════════════════════ organizational chart ═══════════════════════ */
@@ -5152,8 +5433,15 @@ document.addEventListener('click', ev => {
   if (act === 'clearFilters') { S.filters[a.dataset.list] = []; return render(); }
   if (act === 'pubBadge') { if (D.me.role === 'Admin') return go('admin'); return toast('Public test link: anyone with this link can see and change these records.'); }
   if (act === 'offToggle') { S.offOpen[a.dataset.office] = !S.offOpen[a.dataset.office]; return render(); }
-  if (act === 'orderPreview') { if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return; ev.preventDefault(); return openOrderPreview(a.dataset.file, a.dataset.ref); }
-  if (act === 'orderClose') return closeOrderPreview();
+  if (act === 'orderPreview') { if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return; ev.preventDefault(); mvMark(a.closest('.mvRow')); return openOrderPreview(a.dataset.file, a.dataset.ref); }
+  if (act === 'orderClose') { mvMark(null); return closeOrderPreview(); }
+  if (act === 'mvRow') { if (ev.target.closest('a,button,input,select')) return; mvMark(a); return openOrderPreview(a.dataset.file, a.dataset.ref); }
+  if (act === 'mvType') { S.mvType = a.dataset.t || ''; S.mvLimit = 0; return mvRedraw(); }
+  if (act === 'mvMore') { S.mvLimit = (S.mvLimit || 150) + 150; return mvRedraw(); }
+  if (act === 'mvClear') { S.mvType = S.mvDiv = S.mvYear = S.mvQ = ''; S.mvDoc = false; S.mvLimit = 0; return render(); }
+  if (act === 'mvSize') { const ph = mvPhone(); return mvSetSize(ph ? 'H' : 'P', ({ s: ph ? 35 : 66, m: ph ? 55 : 48, l: ph ? 85 : 30 })[a.dataset.s]); }
+  if (act === 'mvAdd') return formMvAdd();
+  if (act === 'mvAddGo') return mvAddGo();
   if (act === 'csv') return downloadCsv(a.dataset.list);
   if (act === 'xlsx') return downloadXlsx(a.dataset.list);
   if (act === 'pdf') return formPdf(pdfCtx(a.dataset.list));
@@ -5231,6 +5519,8 @@ document.addEventListener('change', ev => {
   if (ev.target && ev.target.id === 'phImp') return void photoImportRead(ev.target);
   if (ev.target.id === 'officeSel') { S.office = ev.target.value; render(); }
   if (ev.target.id === 'seatOfficeSel') { S.seatOffice = ev.target.value; render(); }
+  if (['mvDiv', 'mvYear', 'mvSort'].includes(ev.target.id)) { S[ev.target.id] = ev.target.value; S.mvLimit = 0; mvRedraw(); }
+  if (ev.target.id === 'mvDoc') { S.mvDoc = ev.target.checked; S.mvLimit = 0; mvRedraw(); }
 });
 let qTimer = null;
 $('#qClear').addEventListener('click', () => {
