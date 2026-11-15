@@ -623,6 +623,21 @@ footer.xoBusy::before{content:"";position:absolute;inset:0 auto 0 0;z-index:-1;w
 footer.xoBusy::after{content:"";position:absolute;inset:0 auto 0 0;z-index:-1;width:var(--xoP,0%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent) 0 0/180px 100% no-repeat;animation:xoShine 1.4s linear infinite;transition:width .45s var(--io)}
 @keyframes xoShine{from{background-position:-180px 0}to{background-position:calc(100% + 180px) 0}}
 footer.xoBusy #xoNote{color:#1A1A1A;font-weight:600;font-variant-numeric:tabular-nums;white-space:pre}
+.aoWrap{overflow-x:auto;padding:6px 2px 10px}
+.aoChart{width:max-content;min-width:100%;display:flex;justify-content:center}
+.aoBox{width:190px;display:grid;gap:3px;text-align:center;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--head);font:inherit;cursor:pointer;box-shadow:0 4px 12px rgba(6,30,69,.08);transition:transform .2s,box-shadow .2s,border-color .2s}
+.aoBox:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(6,30,69,.16);border-color:var(--orange)}
+.aoBox b{font-size:.84rem;line-height:1.2}
+.aoBox small{font-size:.72rem;color:var(--muted)}
+.aoL{font:700 .64rem var(--cond);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.aoBox.top{cursor:default;background:#0F2A5C;color:#fff;border-color:transparent}
+.aoBox.top .aoL,.aoBox.top small{color:rgba(255,255,255,.75)}
+.aoBox.division{background:linear-gradient(140deg,#1E63C9,#0D47A1 42%,#0A2E6E);color:#fff;border-color:transparent}
+.aoBox.division .aoL,.aoBox.division small{color:rgba(255,255,255,.78)}
+.aoBox.section{background:linear-gradient(140deg,#F9A13A,#F26522 58%,#E2541A);color:#fff;border-color:transparent}
+.aoBox.section .aoL,.aoBox.section small{color:rgba(255,255,255,.85)}
+.aoBox.unit{border-top:4px solid #1E63C9}
+.aoChart .otK{padding:20px 6px 0}
 /* Photo crop */
 .photoPick{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 .cropBox{position:relative;width:280px;height:280px;border-radius:20px;overflow:hidden;background:var(--soft);box-shadow:var(--shadow-card-hi);display:grid;place-items:center}
@@ -860,6 +875,13 @@ html.classic .mvSplit .mvRight{transition-property:opacity,transform,visibility,
 html.classic .mvSplit.open .mvRight{transition-delay:.08s,0s,0s,0s,0s!important}
 html.classic .otFit.orgMorph{transition-property:transform!important;transition-duration:.55s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
 html.classic .org.orgMoving .otK::before,html.classic .org.orgMoving .otK::after,html.classic .org.orgMoving .oStem{opacity:.25}
+html.classic .aoBox{border-radius:0;box-shadow:none;border:1px solid #A0A0A0;background:#fff;color:#000;padding:4px 6px;width:170px}
+html.classic .aoBox:hover{transform:none;background:#E5F3FB;border-color:#3399FF}
+html.classic .aoBox.top{background:#0F2A5C;color:#fff}
+html.classic .aoBox.division{background:#1F4E9C;color:#fff}
+html.classic .aoBox.section{background:#F0812A;color:#fff}
+html.classic .aoBox.unit{border-top:3px solid #1F4E9C}
+html.classic .aoBox b{font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif}
 html.classic .oc.ocPulse{animation:ocPulse 1.6s cubic-bezier(.4,0,.2,1)!important}
 html.classic .orgSide{transition-property:width,right!important;transition-duration:.45s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
 html.classic .orgSide{border-color:#A0A0A0;box-shadow:-4px 0 10px rgba(0,0,0,.15)}
@@ -1947,7 +1969,7 @@ function render(animate) {
   afterRender();
 }
 function afterRender() {
-  if (S.view === 'admin') wireAdmin();
+  if (S.view === 'admin') { wireAdmin(); const w = $('.aoWrap'); if (w) w.scrollLeft = (w.scrollWidth - w.clientWidth) / 2; }   // office chart: start at the middle
   if (S.view === 'reports') wireEmpPicker('srEmp');
   if (S.view === 'movements') wireMovements();
   if (S.view === 'profile' && S.id) { loadPhoto(S.id); wireSplit(); }
@@ -2867,6 +2889,18 @@ async function orgMoveAnim(id) {
     ORG_ANIM = false;
     setTimeout(softRender, 1800);
   }
+}
+/* Admin: the office tree drawn as a chart (offices only, no people). Click a box to edit that office. */
+S.aoView = (() => { try { return localStorage.getItem('boe.aoView') || 'list'; } catch (e) { return 'list'; } })();
+function aoChart() {
+  const n = code => D.employees.filter(e => !IX.cur[e['Employee Number']].separated && inOffice(IX.cur[e['Employee Number']].officeCode, code)).length;
+  const kidsOf = code => (IX.offKids[code] || []).map(o => String(o['Office Code'])).filter(k => IX.off[k] && !isOutside(k));
+  const box = code => { const o = IX.off[code], lvl = orgLevel(o), c = n(code);
+    return `<button type="button" class="aoBox ${lvl.toLowerCase()}" data-act="editOffice" data-code="${esc(code)}" title="Edit ${esc(o['Office Name'])}"><span class="aoL">${esc(lvl)}</span><b>${esc(o['Office Name'])}</b><small>${esc(code)} · ${orgPeople(c)}</small></button>`; };
+  const node = code => { const ks = kidsOf(code); return `<div class="ot">${box(code)}${ks.length ? orgKids(ks.map(node)) : ''}</div>`; };
+  const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
+  const top = `<div class="aoBox top"><span class="aoL">Bureau</span><b>${esc(D.agency || 'Bureau of Equipment')}</b><small>${orgPeople(active().length)}</small></div>`;
+  return `<div class="aoWrap"><div class="org aoChart" style="--wire:#A9BFE3"><div class="ot">${top}${orgKids(roots.map(node))}</div></div></div>`;
 }
 /* ═══════════════════════ organizational chart ═══════════════════════ */
 /* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
@@ -5533,19 +5567,21 @@ function viewAdmin() {
   <section style="display:grid;gap:4px"><span class="eyebrow">Settings</span><h1>Admin</h1></section>
   ${upgradeNote()}
   <section class="panel">
-    <div class="panelHead"><h3>${hi('org')}Divisions, sections and units</h3><button class="btn primary small" data-act="addOffice">＋ Add section or unit</button></div>
+    <div class="panelHead"><h3>${hi('org')}Divisions, sections and units</h3><span class="actions" style="align-items:center">
+      <div class="seg" role="group" aria-label="Show as"><button type="button" data-act="aoView" data-v="list" aria-pressed="${S.aoView !== 'chart'}">List</button><button type="button" data-act="aoView" data-v="chart" aria-pressed="${S.aoView === 'chart'}">Chart</button></div>
+      <button class="btn primary small" data-act="addOffice">＋ Add section or unit</button></span></div>
     <p class="muted" style="font-size:.9rem">The office tree. A <b>division</b> is the top level, a <b>section</b> sits under a division, and a <b>unit</b> sits under a section.
       Plantilla seats stay with the division; a person can be assigned to any of the three. Counts include everything underneath.</p>
-    <div class="list">${IX.offTree.map(t => {
+    ${S.aoView === 'chart' ? aoChart() : `<div class="list">${IX.offTree.map(t => {
       const here = D.employees.filter(e => !IX.cur[e['Employee Number']].separated && String(IX.cur[e['Employee Number']].officeCode) === String(t.code)).length;
       const below = D.employees.filter(e => !IX.cur[e['Employee Number']].separated && inOffice(IX.cur[e['Employee Number']].officeCode, t.code)).length;
-      return `<div class="li" style="padding-left:${t.depth * 20}px">
+      return `<div class="li" style="padding-left:calc(${t.depth} * min(60px, 9vw))">
         <span class="pill ${t.level === 'Division' ? 'plantilla' : t.level === 'Section' ? 'contract' : 'sep'}">${esc(t.level)}</span>
         <span class="main"><b>${t.depth ? '└ ' : ''}${esc(t.name)}</b><span>${esc(t.code)}${t.orphan ? ' · parent "' + esc(sv(t.row['Parent Code'])) + '" is not in the list' : ''}</span></span>
         <span class="num mono muted" style="font-size:.85rem" title="${below} including everything underneath">${here}${below !== here ? ' · ' + below + ' with sub-offices' : ''}</span>
         <span class="evTools"><button class="iconBtn" data-act="editOffice" data-code="${esc(t.code)}" title="Edit ${esc(t.name)}" aria-label="Edit ${esc(t.name)}">${ICON.pen}</button>${
           t.level === 'Division' ? '' : `<button class="iconBtn del" data-act="rmOffice" data-code="${esc(t.code)}" title="Remove ${esc(t.name)}" aria-label="Remove ${esc(t.name)}">${ICON.trash}</button>`}</span></div>`;
-    }).join('')}</div>
+    }).join('')}</div>`}
     ${(D.needsUpgrade || []).indexOf('Offices tree') >= 0 ? '<div class="note warnNote">The Offices tab has no <b>Parent Code</b> and <b>Level</b> columns yet. Run <b>upgradeSheets</b> once, then reload.</div>' : ''}
   </section>
   ${D.signIn ? accountsPanel(list) : usersPanel(list)}
@@ -5981,6 +6017,7 @@ document.addEventListener('click', ev => {
   if (act === 'orgDlGo') return orgDownloadGo();
   if (act === 'newHire') return formNewHire(a.dataset.item);
   if (act === 'addUser') return formUser('');
+  if (act === 'aoView') { S.aoView = a.dataset.v; try { localStorage.setItem('boe.aoView', S.aoView); } catch (e) { /* storage blocked */ } return render(); }
   if (act === 'addOffice') return formOffice('');
   if (act === 'editOffice') return formOffice(a.dataset.code);
   if (act === 'rmOffice') return formRemoveOffice(a.dataset.code);
