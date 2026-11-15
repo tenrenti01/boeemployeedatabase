@@ -265,6 +265,10 @@ dl.kv.two dd.w,dl.kv.cols3 dd.w{grid-column:span 3}
 .modal header h2{color:#fff;display:flex;align-items:center;gap:10px}
 .modal header h2::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--orange);flex:none}
 .modal .body{padding:20px 22px;display:grid;gap:18px}
+.modal.docPop{width:min(1100px,100%)!important}
+.docPopB{position:relative;height:min(82vh,1100px);background:var(--soft)}
+.docPopB iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.docPopB .svcLoad{position:absolute;inset:0;display:grid;place-items:center}
 .modal footer{padding:14px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;background:var(--soft)}
 .x{all:unset;cursor:pointer;font-size:1.5rem;line-height:1;color:#fff;width:40px;height:40px;display:grid;place-items:center;border-radius:10px;transition:background .25s,transform .25s var(--ease)}
 .x:hover{background:var(--orange);transform:scale(1.06)}
@@ -855,6 +859,7 @@ html.classic .mvSplit{transition-property:grid-template-columns!important;transi
 html.classic .mvSplit .mvRight{transition-property:opacity,transform,visibility,height,border-width!important;transition-duration:.35s,.45s,0s,0s,0s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important;transition-delay:0s,0s,.45s,.45s,.45s!important}
 html.classic .mvSplit.open .mvRight{transition-delay:.08s,0s,0s,0s,0s!important}
 html.classic .otFit.orgMorph{transition-property:transform!important;transition-duration:.55s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
+html.classic .org.orgMoving .otK::before,html.classic .org.orgMoving .otK::after,html.classic .org.orgMoving .oStem{opacity:.25}
 html.classic .oc.ocPulse{animation:ocPulse 1.6s cubic-bezier(.4,0,.2,1)!important}
 html.classic .orgSide{transition-property:width,right!important;transition-duration:.45s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
 html.classic .orgSide{border-color:#A0A0A0;box-shadow:-4px 0 10px rgba(0,0,0,.15)}
@@ -1165,6 +1170,9 @@ body.wide main{max-width:none}
 .org{--wire:#9DB2D3}
 .org .oStem{background:var(--wire);flex:none}
 .otFit.orgMorph{transition:transform .55s cubic-bezier(.4,0,.2,1)}
+.ocFlyWrap .oc.ocFly{z-index:2;box-shadow:0 calc(var(--lift,0) * 22px) calc(var(--lift,0) * 44px) rgba(6,30,69,calc(var(--lift,0) * .35)),0 0 0 calc(var(--lift,0) * 3px) rgba(247,147,30,.9),0 0 calc(var(--lift,0) * 30px) rgba(247,147,30,calc(var(--lift,0) * .55));outline:none}
+.org.orgMoving .otK::before,.org.orgMoving .otK::after,.org.orgMoving .oStem,.org.orgMoving .oSkip::before{opacity:.25;transition:opacity .3s}
+.org .otK::before,.org .otK::after,.org .oStem,.org .oSkip::before{transition:opacity .5s .2s}
 .otL{width:var(--ocW,250px);display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}
 .otL > .oc.head,.otS > .oc.head,.ot > .oc.head{width:var(--ocW,250px);min-width:0;max-width:none}
 .ot > .ouH{width:var(--ocW,250px);margin-bottom:6px}
@@ -1948,6 +1956,8 @@ function afterRender() {
 /* Redraw after background data arrives, unless nothing changed or the person is typing on the page */
 function softRender() {
   if (!D || !$('#top') || $('#top').hidden) return;
+  if (ORG_ANIM) return;                                                    // a person is moving on the chart; refresh after
+  renderPeek(); renderOrgSide();                                           // e.g. "Saving…" turns into the edit buttons
   if ((S.view === 'movements' || S.view === 'profile') && $('#svcSplit.open')) return;           // keep the open order in view
   const html = VIEWS()[S.view]();
   if (html === LAST_HTML) return;
@@ -2270,7 +2280,7 @@ function licensePanel(id, lic) {
       return `<div class="li licRow">
         <span class="main"><b>${esc(x['Profession / License'] || '—')}${x['License Number'] ? ' <span class="mono" style="font-weight:600">· ' + esc(x['License Number']) + '</span>' : ''}</b>
           <span>${esc(dates || 'no dates on file')}${x['Remarks'] ? ' · ' + esc(x['Remarks']) : ''}</span>
-          ${file ? `<span class="sub"><a class="orderLink" href="${esc(file)}" target="_blank" rel="noopener">${ICON.clip} Open the license scan</a></span>` : ''}</span>
+          ${file ? `<span class="sub"><a class="orderLink" href="${esc(file)}" target="_blank" rel="noopener" data-act="docPop" data-file="${esc(file)}" data-ref="${esc((x['Profession / License'] || 'PRC license') + (x['License Number'] ? ' · ' + x['License Number'] : ''))}">${ICON.clip} Open the license scan</a></span>` : ''}</span>
         <span class="licTools"><span class="pill ${st.cls}">${esc(st.label)}</span>${canEdit() ? `<button class="iconBtn" data-act="editLicense" data-id="${esc(id)}" data-lic="${esc(x['License ID'])}" aria-label="Edit license" title="Edit">${ICON.pen}</button><button class="iconBtn del" data-act="rmLicense" data-lic="${esc(x['License ID'])}" aria-label="Remove license" title="Remove (master password)">${ICON.trash}</button>` : ''}</span>
       </div>`;
     }).join('') : '<p class="empty">No licenses on file yet.' + (canEdit() ? ' Use ＋ Add license.' : '') + '</p>'}</div>
@@ -2712,7 +2722,7 @@ function orgFocus(box, id) {
   } else card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
   setTimeout(() => { card.classList.remove('ocPulse'); void card.offsetWidth; card.classList.add('ocPulse', 'osOn'); setTimeout(() => card.classList.remove('ocPulse'), 1700); }, 700);
 }
-let OS_HTML = '', OS_T = null;
+let OS_HTML = '', OS_T = null, OS_FOCUS = '';
 /* The person's division as a chart (their own office's division; the whole Director's office for OD) */
 function orgSideHtml(id) {
   const code = orgSpot(id); if (!code) return null;
@@ -2726,7 +2736,7 @@ function renderOrgSide() {
   const on = !!(S.orgSide && S.view === 'profile' && S.id && IX.emp[S.id]);
   let el = r.querySelector('.orgSide');
   if (!on) {
-    S.orgSide = false;
+    S.orgSide = false; OS_FOCUS = '';
     if (el && !el.classList.contains('closing')) {
       el.classList.add('closing'); pkSet(false); clearTimeout(OS_T);
       OS_T = setTimeout(() => { if (S.orgSide) return; el.remove(); OS_HTML = ''; if (!r.querySelector('.peek,.orgSide')) pkRoot().classList.remove('peeking'); }, 470);
@@ -2749,8 +2759,89 @@ function renderOrgSide() {
   el.querySelector('.osTitle').textContent = built ? 'Org chart · ' + IX.off[built.div]['Office Name'] : 'Org chart';
   void el.offsetWidth; pkRoot().classList.add('peeking'); pkSet(true);
   const id = S.id;
+  if (!fresh && OS_FOCUS === id) return;
+  OS_FOCUS = id;
   // once the column has opened: a short pause, fit the chart, glide to the person and make them pulse
   setTimeout(() => { if (!S.orgSide || S.id !== id) return; fitOrg(); orgFocus(body, id); }, fresh ? 600 : 120);
+}
+/* After a change saved from the side profile on the Org Chart: the person is lifted off the chart, flies to their new
+   place while the others slide to close the gap and make room, the page glides along, and they land with a pulse. */
+let ORG_ANIM = false;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const easeBack = t => { const c = 1.15, k = t - 1; return 1 + (c + 1) * k * k * k + c * k * k; };      // quick, slight overshoot, settle
+const easeIO = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+async function orgMoveAnim(id) {
+  const view = $('#view'), old = view.querySelector('.oc[data-id="' + id + '"]');
+  const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!old || reduced || ORG_ANIM) { render(); return setTimeout(() => orgFocus(null, id), 300); }
+  ORG_ANIM = true;
+  try {
+    await sleep(500);
+    // the person in view first
+    const vis = r => r.top >= 70 && r.bottom <= window.innerHeight - 30;
+    if (!vis(old.getBoundingClientRect())) { old.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); await sleep(650); }
+    // 1. highlight and lift: a floating copy takes the card's place
+    const zoomOf = el => (el.getBoundingClientRect().width / (el.offsetWidth || 1)) || 1;
+    const r0 = old.getBoundingClientRect(), z0 = zoomOf(old), root0 = old.closest('.ot.root');
+    const wrap = document.createElement('div');
+    wrap.className = 'org ocFlyWrap'; wrap.setAttribute('aria-hidden', 'true');
+    wrap.style.cssText = (root0 ? root0.style.cssText : '') + ';zoom:1;position:fixed;inset:0;pointer-events:none;z-index:90;display:block;';
+    const ghost = old.cloneNode(true); ghost.removeAttribute('data-act'); ghost.classList.remove('ocPulse'); ghost.classList.add('ocFly');
+    const w0 = old.offsetWidth, h0 = old.offsetHeight;
+    Object.assign(ghost.style, { position: 'absolute', left: r0.left + 'px', top: r0.top + 'px', width: w0 + 'px', height: h0 + 'px', margin: 0, transformOrigin: '0 0' });
+    wrap.appendChild(ghost); document.body.appendChild(wrap);
+    old.style.visibility = 'hidden';
+    const place = (x, y, z, s, lift) => { ghost.style.left = x + 'px'; ghost.style.top = y + 'px'; ghost.style.transform = `translate(${(1 - s) * w0 * z / 2}px,${(1 - s) * h0 * z / 2}px) scale(${z * s})`; ghost.style.setProperty('--lift', lift); };
+    await new Promise(done => { const t0 = performance.now(); const f = t => { const k = Math.min(1, (t - t0) / 380); place(r0.left, r0.top, z0, 1 + 0.12 * easeBack(k), easeBack(k)); k < 1 ? requestAnimationFrame(f) : done(); }; requestAnimationFrame(f); });
+    await sleep(160);
+    // 2. the new chart, with everyone else drawn where they were, then sliding to their new places
+    const before = {}, hBefore = {}, hKey = {};
+    view.querySelectorAll('.oc[data-id]').forEach(c => { before[c.dataset.id] = c.getBoundingClientRect(); });
+    const heads = () => Array.from(view.querySelectorAll('.ouH:not(.ghost), .otSH:not(.ghost), .odH')).map(h => { const k = ((h.querySelector('b,h2') || h).textContent || '').trim(); hKey[k] = (hKey[k] || 0) + 1; return [k + '#' + hKey[k], h]; });
+    heads().forEach(([k, h]) => { hBefore[k] = h.getBoundingClientRect(); });
+    Object.keys(hKey).forEach(k => delete hKey[k]);
+    const sx = window.scrollX, sy = window.scrollY;
+    render(); fitOrg(); window.scrollTo(sx, sy);
+    const org = view.querySelector('.org'); if (org) org.classList.add('orgMoving');
+    const neu = view.querySelector('.oc[data-id="' + id + '"]');
+    const slide = (el, a) => {
+      const b = el.getBoundingClientRect(), z = zoomOf(el);
+      if (!a) { el.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 420, easing: 'ease-out', fill: 'backwards' }); return; }
+      const dx = (a.left - b.left) / z, dy = (a.top - b.top) / z;
+      if (Math.abs(dx) < .5 && Math.abs(dy) < .5) return;
+      el.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 1000, delay: 140, easing: 'cubic-bezier(.34,1.32,.64,1)', fill: 'backwards' });
+    };
+    view.querySelectorAll('.oc[data-id]').forEach(c => { if (c !== neu) slide(c, before[c.dataset.id]); });
+    heads().forEach(([k, h]) => slide(h, hBefore[k]));
+    if (!neu) { wrap.remove(); return; }
+    neu.style.visibility = 'hidden';
+    // 3. glide the page to the new place while the copy flies there along a gentle arc
+    await sleep(240);
+    neu.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    const from = ghost.getBoundingClientRect(), z1 = zoomOf(neu), dur = 1250;
+    await new Promise(done => {
+      const t0 = performance.now();
+      const f = t => {
+        const k = Math.min(1, (t - t0) / dur), p = easeIO(Math.min(1, k * 1.08)), q = k < .82 ? 0 : easeBack((k - .82) / .18);
+        const to = neu.getBoundingClientRect();
+        const x = from.left + (to.left - from.left) * p, y = from.top + (to.top - from.top) * p - Math.sin(Math.PI * Math.min(1, k * 1.08)) * 70;
+        place(x, y, z0 + (z1 - z0) * p, 1.12 - 0.12 * q, 1 - q * .6);
+        k < 1 ? requestAnimationFrame(f) : done();
+      };
+      requestAnimationFrame(f);
+    });
+    // 4. land and pulse
+    wrap.remove(); neu.style.visibility = '';
+    neu.animate([{ transform: 'scale(1.06)' }, { transform: 'scale(.97)' }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+    await sleep(380);
+    document.querySelectorAll('.oc.osOn').forEach(c => c.classList.remove('osOn'));
+    neu.classList.remove('ocPulse'); void neu.offsetWidth; neu.classList.add('ocPulse', 'osOn');
+    setTimeout(() => neu.classList.remove('ocPulse'), 1700);
+    if (org) setTimeout(() => org.classList.remove('orgMoving'), 300);
+  } finally {
+    ORG_ANIM = false;
+    setTimeout(softRender, 1800);
+  }
 }
 /* ═══════════════════════ organizational chart ═══════════════════════ */
 /* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
@@ -3842,7 +3933,11 @@ function checkRequired(list) {
 }
 /* After saving a change: stay on the Org Chart / Employees page with the profile column open when it was open there */
 function goAfterSave(id) {
-  if (S.peek && PEEK_VIEWS.includes(S.view)) { if (id && IX.emp[id]) S.peek = String(id); return render(); }
+  if (S.peek && PEEK_VIEWS.includes(S.view)) {
+    if (id && IX.emp[id]) S.peek = String(id);
+    if (S.view === 'org' && S.peek) return orgMoveAnim(S.peek);
+    return render();
+  }
   go('profile', id);
 }
 function openForm(title, sub, inner, onSave, saveLabel) {
@@ -5748,6 +5843,13 @@ function openModal(html, wide) {
   document.body.style.overflow = 'hidden';
   wireDates($('#modalRoot'));
 }
+/* A scan shown in a pop-up over the page (Ctrl / middle-click still opens a new tab) */
+function docPop(file, title) {
+  openModal(`<header><div><span class="label">Scan</span><h2>${esc(title || 'Scanned file')}</h2></div>
+    <div class="actions" style="align-items:center"><a class="btn small" href="${esc(file)}" target="_blank" rel="noopener">Open in new tab ↗</a><button class="x" data-act="close" aria-label="Close">×</button></div></header>
+    <div class="docPopB"><div class="svcLoad">Loading the scan…</div><iframe src="${esc(drivePreview(file))}" title="${esc(title || 'Scanned file')}" onload="this.previousElementSibling&&this.previousElementSibling.remove()"></iframe></div>`, true);
+  const m = document.querySelector('#modalRoot .modal'); if (m) m.classList.add('docPop');
+}
 function closeModal() { CAL.close(); $('#modalRoot').innerHTML = ''; document.body.style.overflow = ''; }
 function toast(msg, kind, ms) {
   document.querySelectorAll('.toast').forEach(x => x.remove());
@@ -5843,6 +5945,7 @@ document.addEventListener('click', ev => {
   if (act === 'pubBadge') { if (D.me.role === 'Admin') return go('admin'); return toast('Public test link: anyone with this link can see and change these records.'); }
   if (act === 'offToggle') { S.offOpen[a.dataset.office] = !S.offOpen[a.dataset.office]; return render(); }
   if (act === 'orderPreview') { if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return; ev.preventDefault(); if (a.closest('#peekRoot')) return pkDoc(a.dataset.file, a.dataset.ref, a); mvMark(a.closest('.mvRow')); return openOrderPreview(a.dataset.file, a.dataset.ref); }
+  if (act === 'docPop') { if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return; ev.preventDefault(); return docPop(a.dataset.file, a.dataset.ref); }
   if (act === 'orderClose') { mvMark(null); return closeOrderPreview(); }
   if (act === 'mvRow') { if (ev.target.closest('a,button,input,select')) return; mvMark(a); return openOrderPreview(a.dataset.file, a.dataset.ref); }
   if (act === 'mvType') { S.mvType = a.dataset.t || ''; S.mvLimit = 0; return mvRedraw(); }
