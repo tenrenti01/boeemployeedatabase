@@ -96,7 +96,7 @@ const APP_ACC = {
 
 /* What the page may ask for once signed in. Anything not listed here can't be called from outside. */
 const APP_API_ = {
-  getBootstrap: () => getBootstrap(), getPhoto: a => getPhoto(a),
+  getBootstrap: () => getBootstrap(), getPhoto: a => getPhoto(a), getLicenseImage: a => getLicenseImage(a),
   saveNewHire: a => saveNewHire(a), saveJobChange: a => saveJobChange(a), saveNameChange: a => saveNameChange(a),
   savePersonal: a => savePersonal(a), savePhoto: a => savePhoto(a), separateEmployee: a => separateEmployee(a),
   saveSeat: a => saveSeat(a), saveOrderFile: a => saveOrderFile(a), removeOrderFile: a => removeOrderFile(a),
@@ -713,6 +713,24 @@ function saveLicense(p) {
     return { id: p.employeeId, record: licId, action: isNew ? 'License added' : 'License updated',
       details: app_s_(p.profession) + (app_s_(p.number) ? ' ' + app_s_(p.number) : '') + ' → ' + app_empNo_(p.employeeId) };
   });
+}
+
+/* A picture of a license scan, for the Competency and Professional Standing report: the picture itself when the scan
+   is a JPG / PNG (up to 2 MB), else Drive's preview of the first page. Only files that a PRC Licenses row points to. */
+function getLicenseImage(p) {
+  const ss = app_ss_();
+  const me = app_user_(ss);
+  if (me.role === 'None' || me.role === 'Inactive') throw new Error('No access.');
+  const m = app_s_(p && p.url).match(/[-\w]{25,}/);
+  if (!m) return '';
+  const known = app_readOpt_(ss, APP.OPT.lic).rows.some(r => (app_s_(r['License File']).match(/[-\w]{25,}/) || [])[0] === m[0]);
+  if (!known) throw new Error('That file is not a license scan.');
+  const f = DriveApp.getFileById(m[0]);
+  let blob = null;
+  if (/^image\/(jpeg|png)$/i.test(f.getMimeType()) && f.getSize() <= 2 * 1024 * 1024) blob = f.getBlob();
+  if (!blob) { try { blob = f.getThumbnail(); } catch (e) { blob = null; } }
+  if (!blob) return '';
+  return 'data:' + (blob.getContentType() || 'image/png') + ';base64,' + Utilities.base64Encode(blob.getBytes());
 }
 
 /* Delete one license row and bin its scan. Needs the master password: it is a record. */

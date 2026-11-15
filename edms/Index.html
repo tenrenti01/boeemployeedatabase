@@ -638,6 +638,8 @@ footer.xoBusy #xoNote{color:#1A1A1A;font-weight:600;font-variant-numeric:tabular
 .aoBox.section .aoL,.aoBox.section small{color:rgba(255,255,255,.85)}
 .aoBox.unit{border-top:4px solid #1E63C9}
 .aoChart .otK{padding:20px 6px 0}
+.doc .licPic{width:30%}
+.doc .licImg img{display:block;max-width:100%;max-height:150px;border:1px solid #ccc;border-radius:4px}
 /* Photo crop */
 .photoPick{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 .cropBox{position:relative;width:280px;height:280px;border-radius:20px;overflow:hidden;background:var(--soft);box-shadow:var(--shadow-card-hi);display:grid;place-items:center}
@@ -1367,7 +1369,8 @@ setTimeout(function () {
 <script>
 /* ═══════════════════════ state ═══════════════════════ */
 let D = null, IX = null;
-const S = { view: 'dashboard', id: null, q: '', kind: 'all', office: '', fix: '', seatFilter: 'all', seatOffice: '', offOpen: {}, orgDiv: '', orgKind: 'all' };
+const S = { view: 'dashboard', id: null, q: '', kind: 'all', office: '', fix: '', seatFilter: 'all', seatOffice: '', offOpen: {}, orgDiv: '', orgKind: 'all', orgBasis: 'assign' };
+try { S.orgBasis = localStorage.getItem('boe.orgBasis') === 'item' ? 'item' : 'assign'; } catch (e) { /* storage blocked */ }
 const ICON = {
   pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
@@ -2226,7 +2229,7 @@ function viewProfile(pid, peek) {
       ${nm.length ? `<div class="label" style="margin-top:6px">Previous last names</div><div class="list">${nm.map(n => `<div class="li"><span class="main"><b>${esc(n['Old Last Name'])} → ${esc(n['New Last Name'])}</b><span>${esc(fmtDate(n['Date Effective']))} · ${esc(n['Reason'] || '')}${n['Document / Reference'] ? ' · ' + esc(n['Document / Reference']) : ''}</span></span></div>`).join('')}</div>` : ''}
     </section>
   </div>
-  ${ra1080 ? licensePanel(id, lic) : ''}
+  ${!c.separated || lic.length ? licensePanel(id, lic) : ''}
   <section class="panel${peek ? '' : ' svcPanel'}">
     <div class="panelHead"><h3>${hi('history')}Service history</h3><span class="label">${h.length} ${h.length === 1 ? 'entry' : 'entries'} · newest first</span></div>
     ${timeline}
@@ -2275,12 +2278,16 @@ function closeOrderPreview() {
   setTimeout(() => { if (viewer && !split.classList.contains('open')) viewer.innerHTML = ''; }, 520);
 }
 /* ═══════════════════════ PRC licenses ═══════════════════════ */
+const NC2_TYPES = ['TESDA NC II - Heavy Equipment Operation', 'TESDA NC II - Automotive Servicing', 'TESDA NC II - Driving',
+  'TESDA NC II - Shielded Metal Arc Welding (SMAW)', 'TESDA NC II - Electrical Installation and Maintenance', 'TESDA NC II - Construction Painting',
+  'TESDA NC II - Carpentry', 'TESDA NC II - Masonry', 'TESDA NC II - Plumbing', 'TESDA NC II - Machining', 'TESDA NC II - RAC Servicing (DomRAC)',
+  'TESDA NC III - Heavy Equipment Operation', 'TESDA NC III - Automotive Servicing'];
 const PRC_PROFESSIONS = ['Professional Civil Engineer', 'Registered Civil Engineer', 'Professional Mechanical Engineer', 'Registered Mechanical Engineer',
   'Certified Plant Mechanic', 'Professional Electrical Engineer', 'Registered Electrical Engineer', 'Registered Electronics Engineer',
   'Professional Electronics Engineer', 'Registered Electronics Technician', 'Geodetic Engineer', 'Registered Chemical Engineer',
   'Registered Sanitary Engineer', 'Registered Metallurgical Engineer', 'Registered Mining Engineer', 'Registered Naval Architect and Marine Engineer',
   'Registered Materials Engineer', 'Registered Master Plumber', 'Registered Architect', 'Certified Public Accountant', 'Licensed Agricultural and Biosystems Engineer'];
-const profDatalist = () => '<datalist id="profList">' + PRC_PROFESSIONS.map(p => `<option value="${esc(p)}">`).join('') + '</datalist>';
+const profDatalist = () => '<datalist id="profList">' + PRC_PROFESSIONS.concat(NC2_TYPES).map(p => `<option value="${esc(p)}">`).join('') + '</datalist>';
 function hasRA1080(id) { return (IX.elig[id] || []).some(x => /ra\s*1080|board|bar/i.test(String(x['Eligibility / Exam']))); }
 /* Valid / Expiring soon / Expired, from Valid Until against today */
 function licStatus(validUntil) {
@@ -2295,7 +2302,7 @@ const licSort = (a, b) => String(b['Valid Until'] || '').localeCompare(String(a[
 function licensePanel(id, lic) {
   const rows = lic.slice().sort(licSort);
   return `<section class="panel">
-    <div class="panelHead"><h3>${hi('award')}PRC licenses</h3><span class="label">${rows.length} on file${canEdit() ? '' : ''}</span>${canEdit() ? `<button class="btn small primary" data-act="addLicense" data-id="${esc(id)}" style="margin-left:auto">＋ Add license</button>` : ''}</div>
+    <div class="panelHead"><h3>${hi('award')}PRC licenses & NC II</h3><span class="label">${rows.length} on file${canEdit() ? '' : ''}</span>${canEdit() ? `<button class="btn small primary" data-act="addLicense" data-id="${esc(id)}" style="margin-left:auto">＋ Add license</button>` : ''}</div>
     <div class="list">${rows.length ? rows.map(x => {
       const st = licStatus(x['Valid Until']), file = sv(x['License File']);
       const dates = [x['Registration Date'] ? 'Registered ' + fmtDate(x['Registration Date']) : '', x['Valid Until'] ? 'valid until ' + fmtDate(x['Valid Until']) : ''].filter(Boolean).join(' · ');
@@ -2697,7 +2704,7 @@ window.addEventListener('resize', () => { if (S.peek || S.orgSide) pkSet(true); 
 /* ── Where a person sits: their immediate supervisor and peers, and the org chart column on the profile page ── */
 /* The chart's index with everyone (not only plantilla), and who leads an office the same way the chart decides it */
 function orgAll() {
-  const keep = S.orgKind; S.orgKind = 'all'; let O; try { O = orgIndex(); } finally { S.orgKind = keep; }
+  const keep = S.orgKind, kb = S.orgBasis; S.orgKind = 'all'; S.orgBasis = 'assign'; let O; try { O = orgIndex(); } finally { S.orgKind = keep; S.orgBasis = kb; }
   const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
   O.roots = roots; O.apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
   O.asst = O.apex ? (IX.offKids[O.apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
@@ -2907,13 +2914,27 @@ function aoChart() {
    designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone:
    engineers first, then by salary grade, highest first; same grade by pay, then by longest service. */
 const orgName = e => (e['First Name'] + (e['Middle Name'] ? ' ' + e['Middle Name'][0] + '.' : '') + ' ' + e['Last Name'] + (e['Suffix'] ? ' ' + e['Suffix'] : '')).toUpperCase();
+/* Plantilla item view: where a person belongs by their mother unit / plantilla item, ignoring reassignments.
+   1. a Mother Unit on file that is a BOE office (code or name); a Mother Unit outside BOE = not on this chart;
+   2. else the office of their plantilla item; 3. else (CoS / JO) the office of their latest entry that is not a movement. */
+function orgHome(e) {
+  const id = e['Employee Number'], c = IX.cur[id], mu = sv(e['Mother Unit']);
+  if (mu) {
+    if (IX.off[mu] && !isOutside(mu)) return mu;
+    const hit = Object.keys(IX.off).find(k => !isOutside(k) && sv(IX.off[k]['Office Name']).toLowerCase() === mu.toLowerCase());
+    return hit || '';
+  }
+  if (c.kind === 'plantilla' && c.seatOffice !== '' && IX.off[c.seatOffice]) return String(c.seatOffice);
+  const h = (IX.hist[id] || []).find(x => x['Change Type'] !== 'Separation' && mvKind(x['Change Type']) !== 'move' && sv(x['Office Code']) !== '');
+  return h ? sv(h['Office Code']) : String(c.officeCode);
+}
 function orgIndex() {
   const at = {}, lost = [];
   const C = e => IX.cur[e['Employee Number']];
   active().forEach(e => {
-    const c = C(e), code = String(c.officeCode);
+    const c = C(e), code = S.orgBasis === 'item' ? orgHome(e) : String(c.officeCode);
     if (S.orgKind === 'plantilla' && c.kind !== 'plantilla') return;
-    if (code === '' || !IX.off[code]) { lost.push(e); return; }
+    if (code === '' || !IX.off[code] || isOutside(code)) { lost.push(e); return; }
     (at[code] = at[code] || []).push(e);
   });
   // Who sits higher: engineers first, then the higher salary grade (plantilla and CoS / JO mixed).
@@ -2930,13 +2951,15 @@ function orgIndex() {
 }
 /* Every card has the same rows (name on two lines, position, item number, tags) so cards of one kind are the same height.
    What shows follows the chart settings (XO), the same ones the download uses. */
+const orgFrom = (e, c) => S.orgBasis === 'item' ? (String(c.officeCode) !== '' && String(c.officeCode) !== orgHome(e) ? '→ ' + (isOutside(c.officeCode) ? IX.off[c.officeCode]['Office Name'] : c.officeCode) : '')
+  : e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
 function orgCard(e, isHead, role) {
   const id = e['Employee Number'], c = IX.cur[id];
-  const from = e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
+  const from = orgFrom(e, c);
   const pos = (XO.pos ? String(c.position || 'Position not on record') : '') + (XO.sg && c.sg !== '' && c.sg !== undefined ? (XO.pos ? ' ' : '') + '(SG ' + c.sg + ')' : '');
   const line = (c.type === 'Designation (OIC)' ? '<em class="ocO">OIC</em>' + (pos ? ' · ' : '') : '') + esc(pos);
   const tags = (XO.kind ? (c.kind === 'contract' ? `<span class="pill contract">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</span>` : `<span class="pill plantilla">${esc(c.status || 'Permanent')}</span>`) : '') +
-    (XO.from && from ? `<span class="pill warn" title="${e['Mother Unit'] ? 'Mother unit' : 'Plantilla office'}: ${esc(from)}">(${esc(String(from).replace(/^DPWH\s+/i, ''))})</span>` : '');
+    (XO.from && from ? `<span class="pill warn" title="${S.orgBasis === 'item' ? 'Assigned to' : e['Mother Unit'] ? 'Mother unit' : 'Plantilla office'}: ${esc(from)}">(${esc(String(from).replace(/^DPWH\s+/i, ''))})</span>` : '');
   return `<button type="button" class="oc ${c.kind === 'contract' ? 'cos' : 'plan'}${isHead ? ' head' : ''}${role ? ' r' : ''}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${avatar(e)}<span class="ocT"><b>${esc(orgName(e))}</b>${XO.pos || XO.sg ? `<span class="ocP" title="${esc(pos)}">${line || '&nbsp;'}</span>` : ''}${XO.item ? `<span class="mono ocP">${esc(c.item) || '&nbsp;'}</span>` : ''}${role ? `<span class="ocR">${esc(role)}</span>` : ''}${XO.kind || XO.from ? `<span class="ocTags">${tags}</span>` : ''}</span></button>`;
 }
 /* An empty, invisible card: keeps a level free so the people below line up with the same rank in the next column */
@@ -3084,7 +3107,10 @@ function viewOrg() {
   O.asst = O.apex ? (IX.offKids[O.apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
   const seg = (act, cur, k, l) => `<button type="button" data-act="${act}" data-f="${esc(k)}" aria-pressed="${cur === k}">${esc(l)}</button>`;
   const total = Object.keys(O.at).reduce((n, k) => n + O.at[k].length, 0) + O.lost.length;
-  const note = e => { const c = IX.cur[e['Employee Number']]; return (c.entry && c.entry['Remarks']) || (String(c.officeCode) === '' ? 'No office on record' : 'Office ' + c.officeCode + ' is not in the office list'); };
+  const note = e => { const c = IX.cur[e['Employee Number']];
+    if (S.orgBasis === 'item' && sv(e['Mother Unit'])) return 'Mother unit: ' + sv(e['Mother Unit']) + ' (outside BOE)';
+    if (isOutside(c.officeCode)) return 'Assigned to ' + offLetterName(c.officeCode) + ' (outside BOE)';
+    return (c.entry && c.entry['Remarks']) || (String(c.officeCode) === '' ? 'No office on record' : 'Office ' + c.officeCode + ' is not in the office list'); };
   setTimeout(fitOrg, 0);
   return `
   <div class="orgDl"><button type="button" class="btn primary" data-act="orgDl" title="Save this chart as an HD picture or a PDF">${ICON.dl} Download</button></div>
@@ -3092,9 +3118,10 @@ function viewOrg() {
     <div style="display:grid;gap:4px"><span class="eyebrow">${orgPeople(total)} · as of ${esc(fmtDate(D.today))}</span><h1>Organizational chart</h1></div>
     <div class="toolbar"><div class="seg" role="group" aria-label="Office">${seg('orgDiv', S.orgDiv, '', 'Whole bureau')}${roots.map(c => seg('orgDiv', S.orgDiv, c, c)).join('')}</div>
       <div class="seg" role="group" aria-label="Who to show">${seg('orgKind', S.orgKind, 'all', 'Everyone')}${seg('orgKind', S.orgKind, 'plantilla', 'Plantilla only')}</div>
+      <div class="seg" role="group" aria-label="Place people by">${seg('orgBasis', S.orgBasis, 'assign', 'By assignment')}${seg('orgBasis', S.orgBasis, 'item', 'By plantilla item')}</div>
       <button type="button" class="btn" data-act="orgLook" title="Choose what each box shows and the colours">Chart settings</button></div>
   </section>
-  <div class="oLegend"><span>Click a person to open their record. Where people sit comes from each person's latest assignment.</span></div>
+  <div class="oLegend"><span>Click a person to open their record. ${S.orgBasis === 'item' ? '<b>Plantilla item view:</b> people sit in their mother unit (or the office of their plantilla item), ignoring reassignments; the tag shows where they actually work.' : 'Where people sit comes from each person\'s latest assignment.'}</span></div>
   <div class="org" style="${orgVars(1, 1, 250)}">${roots.filter(c => !S.orgDiv || c === S.orgDiv).map(c => orgNode(c, O)).join('')}
     ${!S.orgDiv && O.lost.length ? `<section class="od"><div class="odH"><h2>Not on the chart</h2><span>${orgPeople(O.lost.length)} assigned outside the bureau or with no office</span></div>
       <div class="odB"><div class="oGrid" style="width:100%">${O.lost.map(e => `<div class="oOut">${orgCard(e)}<span class="muted">${esc(note(e))}</span></div>`).join('')}</div></div></section>` : ''}
@@ -3209,7 +3236,7 @@ function xoCard(e, role, X, big) {   // big: true = chief-size card, 'mid' = uni
   const src = (XO.hd ? (local !== undefined ? local : PHOTO[id]) : '') || (D.thumbs || {})[id] || '';
   const pic = /^data:image\//.test(src) ? `<img src="${esc(src)}" alt="" />` : `<span class="xav">${esc(initials(e))}</span>`;
   const line = [XO.pos ? esc(c.position || 'Position not on record') : '', XO.sg && c.sg !== '' && c.sg !== undefined ? 'SG ' + esc(c.sg) : ''].filter(Boolean).join(' · ');
-  const from = e['Mother Unit'] || (c.reassigned && String(c.officeCode) !== '' ? c.seatOffice : '');
+  const from = orgFrom(e, c);
   const tags = (XO.kind ? (c.kind === 'contract' ? `<i class="cos">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</i>` : `<i>${esc(c.status || 'Permanent')}</i>`) : '') +
     (XO.from && from ? `<i class="from">(${esc(String(from).replace(/^DPWH\s+/i, ''))})</i>` : '');
   return `<div class="xpc${role || big ? ' chief' : ''}${big === 'mid' ? ' mid' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(orgName(e))}</b>${line ? `<span>${line}</span>` : ''}${XO.item && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
@@ -3522,6 +3549,8 @@ function viewReports() {
       <p class="muted">Item numbers with no one in them, by office.</p>${btns('vac')}</section>
     <section class="panel"><div class="panelHead"><h3>${hi('calendar')}Retirement forecast</h3><span class="label">next 5 years</span></div>
       <p class="muted">Who turns ${D.retireAge} in the next five years, by year.</p>${btns('ret')}</section>
+    <section class="panel"><div class="panelHead"><h3>${hi('award')}Competency and professional standing</h3><span class="label">${compRows().length} licenses / NC II</span></div>
+      <p class="muted">A4 landscape: name, plantilla item, PRC license or NC II, license number, expiry, standing, and a picture of the license.</p>${btns('comp')}</section>
     <section class="panel"><div class="panelHead"><h3>${hi('globe')}BOE personnel assigned outside</h3><span class="label">${orgPeople(outsideRows().length)}</span></div>
       <p class="muted">BOE employees now working in another DPWH office: their BOE plantilla office, where they are assigned, since when and the order.</p>${btns('out')}</section>
     <section class="panel"><div class="panelHead"><h3>${hi('people')}External personnel assigned to BOE</h3><span class="label">${orgPeople(externalRows().length)}</span></div>
@@ -3587,6 +3616,21 @@ function docVacancies() {
     ${v.map((s, i) => { const pos = IX.pos[s['Position Title']], off = IX.off[s['Office Code']]; return `<tr><td class="num">${i + 1}</td><td>${esc(s['Item Number'])}</td><td>${esc(s['Position Title'])}</td><td class="num">${esc(pos ? pos['Salary Grade'] : '')}</td><td>${esc(off ? off['Office Name'] : '')}</td><td class="num">${peso(s['Authorized Monthly (PHP)'])}</td></tr>`; }).join('')}
     </tbody></table><p style="margin-top:8px"><b>Total vacant: ${v.length}</b></p>${docFoot()}</div>`;
 }
+function docComp() {
+  const r = compRows();
+  return `<div class="doc land">${docHead('COMPETENCY AND PROFESSIONAL STANDING', 'PRC licenses and TESDA national certificates · as of ' + fmtDate(D.today))}
+    <table style="margin-top:14px"><thead><tr><th>#</th><th>Name</th><th>Plantilla item</th><th>License / NC II</th><th>License no.</th><th>Valid until</th><th>Standing</th><th>License</th></tr></thead><tbody>
+    ${r.map((x, i) => `<tr><td class="num">${i + 1}</td><td>${esc(fullName(x.e))}</td><td>${esc(x.c.kind === 'plantilla' ? (x.c.item || '—') : (x.c.status || 'CoS / JO'))}</td><td>${esc(sv(x.x['Profession / License']))}</td>
+      <td>${esc(sv(x.x['License Number']) || '—')}</td><td>${esc(x.x['Valid Until'] ? fmtDate(x.x['Valid Until']) : '—')}</td><td>${esc(x.st.label)}</td>
+      <td class="licPic">${sv(x.x['License File']) ? `<span class="licImg" data-lic="${esc(x.x['License File'])}">Loading picture…</span>` : '<span class="muted">No scan on file</span>'}</td></tr>`).join('') || '<tr><td colspan="8">No licenses or NC II on record.</td></tr>'}
+    </tbody></table><p style="margin-top:8px"><b>Total: ${r.length}</b></p>${docFoot()}</div>`;
+}
+/* Put the license pictures into an open preview */
+function fillLicPics(root) {
+  (root || document).querySelectorAll('.licImg[data-lic]').forEach(el => licImage(el.dataset.lic).then(d => {
+    el.innerHTML = d ? `<img src="${esc(d)}" alt="License scan">` : '<span class="muted">Scan on file (picture not available)</span>';
+  }));
+}
 function docOutside() {
   const r = outsideRows();
   return `<div class="doc">${docHead('BOE PERSONNEL ASSIGNED OUTSIDE', 'Assigned to other DPWH offices · as of ' + fmtDate(D.today))}
@@ -3614,7 +3658,7 @@ function docRetirement() {
 function preview(title, html, rep) {
   openModal(`<header><div><span class="label">Preview</span><h2>${esc(title)}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
     <div class="body"><div class="preview">${html}</div></div>
-    <footer><span class="muted" style="font-size:.85rem">The PDF is A4 portrait, ready to print or send.</span><div class="actions"><button class="btn" data-act="close">Close</button><button class="btn primary" data-act="repPdf" ${rep}>${ICON.dl} Download PDF</button></div></footer>`, true);
+    <footer><span class="muted" style="font-size:.85rem">The PDF is A4 ${/"comp"/.test(rep || '') ? 'landscape' : 'portrait'}, ready to print or send.</span><div class="actions"><button class="btn" data-act="close">Close</button><button class="btn primary" data-act="repPdf" ${rep}>${ICON.dl} Download PDF</button></div></footer>`, true);
 }
 
 /* A list that shows the first few rows and opens the rest when you ask */
@@ -4970,6 +5014,7 @@ async function buildPdf(spec) {
   const W = land ? 841.89 : 595.28, H = land ? 595.28 : 841.89, M = 72, uw = W - 2 * M, fs = spec.fontSize || 8, lineH = fs * 1.22, pad = 4.5, headH = 18, bottom = 72;
   const logos = [await logoJpeg(1), await logoJpeg(2)].filter(Boolean);
   const logo = logos[0] || null;
+  const imgs = logos.slice();                // every picture in the file: the logos first, then any picture cells (/Im1, /Im2, …)
   const totalW = spec.columns.reduce((s, c) => s + c.w, 0);
   const cols = spec.columns.map(c => Object.assign({}, c, { pw: c.w / totalW * uw }));
   const NAVY = '0 0 0', INK = '0 0 0', GREY = '0.38 0.38 0.38', ORANGE = '0.35 0.35 0.35', HEADFILL = '0.2 0.2 0.2';   // black on white, like the memoranda
@@ -4995,8 +5040,16 @@ async function buildPdf(spec) {
     blocks.push({ t: 'thead', h: headH });
     if (!sec.rows.length) blocks.push({ t: 'empty', h: 18 });
     sec.rows.forEach((r, ri) => {
-      const cells = cols.map((c, ci) => c.wrap ? wrapText(r[ci], c.pw - 2 * pad, false, fs, 4) : [fitText(r[ci], c.pw - 2 * pad, false, fs)]);
-      blocks.push({ t: 'row', cells: cells, zebra: ri % 2 === 1, h: Math.max(1, ...cells.map(x => x.length)) * lineH + 2 * pad });
+      const pics = [];
+      const cells = cols.map((c, ci) => {
+        const v = r[ci];
+        if (v && typeof v === 'object' && v.img) {             // a picture, fitted to the cell
+          const g = v.img, k = Math.min((c.pw - 2 * pad) / g.w, (spec.imgH || 80) / g.h);
+          pics[ci] = { n: imgs.push(g), w: g.w * k, h: g.h * k }; return [];
+        }
+        return c.wrap ? wrapText(v, c.pw - 2 * pad, false, fs, 4) : [fitText(v, c.pw - 2 * pad, false, fs)];
+      });
+      blocks.push({ t: 'row', cells: cells, pics: pics, zebra: ri % 2 === 1, h: Math.max(Math.max(1, ...cells.map(x => x.length)) * lineH, ...pics.filter(Boolean).map(p => p.h)) + 2 * pad });
     });
     if (sec.total) blocks.push({ t: 'sub', text: sec.total, h: 18 });
     if (si < sections.length - 1) blocks.push({ t: 'gap', h: 12 });
@@ -5052,6 +5105,8 @@ async function buildPdf(spec) {
         let cx = M;
         cols.forEach((c, ci) => {
           b.cells[ci].forEach((ln, li) => ops.push(txt(ln, c.a === 'right' ? cx + c.pw - pad - textW(ln, false, fs) : cx + pad, yy + pad + fs * 0.9 + li * lineH, fs, false)));
+          const pic = b.pics && b.pics[ci];
+          if (pic) ops.push('q ' + pic.w.toFixed(2) + ' 0 0 ' + pic.h.toFixed(2) + ' ' + (cx + pad).toFixed(2) + ' ' + Y(yy + pad + pic.h) + ' cm /Im' + pic.n + ' Do Q');
           cx += c.pw;
         });
         ops.push('0.83 0.86 0.9 RG 0.4 w ' + M + ' ' + Y(yy + b.h) + ' m ' + (M + uw).toFixed(2) + ' ' + Y(yy + b.h) + ' l S');
@@ -5098,21 +5153,21 @@ async function buildPdf(spec) {
     return ops.join('\n');
   });
   const enc = s => new TextEncoder().encode(s);
-  const objs = [], firstPage = 5 + logos.length;
+  const objs = [], firstPage = 5 + imgs.length;
   objs.push(enc('<< /Type /Catalog /Pages 2 0 R >>'));
   objs.push(enc('<< /Type /Pages /Kids [' + pages.map((_, k) => (firstPage + k * 2) + ' 0 R').join(' ') + '] /Count ' + pages.length + ' >>'));
-  const F = PDFFONT, nBase = 4 + logos.length + pages.length * 2;      // the embedded font files go after the pages
+  const F = PDFFONT, nBase = 4 + imgs.length + pages.length * 2;      // the embedded font files go after the pages
   const fontObj = (f, k) => '<< /Type /Font /Subtype /TrueType /BaseFont /' + f.tag + ' /FirstChar 32 /LastChar 255 /Widths [' + f.w.join(' ') + '] /FontDescriptor ' + (nBase + 1 + k * 2) + ' 0 R /Encoding /WinAnsiEncoding >>';
   objs.push(enc(F ? fontObj(F.reg, 0) : '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>'));
   objs.push(enc(F ? fontObj(F.bold, 1) : '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'));
-  logos.forEach(g => {
+  imgs.forEach(g => {
     const head = enc('<< /Type /XObject /Subtype /Image /Width ' + g.w + ' /Height ' + g.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + g.bytes.length + ' >>\nstream\n');
     const tail = enc('\nendstream');
     const all = new Uint8Array(head.length + g.bytes.length + tail.length); all.set(head, 0); all.set(g.bytes, head.length); all.set(tail, head.length + g.bytes.length);
     objs.push(all);
   });
   streams.forEach((st, k) => {
-    const xo = logos.map((g, gi) => '/Im' + (gi + 1) + ' ' + (5 + gi) + ' 0 R').join(' ');
+    const xo = imgs.map((g, gi) => '/Im' + (gi + 1) + ' ' + (5 + gi) + ' 0 R').join(' ');
     const res = '/Resources << /Font << /F1 3 0 R /F2 4 0 R >>' + (xo ? ' /XObject << ' + xo + ' >>' : '') + ' >>';
     objs.push(enc('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] ' + res + ' /Contents ' + (firstPage + k * 2 + 1) + ' 0 R >>'));
     const body = enc(st);
@@ -5174,6 +5229,19 @@ const REPORTS = {
       rows: v.map((s, i) => { const pos = IX.pos[s['Position Title']], off = IX.off[s['Office Code']]; return [i + 1, s['Item Number'], s['Position Title'], pos ? pos['Salary Grade'] : '', off ? off['Office Name'] : '', s['Authorized Monthly (PHP)'] === '' ? '' : peso(s['Authorized Monthly (PHP)'])]; }),
       total: 'Total vacant: ' + v.length };
   },
+  async comp() {
+    const r = compRows(); let done = 0;
+    const pics = new Array(r.length);
+    const work = r.map((x, i) => () => licImage(x.x['License File']).then(d => jpegOf(d, 900)).then(j => { pics[i] = j; done++; if (r.length > 3) toast('Getting license pictures… ' + done + ' of ' + r.length); }));
+    const runners = [0, 1, 2, 3].map(async () => { while (work.length) await work.shift()(); });
+    await Promise.all(runners);
+    return { file: 'competency-and-professional-standing', title: 'COMPETENCY AND PROFESSIONAL STANDING', subtitle: 'PRC licenses and TESDA national certificates · as of ' + fmtDate(D.today), landscape: true, imgH: 96,
+      columns: [{ h: '#', w: 3, a: 'right' }, { h: 'Name', w: 15, wrap: true }, { h: 'Plantilla item', w: 11, wrap: true }, { h: 'License / NC II', w: 17, wrap: true }, { h: 'License no.', w: 10, wrap: true },
+        { h: 'Valid until', w: 9, wrap: true }, { h: 'Standing', w: 8, wrap: true }, { h: 'License', w: 27, img: true }],
+      rows: r.map((x, i) => [i + 1, fullName(x.e), x.c.kind === 'plantilla' ? (x.c.item || '—') : (x.c.status || 'CoS / JO'), sv(x.x['Profession / License']), sv(x.x['License Number']) || '—',
+        x.x['Valid Until'] ? fmtDate(x.x['Valid Until']) : '—', x.st.label, pics[i] ? { img: pics[i] } : (sv(x.x['License File']) ? 'Scan on file (picture not available)' : 'No scan on file')]),
+      total: 'Total: ' + r.length + ' license' + (r.length === 1 ? '' : 's') + ' / certificate' + (r.length === 1 ? '' : 's') + ' of ' + orgPeople(new Set(r.map(x => x.e['Employee Number'])).size) };
+  },
   out() {
     const r = outsideRows();
     return { file: 'personnel-assigned-outside', title: 'BOE PERSONNEL ASSIGNED OUTSIDE', subtitle: 'Assigned to other DPWH offices · as of ' + fmtDate(D.today),
@@ -5221,8 +5289,54 @@ function retireGroups() {
     .filter(x => x.r.getFullYear() <= years[4]).sort((a, b) => a.r - b.r);
   return { now, years, pl: list.filter(x => IX.cur[x.e['Employee Number']].kind === 'plantilla'), co: list.filter(x => IX.cur[x.e['Employee Number']].kind === 'contract') };
 }
+/* A license scan as a picture (data URL): from the server (Drive preview of the file), else Drive's public thumbnail
+   when the browser is allowed to read it. '' when neither works. */
+const LICIMG = {};
+function licImage(url) {
+  url = sv(url); if (!url) return Promise.resolve('');
+  if (LICIMG[url]) return LICIMG[url];
+  const id = (url.match(/[-\w]{25,}/) || [])[0];
+  const viaThumb = () => new Promise(res => {
+    if (!id) return res('');
+    const im = new Image(); im.crossOrigin = 'anonymous';
+    im.onload = () => { try { const cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight; cv.getContext('2d').drawImage(im, 0, 0); res(cv.toDataURL('image/jpeg', .9)); } catch (e) { res(''); } };
+    im.onerror = () => res('');
+    im.src = 'https://drive.google.com/thumbnail?sz=w900&id=' + id;
+  });
+  LICIMG[url] = call('getLicenseImage', { url: url }).then(d => d || viaThumb(), () => viaThumb()).then(d => { if (!d) delete LICIMG[url]; return d || ''; });
+  return LICIMG[url];
+}
+/* A data URL as a JPEG for the PDF, at most `max` px on its longer side */
+function jpegOf(dataUrl, max) {
+  return new Promise(res => {
+    if (!dataUrl) return res(null);
+    const im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, (max || 900) / Math.max(im.width, im.height)), w = Math.max(1, Math.round(im.width * k)), h = Math.max(1, Math.round(im.height * k));
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(im, 0, 0, w, h);
+      const bin = atob(cv.toDataURL('image/jpeg', 0.88).split(',')[1]), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      res({ bytes: bytes, w: w, h: h });
+    };
+    im.onerror = () => res(null);
+    im.src = dataUrl;
+  });
+}
+/* Everyone's current licenses and NC IIs: per person, the newest row of each kind */
+function compRows() {
+  const out = [];
+  active().forEach(e => {
+    const id = e['Employee Number'], c = IX.cur[id], seen = {};
+    (IX.lic[id] || []).slice().sort(licSort).forEach(x => {
+      const k = sv(x['Profession / License']).toLowerCase(); if (!k || seen[k]) return; seen[k] = 1;
+      out.push({ e: e, c: c, x: x, st: licStatus(x['Valid Until']) });
+    });
+  });
+  return out.sort((a, b) => fullName(a.e).localeCompare(fullName(b.e)) || sv(a.x['Profession / License']).localeCompare(sv(b.x['Profession / License'])));
+}
 async function reportPdf(kind, a, b) {
-  const spec = REPORTS[kind](a, b);
+  const spec = await REPORTS[kind](a, b);
   const bytes = await buildPdf(spec);
   download('BOE-' + spec.file + '-' + D.today + '.pdf', 'application/pdf', bytes);
 }
@@ -6010,6 +6124,7 @@ document.addEventListener('click', ev => {
   if (act === 'seatFilter') { S.seatFilter = a.dataset.f; return render(); }
   if (act === 'orgDiv') { S.orgDiv = a.dataset.f; return render(); }
   if (act === 'orgKind') { S.orgKind = a.dataset.f; return render(); }
+  if (act === 'orgBasis') { S.orgBasis = a.dataset.f === 'item' ? 'item' : 'assign'; try { localStorage.setItem('boe.orgBasis', S.orgBasis); } catch (e) { /* storage blocked */ } return render(); }
   if (act === 'phImpGo') return photoImportGo();
   if (act === 'orgDl') return formOrgDownload();
   if (act === 'orgLook') return formOrgDownload(true);
@@ -6039,6 +6154,7 @@ document.addEventListener('click', ev => {
     if (rep === 'ml') return preview('Masterlist', docMasterlist(x, y), `data-rep="ml" data-off="${esc(x)}" data-kind="${esc(y)}"`);
     if (rep === 'vac') return preview('Vacant plantilla seats', docVacancies(), 'data-rep="vac"');
     if (rep === 'out') return preview('BOE personnel assigned outside', docOutside(), 'data-rep="out"');
+    if (rep === 'comp') { preview('Competency and professional standing', docComp(), 'data-rep="comp"'); return fillLicPics($('#modalRoot')); }
     if (rep === 'ext') return preview('External personnel assigned to BOE', docExternal(), 'data-rep="ext"');
     return preview('Retirement forecast', docRetirement(), 'data-rep="ret"');
   }
