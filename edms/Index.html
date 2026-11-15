@@ -523,8 +523,8 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
 .mvGrip:focus-visible{outline:none}
 .mvSplit.drag,.mvSplit.drag *{user-select:none}
 .mvSplit.drag iframe{pointer-events:none}
-.mvSplit:not(.open) .mvRight{height:0;border:0;visibility:hidden}
-.mvSplit.open .mvRight{opacity:1;transform:none}
+.mvSplit:not(.open) .mvRight{height:0;border-width:0;visibility:hidden;transition:opacity .3s var(--io),transform .45s var(--io),visibility 0s linear .45s,height 0s linear .45s,border-width 0s linear .45s}
+.mvSplit.open .mvRight{opacity:1;transform:none;transition:opacity .35s var(--io) .08s,transform .45s var(--io),visibility 0s,height 0s,border-width 0s}
 .mvSplit.open .mvRight{position:sticky;top:calc(var(--mvStick,0px) + 8px);height:calc(100vh - var(--mvStick,0px) - 20px);min-height:360px}
 .mvRight .svcViewer{min-height:0}
 .mvRight .svcViewer iframe{position:absolute;inset:0;min-height:0;height:100%}
@@ -547,23 +547,44 @@ th .sortBtn .arr sub{font-size:.62rem;margin-left:1px}
   .mvTools{opacity:1}
 }
 /* Profile: the page slides left and the order viewer takes the right side */
-main:has(.mvSplit.open){max-width:none}
+main:has(.mvSplit.open){max-width:100vw}
 .pfMain{min-width:0;display:flex;flex-direction:column;gap:22px;min-height:calc(100vh - var(--mvStick,0px) - 150px)}
 .pfMain > .svcPanel{flex:1 0 auto}
 .pfSplit.open .pfMain .profileHead{flex-wrap:wrap}
-/* Org chart profile peek */
-.peek{position:fixed;top:var(--mvStick,0px);right:0;bottom:0;width:50vw;z-index:30;background:var(--bg);border-left:1px solid var(--line-2);box-shadow:-14px 0 34px rgba(6,30,69,.16);display:flex;flex-direction:column}
-.peek.enter{animation:peekIn .4s var(--io)}
-@keyframes peekIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
-.peekBar{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 16px;background:var(--grad);color:#fff;flex:none}
-.peekTitle{flex:1;font:700 .88rem var(--cond);letter-spacing:.06em;text-transform:uppercase}
-.peekBody{flex:1;overflow:auto;padding:18px 18px 60px;display:flex;flex-direction:column;gap:18px;overscroll-behavior:contain}
+/* Profile column (org chart, employees) and the order column beside it */
+:root{--pkW:0px;--pkD:0px;--pkT:46vw;--pkDT:34vw;--pkPad:0px}
+.peek,.peekDoc{position:fixed;top:var(--mvStick,0px);bottom:0;z-index:30;overflow:hidden;background:var(--bg);border-left:1px solid var(--line-2);box-shadow:-14px 0 34px rgba(6,30,69,.16);transition:width .45s var(--io),right .45s var(--io),box-shadow .45s}
+.peek{right:var(--pkD);width:var(--pkW)}
+.peekDoc{right:0;width:var(--pkD);z-index:31;background:var(--soft)}
+.peek.closing,.peekDoc.closing{box-shadow:none}
+.peekIn{position:absolute;top:0;bottom:0;left:0;display:flex;flex-direction:column}
+.peek .peekIn{width:var(--pkT)}
+.peekDoc .peekIn{width:var(--pkDT)}
+.pkGrip{position:absolute;left:0;top:0;bottom:0;width:10px;z-index:3;cursor:col-resize;touch-action:none}
+.pkGrip span{position:absolute;left:2px;top:calc(50% - 30px);width:5px;height:60px;border-radius:9px;background:var(--line-2);opacity:.7;transition:background .2s,height .2s,top .2s}
+.pkGrip:hover span,html.pkDrag .pkGrip span{background:var(--orange);opacity:1;height:84px;top:calc(50% - 42px)}
+html.pkDrag,html.pkDrag *{user-select:none}
+html.pkDrag iframe{pointer-events:none}
+html.pkDrag .peek,html.pkDrag .peekDoc,html.pkDrag main{transition:none!important}
+.peekBar{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 18px;background:var(--grad);color:#fff;flex:none}
+.peekTitle{flex:1;min-width:0;font:700 .88rem var(--cond);letter-spacing:.06em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.peekBody{flex:1;overflow:auto;padding:18px 18px 60px 22px;display:flex;flex-direction:column;gap:18px;overscroll-behavior:contain}
+.peekBody.swap{animation:pkSwap .35s var(--io)}
+@keyframes pkSwap{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 .peekBody .profileHead{flex-wrap:wrap}
-html.peeking main{max-width:none;margin:0 50vw 0 0;transition:margin .4s var(--io)}
+.peekBody > *{flex:none}
+.pkView{flex:1;position:relative;min-height:0}
+.pkView iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.pkDocOn{outline:2px solid var(--orange);outline-offset:2px;border-radius:4px}
+main{transition:padding-right .45s var(--io),max-width .45s var(--io)}
+html.peeking main{max-width:calc(1640px + var(--pkPad));padding-right:calc(32px + var(--pkPad))}
 .oc.peekOn{outline:3px solid var(--orange);outline-offset:2px}
+tr.peekOn > td{background:var(--accent-soft)}
+tr.peekOn > td:first-child{box-shadow:inset 4px 0 0 var(--orange)}
 @media (max-width:780px){
-  .peek{width:100vw;top:0}
-  html.peeking main{margin:0}
+  .peek,.peekDoc{top:0}
+  .peek{right:0}
+  html.peeking main{padding-right:13px}
   .pfMain{min-height:0}
 }
 .offPick{display:grid;gap:6px;min-width:0}
@@ -806,6 +827,14 @@ html.classic body{background:#F0F0F0;color:#000;font:12px/1.4 Tahoma,"Segoe UI",
 html.classic *,html.classic *::before,html.classic *::after{animation:none!important;transition-property:background-color,border-color,color,opacity!important;transition-duration:.12s!important;transition-timing-function:linear!important}
 html.classic .spin,html.classic .sync i{animation:spin .9s linear infinite!important}
 html.classic .sync.ok i{animation:none!important}
+/* The simple look keeps its moving columns: the profile / order columns grow and shrink, the page beside them makes room */
+html.classic .peek,html.classic .peekDoc{transition-property:width,right!important;transition-duration:.45s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
+html.classic main{transition-property:padding-right,max-width!important;transition-duration:.45s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
+html.classic .mvSplit{transition-property:grid-template-columns!important;transition-duration:.45s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
+html.classic .mvSplit .mvRight{transition-property:opacity,transform,visibility,height,border-width!important;transition-duration:.35s,.45s,0s,0s,0s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important;transition-delay:0s,0s,.45s,.45s,.45s!important}
+html.classic .mvSplit.open .mvRight{transition-delay:.08s,0s,0s,0s,0s!important}
+html.classic .peekBody.swap{animation:pkSwap .3s cubic-bezier(.4,0,.2,1)!important}
+html.classic.pkDrag .peek,html.classic.pkDrag .peekDoc,html.classic.pkDrag main,html.classic .mvSplit.drag{transition:none!important}
 html.classic .cal{transition:opacity .18s cubic-bezier(.32,.72,0,1),transform .18s cubic-bezier(.32,.72,0,1)!important}
 html.classic .cal *{transition:background-color .17s cubic-bezier(.32,.72,0,1),color .17s cubic-bezier(.32,.72,0,1),transform .17s cubic-bezier(.32,.72,0,1),box-shadow .17s cubic-bezier(.32,.72,0,1)!important}
 html.classic .cal-pk{font-size:22px}
@@ -968,9 +997,13 @@ html.classic .pfMain,html.classic .peekBody{gap:8px}
 html.classic .mvSplit.open .mvRight{height:calc(100vh - var(--mvStick,0px) - 44px)}
 @media (max-width:780px){html.classic .mvSplit.open .mvRight{height:var(--mvH)}}
 html.classic .peek{border-color:#A0A0A0;box-shadow:-4px 0 10px rgba(0,0,0,.15)}
-html.classic .peekBar{background:linear-gradient(#FFFFFF,#E9E9E9);color:#000;border-bottom:1px solid #A0A0A0;padding:3px 6px 3px 8px}
+html.classic .peekBar{padding-left:14px !important;background:linear-gradient(#FFFFFF,#E9E9E9);color:#000;border-bottom:1px solid #A0A0A0;padding:3px 6px 3px 8px}
 html.classic .peekTitle{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none}
-html.classic .peekBody{padding:8px 8px 50px}
+html.classic .peekBody{padding:8px 8px 50px 14px}
+html.classic.peeking main{max-width:none;padding-right:calc(10px + var(--pkPad))}
+@media (max-width:780px){html.classic.peeking main{padding-right:10px}}
+html.classic .peekDoc{border-color:#A0A0A0;box-shadow:-4px 0 10px rgba(0,0,0,.15)}
+html.classic .pkGrip span{border-radius:0;width:4px;background:#C0C0C0}
 html.classic .oc.peekOn{outline:2px solid #3399FF;outline-offset:1px}
 html.classic .mvChip{border-radius:0;font:12px Tahoma,"Segoe UI",Arial,sans-serif;padding:2px 8px;background:#fff;color:#000;border-color:#A0A0A0;box-shadow:none}
 html.classic .mvChip:hover{transform:none;background:#E5F3FB}
@@ -1094,13 +1127,24 @@ body.wide main{max-width:none}
 .otK{position:relative;padding:20px 7px 0;display:flex;justify-content:center;min-width:0}
 .otK::before{content:"";position:absolute;top:0;left:0;right:0;height:20px;border-top:2px solid var(--wire)}
 .otK::after{content:"";position:absolute;top:0;left:calc(50% - 1px);width:2px;height:20px;background:var(--wire)}
-.otK:first-child::before{left:calc(50% - 1px);border-left:2px solid var(--wire);border-top-left-radius:12px}
-.otK:last-child::before{right:calc(50% - 1px);border-right:2px solid var(--wire);border-top-right-radius:12px}
-.otK:first-child::after,.otK:last-child::after{display:none}
-.otK:only-child::before{display:none}
-.otK:only-child::after{display:block}
+.otK:first-of-type::before{left:calc(50% - 1px);border-left:2px solid var(--wire);border-top-left-radius:12px}
+.otK:last-of-type::before{right:calc(50% - 1px);border-right:2px solid var(--wire);border-top-right-radius:12px}
+.otK:first-of-type::after,.otK:last-of-type::after{display:none}
+.otK:only-of-type::before{display:none}
+.otK:only-of-type::after{display:block}
 .org{--wire:#9DB2D3}
 .org .oStem{background:var(--wire);flex:none}
+.otKids.tuck{display:grid;grid-template-rows:auto 1fr;align-items:start;justify-content:center}
+.otKids.tuck > .tS{align-self:stretch}
+.otLane{position:absolute;top:0;bottom:0;right:-1px;width:2px;background:var(--wire);z-index:1}
+.otLane.atL{right:auto;left:-1px}
+.otTuck{position:relative;padding-top:24px;display:flex;justify-content:center;align-self:start}
+.otTuck.mid{justify-self:center}
+.otTuck.side{justify-self:stretch}
+.otTuck::before{content:"";position:absolute;top:0;height:24px;box-sizing:border-box}
+.otTuck.mid::before{left:calc(50% - 1px);width:2px;background:var(--wire)}
+.otTuck.side.L::before{left:calc(50% - 1px);right:-1px;border-top:2px solid var(--wire);border-left:2px solid var(--wire);border-top-left-radius:12px;margin-top:-2px}
+.otTuck.side.R::before{left:-1px;right:calc(50% - 1px);border-top:2px solid var(--wire);border-right:2px solid var(--wire);border-top-right-radius:12px;margin-top:-2px}
 .otL{width:var(--ocW,250px);display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}
 .otL > .oc.head,.otS > .oc.head,.ot > .oc.head{width:var(--ocW,250px);min-width:0;max-width:none}
 .ot > .ouH{width:var(--ocW,250px);margin-bottom:6px}
@@ -1151,7 +1195,7 @@ html.classic .org .oc,html.classic .org .oc.cos,html.classic .org .oc.head{borde
 .ot > .otSH{margin-bottom:8px}
 .otUnder{width:var(--ocW,250px);display:grid;gap:6px}
 .otS > .oc.head,.otS > .oVac{max-width:100%}
-@media (max-width:680px){.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oc.ghost,.ouH.ghost,.otSH.ghost,.oSkip{display:none}.otL > .oc.head,.otS > .oc.head,.ot > .oc.head,.ot > .ouH{width:100%}}
+@media (max-width:680px){.otKids.tuck{display:flex}.otLane,.otTuck::before{display:none}.otTuck{padding-top:8px;transform:none!important}.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oc.ghost,.ouH.ghost,.otSH.ghost,.oSkip{display:none}.otL > .oc.head,.otS > .oc.head,.ot > .oc.head,.ot > .ouH{width:100%}}
 html.classic .org{--wire:#808080}
 html.classic .otSH,html.classic .ouH{border-radius:0;font:bold 11px/1.15 Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0}
 html.classic .otSH small,html.classic .ouH small{font:bold 10px Tahoma,"Segoe UI",Arial,sans-serif;color:#fff}
@@ -2492,28 +2536,109 @@ function mvAddGo() {
   return formJobChange(id, type);
 }
 
-/* Org chart: clicking a person opens their profile in the right half; the chart stays put on the left. */
-let PEEK_HTML = '';
+/* Org chart and Employees list: clicking a person opens their profile beside the page, and a scanned order from that
+   profile opens a third column on the far right. Each column grows out from the right edge while the page beside it
+   makes room, and shrinks back the same way. Drag a column's left edge to resize it (remembered). */
+let PEEK_HTML = '', PEEK_T = null, PEEK_DT = null;
+const PEEK_VIEWS = ['org', 'employees'];
+const PK = { w: 0.46, d: 0.34 };
+try { PK.w = Number(localStorage.getItem('boe.pkW')) || PK.w; PK.d = Number(localStorage.getItem('boe.pkD')) || PK.d; } catch (e) { /* storage blocked */ }
+const pkRoot = () => document.documentElement;
+/* Sizes in px from the saved shares of the window; on a phone each column takes the whole screen */
+function pkSizes() {
+  const W = window.innerWidth, phone = mvPhone(), doc = !!document.querySelector('#peekRoot .peekDoc:not(.closing)');
+  let w = PK.w, d = doc ? PK.d : 0;
+  if (w + d > 0.86) d = Math.max(0.2, 0.86 - w), w = Math.min(w, 0.86 - d);
+  return phone ? { w: W, d: doc ? W : 0, pad: false } : { w: Math.round(W * w), d: Math.round(W * d), pad: true };
+}
+function pkSet(open) {
+  const r = pkRoot(), z = pkSizes(), on = open && !!S.peek;
+  r.style.setProperty('--pkT', z.w + 'px'); r.style.setProperty('--pkDT', (z.d || Math.round(window.innerWidth * PK.d)) + 'px');
+  r.style.setProperty('--pkW', (on ? z.w : 0) + 'px'); r.style.setProperty('--pkD', (on ? z.d : 0) + 'px');
+  r.style.setProperty('--pkPad', (on && z.pad ? z.w + z.d : 0) + 'px');
+  if (S.view === 'org') { clearTimeout(PEEK_DT); PEEK_DT = setTimeout(fitOrg, 480); }
+}
 function renderPeek() {
   const r = $('#peekRoot'); if (!r) return;
-  const on = !!(S.peek && S.view === 'org' && IX.emp[S.peek]);
-  document.documentElement.classList.toggle('peeking', on);
-  document.querySelectorAll('.oc.peekOn').forEach(b => b.classList.remove('peekOn'));
-  if (!on) { S.peek = null; PEEK_HTML = ''; r.innerHTML = ''; return; }
-  mvStick();
-  document.querySelectorAll('.oc[data-id="' + S.peek + '"]').forEach(b => b.classList.add('peekOn'));
-  const e = IX.emp[S.peek];
-  const html = `<aside class="peek" role="dialog" aria-label="Profile of ${esc(fullName(e))}">
-    <div class="peekBar"><span class="peekTitle">Employee profile</span>
-      <button type="button" class="btn small" data-act="peekFull">Open full page</button>
-      <button type="button" class="svcClose" data-act="peekClose" aria-label="Close the profile" title="Close (Esc)">×</button></div>
-    <div class="peekBody">${viewProfile(S.peek, true)}</div></aside>`;
-  if (html === PEEK_HTML) return;
-  const fresh = !PEEK_HTML || r.dataset.id !== S.peek, body = r.querySelector('.peekBody'), y = body && !fresh ? body.scrollTop : 0;
-  PEEK_HTML = html; r.dataset.id = S.peek; r.innerHTML = html;
-  if (fresh) r.querySelector('.peek').classList.add('enter'); else r.querySelector('.peekBody').scrollTop = y;
-  loadPhoto(S.peek);
+  const on = !!(S.peek && PEEK_VIEWS.includes(S.view) && IX.emp[S.peek]);
+  document.querySelectorAll('.peekOn').forEach(b => b.classList.remove('peekOn'));
+  if (!on) { S.peek = null; if (r.firstChild) pkShut(); return; }
+  clearTimeout(PEEK_T); mvStick();
+  document.querySelectorAll('#view [data-act="profile"][data-id="' + S.peek + '"]').forEach(b => b.classList.add('peekOn'));
+  let pk = r.querySelector('.peek');
+  if (!pk) {
+    r.insertAdjacentHTML('afterbegin', `<aside class="peek" role="dialog" aria-label="Employee profile"><div class="pkGrip" data-k="w" title="Drag to resize · double-click to reset" aria-hidden="true"><span></span></div>
+      <div class="peekIn"><div class="peekBar"><span class="peekTitle">Employee profile</span>
+        <button type="button" class="btn small" data-act="peekFull">Open full page</button>
+        <button type="button" class="svcClose" data-act="peekClose" aria-label="Close the profile" title="Close (Esc)">×</button></div>
+      <div class="peekBody"></div></div></aside>`);
+    pk = r.querySelector('.peek'); PEEK_HTML = ''; pkWire(pk.querySelector('.pkGrip'));
+  }
+  pk.classList.remove('closing');
+  const html = viewProfile(S.peek, true), body = pk.querySelector('.peekBody');
+  if (html !== PEEK_HTML || pk.dataset.id !== S.peek) {
+    const same = pk.dataset.id === S.peek, y = body.scrollTop;
+    body.innerHTML = html; PEEK_HTML = html;
+    if (same) body.scrollTop = y; else { body.scrollTop = 0; body.classList.remove('swap'); void body.offsetWidth; body.classList.add('swap'); pkDocClose(); }
+    pk.dataset.id = S.peek; loadPhoto(S.peek);
+  }
+  void pk.offsetWidth;                       // start from width 0 so the column grows
+  pkRoot().classList.add('peeking'); pkSet(true);
 }
+function pkShut(instant) {
+  const r = $('#peekRoot'); S.peek = null;
+  r.querySelectorAll('.peek,.peekDoc').forEach(x => x.classList.add('closing'));
+  if (instant) pkRoot().classList.add('pkDrag');
+  pkSet(false);
+  clearTimeout(PEEK_T);
+  PEEK_T = setTimeout(() => { if (S.peek) return; r.innerHTML = ''; PEEK_HTML = ''; pkRoot().classList.remove('peeking', 'pkDrag'); }, instant ? 0 : 470);
+}
+/* The third column: a scanned order opened from the profile column */
+function pkDoc(file, ref, link) {
+  const r = $('#peekRoot'); if (!r || !S.peek) return window.open(file, '_blank', 'noopener');
+  let d = r.querySelector('.peekDoc');
+  if (!d) {
+    r.insertAdjacentHTML('beforeend', `<aside class="peekDoc" role="dialog" aria-label="Scanned order"><div class="pkGrip" data-k="d" title="Drag to resize · double-click to reset" aria-hidden="true"><span></span></div>
+      <div class="peekIn"><div class="peekBar"><span class="peekTitle pkDocT"></span><a class="svcOpenNew" target="_blank" rel="noopener">Open ↗</a>
+        <button type="button" class="svcClose" data-act="pkDocClose" aria-label="Close the order" title="Close (Esc)">×</button></div>
+      <div class="svcViewer pkView"></div></div></aside>`);
+    d = r.querySelector('.peekDoc'); pkWire(d.querySelector('.pkGrip'));
+  }
+  clearTimeout(d._t); d.classList.remove('closing');
+  d.querySelector('.pkDocT').textContent = ref || 'Scanned order'; d.querySelector('.svcOpenNew').href = file;
+  const v = d.querySelector('.pkView'); v.innerHTML = '<div class="svcLoad">Loading the scan…</div>';
+  const ifr = document.createElement('iframe'); ifr.src = drivePreview(file); ifr.title = 'Scanned order';
+  ifr.addEventListener('load', () => { const l = v.querySelector('.svcLoad'); if (l) l.remove(); });
+  v.appendChild(ifr);
+  document.querySelectorAll('#peekRoot .pkDocOn').forEach(x => x.classList.remove('pkDocOn'));
+  if (link) link.classList.add('pkDocOn');
+  void d.offsetWidth; pkSet(true);
+}
+function pkDocClose() {
+  const d = document.querySelector('#peekRoot .peekDoc'); if (!d || d.classList.contains('closing')) return;
+  d.classList.add('closing'); document.querySelectorAll('#peekRoot .pkDocOn').forEach(x => x.classList.remove('pkDocOn'));
+  pkSet(!!S.peek);
+  d._t = setTimeout(() => { if (d.classList.contains('closing')) d.remove(); }, 470);
+}
+/* Drag a column's left edge: the profile (w) or the order (d) */
+function pkWire(g) {
+  g.addEventListener('pointerdown', ev => {
+    if (mvPhone()) return;
+    ev.preventDefault(); try { g.setPointerCapture(ev.pointerId); } catch (e) { /* older browsers */ }
+    const k = g.dataset.k, r = pkRoot(); r.classList.add('pkDrag');
+    const move = e => {
+      const W = window.innerWidth, z = pkSizes();
+      if (k === 'd') PK.d = Math.min(0.6, Math.max(0.18, (W - e.clientX) / W));
+      else PK.w = Math.min(0.8, Math.max(0.24, (W - z.d - e.clientX) / W));
+      pkSet(true);
+    };
+    const up = () => { r.classList.remove('pkDrag'); g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up);
+      try { localStorage.setItem('boe.pkW', String(PK.w)); localStorage.setItem('boe.pkD', String(PK.d)); } catch (e) { /* storage blocked */ } };
+    g.addEventListener('pointermove', move); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+  });
+  g.addEventListener('dblclick', () => { if (g.dataset.k === 'd') PK.d = 0.34; else PK.w = 0.46; pkSet(true); });
+}
+window.addEventListener('resize', () => { if (S.peek) pkSet(true); });
 /* ═══════════════════════ organizational chart ═══════════════════════ */
 /* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
    designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone:
@@ -2559,6 +2684,59 @@ const orgMid = e => orgSg(e) >= 19 && orgSg(e) < 22;     // unit-head rank (Engi
 const orgPeople = n => n + (n === 1 ? ' person' : ' people');
 /* The chart is drawn as a tree: a head on top, a line down, and the offices under it side by side on one level. */
 const orgVac = what => `<div class="oNone oVac"><b>Vacant</b><span>${esc(what)} not on record</span></div>`;
+/* Staff of an office who belong to no unit no longer get a column of their own. They sit under the two neighbouring
+   columns that end highest, and the line from the head runs down between those two columns to them. hs = how tall each
+   column is (in people); returns the left column of the pair, or -1 when there are fewer than two columns. */
+function tuckAt(hs) { const p = tuckPlan(hs); return p ? p.at : -1; }
+/* Where the staff go: under the two neighbouring columns that end highest. When those two end about level the staff sit
+   centred below both (mode 'mid'); otherwise they sit under the shorter one (mode 'L' = left column, 'R' = right),
+   and the line comes down between the two columns and turns to them. */
+function tuckPlan(hs) {
+  if (hs.length < 2) return null;
+  let best = null, bv = Infinity; const mid = (hs.length - 2) / 2;
+  for (let i = 0; i < hs.length - 1; i++) {
+    const a = hs[i], b = hs[i + 1], even = Math.abs(a - b) <= 1;
+    const v = (even ? Math.max(a, b) : Math.min(a, b)) + Math.abs(i - mid) * 0.01;
+    if (v < bv) { bv = v; best = { at: i, mode: even ? 'mid' : a < b ? 'L' : 'R', top: even ? Math.max(a, b) : Math.min(a, b) }; }
+  }
+  return best;
+}
+/* The grid that holds the columns plus the tucked staff. cls = class names for the on-screen chart or the download. */
+function tuckGrid(kids, plan, tuck, c) {
+  const { at, mode } = plan, short = mode === 'mid' ? -1 : mode === 'L' ? at : at + 1;
+  return `<div class="${c.kids} tuck" style="grid-template-columns:repeat(${kids.length},auto)">${kids.map((k, i) => {
+    const row1 = mode === 'mid' ? (i === at || i === at + 1) : i === short;
+    const lane = mode === 'mid' ? i === at : i === short;
+    return `<div class="${c.k}${row1 ? ' tS' : ''}" style="grid-column:${i + 1};grid-row:${row1 ? '1' : '1 / span 2'}">${k}${lane ? `<i class="${c.lane}${mode === 'R' ? ' atL' : ''}"></i>` : ''}</div>`;
+  }).join('')}<section class="${c.tuck} ${mode === 'mid' ? 'mid' : 'side ' + mode}" style="grid-column:${mode === 'mid' ? (at + 1) + ' / span 2' : short + 1};grid-row:2">${tuck}</section></div>`;
+}
+/* How tall an office's column is, counted in cards */
+function orgEst(code, O) {
+  const ks = orgKidsOf(code, O), own = (O.at[code] || []).length;
+  if (!ks.length) return own + 2;
+  const hs = ks.map(k => orgEst(k, O)), p = own > 1 ? tuckPlan(hs) : null;
+  return 3 + Math.max(Math.max.apply(null, hs), p ? p.top + own + 1 : 0);
+}
+/* After layout: slide each tucked staff block so its centre sits on the line coming down between its two columns */
+function alignTuck(root) {
+  root.querySelectorAll('.otTuck.mid,.xtuck.mid').forEach(t => { t.style.transform = ''; });
+  root.querySelectorAll('.otTuck.mid,.xtuck.mid').forEach(t => {
+    const lane = t.parentNode.querySelector(':scope > .tS > .otLane, :scope > .tS > .xlane'); if (!lane) return;
+    const z = (t.getBoundingClientRect().width / (t.offsetWidth || 1)) || 1, a = lane.getBoundingClientRect(), b = t.getBoundingClientRect();
+    t.style.transform = 'translateX(' + (((a.left + a.width / 2) - (b.left + b.width / 2)) / z).toFixed(1) + 'px)';
+  });
+}
+/* Columns side by side; with staff, the staff go under the two shortest neighbouring columns (see tuckAt) */
+function orgKidsT(kids, hs, staff) {
+  const plan = staff ? tuckPlan(hs) : null;
+  if (!plan) return orgKids((staff ? [staff.col] : []).concat(kids));
+  return '<i class="oStem"></i>' + tuckGrid(kids, plan, staff.tuck, { kids: 'otKids', k: 'otK', lane: 'otLane', tuck: 'otTuck' });
+}
+/* The tucked staff block: a header, anyone of section-chief or unit-head rank first, then everyone else */
+function orgTuckCol(name, list) {
+  const top = list.filter(e => orgBig(e) || orgMid(e)), rest = list.filter(e => top.indexOf(e) < 0);
+  return `<div class="otL">${orgUH(name, list.length)}${top.map(e => orgCard(e, true)).join('')}${rest.length ? `<div class="ouB">${rest.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
+}
 const orgKids = kids => kids.length ? `<i class="oStem"></i><div class="otKids">${kids.map(k => `<div class="otK">${k}</div>`).join('')}</div>` : '';
 let ORG_K = 0;
 const orgUH = (name, n, ghost) => { const or = XO.color === 'orange' || (XO.color === 'alt' && !ghost && ORG_K++ % 2 === 1); return `<div class="ouH${or ? ' or' : ''}${ghost ? ' ghost' : ''}"${ghost ? ' aria-hidden="true"' : ''}><b>${esc(name)}</b>${ghost ? '' : `<small>${n}</small>`}</div>`; };
@@ -2602,7 +2780,8 @@ function orgNode(code, O, deepParent) {
   const hasKids = k => orgKidsOf(k, O).length > 0;
   if (lvl === 'Unit') {
     // a unit with sub-units: its head, then the sub-units side by side
-    if (kids.length) return `<div class="ot">${orgUH(name, O.count(code))}${head ? orgCard(head, true) : orgGhost(true)}${orgKids((rest.length ? [orgUnit('Sub-unit staff', rest, null, true)] : []).concat(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k), null, true))))}</div>`;
+    if (kids.length) return `<div class="ot">${orgUH(name, O.count(code))}${head ? orgCard(head, true) : orgGhost(true)}${orgKidsT(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k), null, true)), kids.map(k => under(k).length + 1),
+      rest.length ? { col: orgUnit('Sub-unit staff', rest, null, true), tuck: orgTuckCol('Sub-unit staff', rest) } : null)}</div>`;
     const col = orgUnit(name, rest, head);
     // a unit straight under a division sits on the unit level, not the section level
     return deepParent ? `<div class="ot">${orgSH('', 0, true)}${orgGhost(true)}<i class="oSkip"></i>${col}</div>` : col;
@@ -2610,8 +2789,8 @@ function orgNode(code, O, deepParent) {
   if (lvl !== 'Division') {
     const headHtml = head ? orgCard(head, true) : orgVac('Section chief');
     if (!kids.length) return orgLead(name, O.count(code), headHtml, rest);
-    const cols = (rest.length ? [orgUnit('Section staff', rest)] : []).concat(kids.map(k => orgNode(k, O)));
-    return `<div class="ot">${orgSH(name, O.count(code))}${headHtml}${orgKids(cols)}</div>`;
+    const staff = rest.length ? { col: orgUnit('Section staff', rest), tuck: orgTuckCol('Section staff', rest) } : null;
+    return `<div class="ot">${orgSH(name, O.count(code))}${headHtml}${orgKidsT(kids.map(k => orgNode(k, O)), kids.map(k => orgEst(k, O)), staff)}</div>`;
   }
   const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
   let tree;
@@ -2628,8 +2807,9 @@ function orgNode(code, O, deepParent) {
     tree = `${head ? orgCard(head, true, name) : orgVac('Director')}${asst}${orgKids(level)}`;
   } else {
     const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && hasKids(k));
-    const cols = (rest.length ? [orgDivStaff(/division/i.test(name) ? 'Division staff' : 'Office staff', rest, deep)] : []).concat(kids.map(k => orgNode(k, O, deep)));
-    tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKids(cols)}`;
+    const sName = /division/i.test(name) ? 'Division staff' : 'Office staff';
+    const staff = rest.length ? { col: orgDivStaff(sName, rest, deep), tuck: orgTuckCol(sName, rest) } : null;
+    tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKidsT(kids.map(k => orgNode(k, O, deep)), kids.map(k => orgEst(k, O)), staff)}`;
   }
   return `<section class="od"><div class="odH"><h2>${esc(name)}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}${(() => { const f = XO.hideField ? (IX.offKids[code] || []).map(o => String(o['Office Code'])).filter(orgIsField).reduce((n, k) => n + O.count(k), 0) : 0; return f ? ' · ' + f + ' field workers not shown' : ''; })()}</span></div>
       <div class="odB"><div class="otFit"><div class="ot root" style="${orgVars(1, 1, 250)}">${tree}</div></div></div></section>`;
@@ -2649,8 +2829,8 @@ function fitOrg() {
   const bar = document.querySelector('.top'); if (bar) document.documentElement.style.setProperty('--topH', (/sticky|fixed/.test(getComputedStyle(bar).position) ? bar.offsetHeight : 0) + 'px');
   document.querySelectorAll('.ot.root').forEach(t => {
     const set = (a, b, w) => { t.style.cssText = orgVars(a, b, w); t.classList.toggle('n2s', a === 2); t.classList.toggle('n2h', b === 2); };
-    set(1, 1, 250);
-    if (window.innerWidth <= 680) return;
+    set(1, 1, 250); t.style.zoom = '';
+    if (window.innerWidth <= 680) return alignTuck(t);
     const room = t.parentNode.clientWidth, wide = () => t.getBoundingClientRect().width;
     const over = sel => Array.from(t.querySelectorAll(sel)).reduce((m, b) => Math.max(m, b.scrollWidth - b.clientWidth), 0);
     const small = '.oc:not(.head):not(.ghost) .ocT b', big = '.oc.head:not(.ghost) .ocT b';
@@ -2662,6 +2842,7 @@ function fitOrg() {
       const a = over(small) > 0 ? 2 : 1, b = over(big) > 0 ? 2 : 1;
       if (a + b > 2) set(a, b, want);
     }
+    alignTuck(t);
     const need = wide();
     if (need > room + 1) t.style.zoom = String(Math.max(0.6, Math.floor(room / need * 100) / 100));
   });
@@ -2725,11 +2906,22 @@ const XO_CSS = `
 .xo .xk{position:relative;padding:26px 9px 0;display:flex;justify-content:center}
 .xo .xk::before{content:"";position:absolute;top:0;left:0;right:0;height:26px;border-top:3px solid var(--wire)}
 .xo .xk::after{content:"";position:absolute;top:0;left:calc(50% - 1.5px);width:3px;height:26px;background:var(--wire)}
-.xo .xk:first-child::before{left:calc(50% - 1.5px);border-left:3px solid var(--wire);border-top-left-radius:16px}
-.xo .xk:last-child::before{right:calc(50% - 1.5px);border-right:3px solid var(--wire);border-top-right-radius:16px}
-.xo .xk:first-child::after,.xo .xk:last-child::after{display:none}
-.xo .xk:only-child::before{display:none}
-.xo .xk:only-child::after{display:block}
+.xo .xk:first-of-type::before{left:calc(50% - 1.5px);border-left:3px solid var(--wire);border-top-left-radius:16px}
+.xo .xk:last-of-type::before{right:calc(50% - 1.5px);border-right:3px solid var(--wire);border-top-right-radius:16px}
+.xo .xk:first-of-type::after,.xo .xk:last-of-type::after{display:none}
+.xo .xk:only-of-type::before{display:none}
+.xo .xk:only-of-type::after{display:block}
+.xo .xkids.tuck{display:grid;grid-template-rows:auto 1fr;align-items:start;justify-content:center}
+.xo .xkids.tuck > .tS{align-self:stretch}
+.xo .xlane{position:absolute;top:0;bottom:0;right:-1.5px;width:3px;background:var(--wire);z-index:1}
+.xo .xlane.atL{right:auto;left:-1.5px}
+.xo .xtuck{position:relative;padding-top:30px;display:flex;justify-content:center;align-self:start}
+.xo .xtuck.mid{justify-self:center}
+.xo .xtuck.side{justify-self:stretch}
+.xo .xtuck::before{content:"";position:absolute;top:0;height:30px;box-sizing:border-box}
+.xo .xtuck.mid::before{left:calc(50% - 1.5px);width:3px;background:var(--wire)}
+.xo .xtuck.side.L::before{left:calc(50% - 1.5px);right:-1.5px;border-top:3px solid var(--wire);border-left:3px solid var(--wire);border-top-left-radius:16px;margin-top:-3px}
+.xo .xtuck.side.R::before{left:-1.5px;right:calc(50% - 1.5px);border-top:3px solid var(--wire);border-right:3px solid var(--wire);border-top-right-radius:16px;margin-top:-3px}
 .xo .xsh{align-self:stretch;min-width:300px;height:60px;padding:6px 14px;border-radius:14px;background:#0F2A5C;color:#fff;display:flex;gap:10px;align-items:center;justify-content:center;box-shadow:var(--sh)}
 .xo .xsh b{font:700 19px/1.08 var(--ft);letter-spacing:.05em;text-transform:uppercase;text-align:center}
 .xo .xsh i,.xo .xuh i{font:700 13px var(--fb);background:rgba(255,255,255,.22);border-radius:999px;min-width:26px;height:26px;padding:0 7px;display:flex;align-items:center;justify-content:center;flex:none}
@@ -2826,6 +3018,13 @@ function xoDivStaff(name, list, X, deep) {
   return `<div class="xn">${bar}${top}<i class="xskip"></i><div class="xleaf"><div class="xuh ghost"></div>${mid.length ? mid.map(e => xoCard(e, '', X, 'mid')).join('') : '<div class="xgapm"></div>'}<div class="xub">${rest.map(e => xoCard(e, '', X)).join('')}</div></div></div>`;
 }
 /* Children side by side on one level, wired to the box above them */
+function xoKidsT(kids, hs, staff) {
+  const plan = staff ? tuckPlan(hs) : null;
+  if (!plan) return xoKids((staff ? [staff.col] : []).concat(kids));
+  return '<i class="xstem"></i>' + tuckGrid(kids, plan, staff.tuck, { kids: 'xkids', k: 'xk', lane: 'xlane', tuck: 'xtuck' });
+}
+/* Tucked staff in the download: chief / unit-head rank first, then everyone else */
+const xoTuckCol = (name, list, X) => { const top = list.filter(e => orgBig(e) || orgMid(e)); return xoLeaf(name, top.concat(list.filter(e => top.indexOf(e) < 0)), X, { plain: true }); };
 const xoKids = kids => kids.length ? `<i class="xstem"></i><div class="xkids">${kids.map(k => `<div class="xk">${k}</div>`).join('')}</div>` : '';
 function xoRole(code, h) {
   const name = IX.off[code]['Office Name'], lvl = orgLevel(IX.off[code]);
@@ -2852,20 +3051,22 @@ function xoNode(code, O, X, root, deepParent) {
     }
     // a unit with sub-units: its head, then its own staff and the sub-units side by side
     const or = XO.color === 'orange' || (XO.color === 'alt' && X.k++ % 2 === 1);
-    const sub = (rest.length ? [xoLeaf('Sub-unit Staff', rest, X, { plain: true })] : []).concat(kids.map(k => xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X, { plain: true })));
-    return `<div class="xn">${root ? '' : `<div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${O.count(code)}</i></div>`}${head ? xoCard(head, '', X, 'mid') : '<div class="xgapm"></div>'}${xoKids(sub)}</div>`;
+    const sub = kids.map(k => xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X, { plain: true }));
+    const st = rest.length ? { col: xoLeaf('Sub-unit Staff', rest, X, { plain: true }), tuck: xoLeaf('Sub-unit Staff', rest, X, { plain: true }) } : null;
+    return `<div class="xn">${root ? '' : `<div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${O.count(code)}</i></div>`}${head ? xoCard(head, '', X, 'mid') : '<div class="xgapm"></div>'}${xoKidsT(sub, kids.map(k => xoUnder(k, O).length + 1), st)}</div>`;
   }
-  const below = [];
+  const below = [], hs = kids.map(k => orgEst(k, O));
+  let st = null;
   if (lvl === 'Division') {
     const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && orgKidsOf(k, O).length > 0);
-    if (rest.length) below.push(xoDivStaff('Division Staff', rest, X, deep));
+    if (rest.length) st = { col: xoDivStaff('Division Staff', rest, X, deep), tuck: xoTuckCol('Division Staff', rest, X) };
     kids.forEach(k => below.push(xoNode(k, O, X, false, deep)));
   } else {
-    if (rest.length && kids.length) below.push(xoLeaf('Section Staff', rest, X));
+    if (rest.length && kids.length) st = { col: xoLeaf('Section Staff', rest, X), tuck: xoTuckCol('Section Staff', rest, X) };
     kids.forEach(k => below.push(xoNode(k, O, X, false)));
   }
   const stack = !kids.length && lvl !== 'Division' && rest.length ? `<div class="xstack ind">${rest.map(e => xoCard(e, '', X)).join('')}</div>` : '';
-  return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKids(below)}</div>`;
+  return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKidsT(below, hs, st)}</div>`;
 }
 /* The top of the bureau: Director, then the Assistant Director, then one level holding the Director's own staff,
    the other offices under the Director (ADMIN) and every division in `divs` */
@@ -2961,8 +3162,9 @@ async function xoCanvas(onStep) {
     const el = d.body.firstElementChild;
     try { await d.fonts.ready; } catch (e) { /* older browsers */ }
     await Promise.all(Array.from(d.images).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+    alignTuck(el);
     const box = el.getBoundingClientRect(); W = Math.ceil(box.width); H = Math.ceil(box.height);
-    XO_LAST = { html: built.html, W: W, H: H };
+    XO_LAST = { html: el.outerHTML, W: W, H: H };
     xml = new XMLSerializer().serializeToString(el);
   } finally { fr.remove(); }
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><foreignObject x="0" y="0" width="${W}" height="${H}">${xml}</foreignObject></svg>`;
@@ -5507,9 +5709,10 @@ document.addEventListener('click', ev => {
     if (PENDING.length || SYNCING) return toast('Wait a moment: your changes are still saving.', 'err', 4000);
     return signOut('You are signed out.');
   }
-  if (act === 'profile' && S.view === 'org') { S.peek = id; return renderPeek(); }
-  if (act === 'peekClose') { S.peek = null; return renderPeek(); }
-  if (act === 'peekFull') { const p = S.peek; S.peek = null; renderPeek(); return go('profile', p); }
+  if (act === 'profile' && PEEK_VIEWS.includes(S.view) && !a.closest('#peekRoot')) { S.peek = id; return renderPeek(); }
+  if (act === 'peekClose') return pkShut();
+  if (act === 'pkDocClose') return pkDocClose();
+  if (act === 'peekFull') { const p = S.peek; pkShut(true); return go('profile', p); }
   if (act === 'profile') return go('profile', id);
   if (act === 'kind') { S.kind = a.dataset.kind; return render(); }
   if (act === 'more') {
@@ -5565,7 +5768,7 @@ document.addEventListener('click', ev => {
   if (act === 'clearFilters') { S.filters[a.dataset.list] = []; return render(); }
   if (act === 'pubBadge') { if (D.me.role === 'Admin') return go('admin'); return toast('Public test link: anyone with this link can see and change these records.'); }
   if (act === 'offToggle') { S.offOpen[a.dataset.office] = !S.offOpen[a.dataset.office]; return render(); }
-  if (act === 'orderPreview') { if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return; ev.preventDefault(); mvMark(a.closest('.mvRow')); return openOrderPreview(a.dataset.file, a.dataset.ref); }
+  if (act === 'orderPreview') { if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return; ev.preventDefault(); if (a.closest('#peekRoot')) return pkDoc(a.dataset.file, a.dataset.ref, a); mvMark(a.closest('.mvRow')); return openOrderPreview(a.dataset.file, a.dataset.ref); }
   if (act === 'orderClose') { mvMark(null); return closeOrderPreview(); }
   if (act === 'mvRow') { if (ev.target.closest('a,button,input,select')) return; mvMark(a); return openOrderPreview(a.dataset.file, a.dataset.ref); }
   if (act === 'mvType') { S.mvType = a.dataset.t || ''; S.mvLimit = 0; return mvRedraw(); }
@@ -5621,9 +5824,10 @@ document.addEventListener('contextmenu', ev => {
 });
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape' && $('#modalRoot').innerHTML) closeModal();
-  else if (ev.key === 'Escape' && S.peek) { S.peek = null; renderPeek(); }
+  else if (ev.key === 'Escape' && document.querySelector('#peekRoot .peekDoc:not(.closing)')) pkDocClose();
+  else if (ev.key === 'Escape' && S.peek) pkShut();
   else if (ev.key === 'Escape' && ev.target.id === 'q' && ev.target.value) $('#qClear').click();
-  if (ev.key === 'Enter' && ev.target.matches('tr[data-act="profile"]')) go('profile', ev.target.dataset.id);
+  if (ev.key === 'Enter' && ev.target.matches('tr[data-act="profile"]')) { if (PEEK_VIEWS.includes(S.view)) { S.peek = ev.target.dataset.id; renderPeek(); } else go('profile', ev.target.dataset.id); }
   if (ev.target.id === 'q') {
     const items = Array.from(document.querySelectorAll('#sugg .sgr'));
     if ((ev.key === 'ArrowDown' || ev.key === 'ArrowUp') && !$('#sugg').hidden && items.length) {
