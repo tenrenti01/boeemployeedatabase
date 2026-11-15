@@ -5811,7 +5811,12 @@ document.addEventListener('click', ev => {
   if (act === 'rmOffice') return formRemoveOffice(a.dataset.code);
   if (act === 'editUser') return formUser(a.dataset.email);
   if (act === 'jobChange') return formJobChange(id);
-  if (act === 'jobReassign') return formJobChange(id, 'Reassignment');
+  if (act === 'jobReassign') {
+    formJobChange(id, 'Reassignment');
+    // Open the New office list straight away (still within the click that opened the form, so the browser allows it)
+    setTimeout(() => { const sl = $('#mOffice_pick') || $('#mOffice'); if (!sl || sl.tagName !== 'SELECT') return; sl.focus({ preventScroll: true }); try { sl.showPicker(); } catch (e) { /* older browsers: the list stays focused */ } }, 260);
+    return;
+  }
   if (act === 'nameChange') return formNameChange(id);
   if (act === 'editPerson') return formEditPerson(id);
   if (act === 'coe') { if (id) formCOE(id); return; }
