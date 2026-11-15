@@ -233,7 +233,7 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--orange);
 .profileHead .who3{flex:1;min-width:240px;display:grid;gap:8px}
 .chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-.profileHead .actions{flex-wrap:nowrap}
+.profileHead .actions{flex-wrap:wrap}
 dl.kv{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:7px 16px}
 dl.kv dt{white-space:nowrap;color:var(--muted);font:600 .82rem var(--cond);letter-spacing:.1em;text-transform:uppercase;padding-top:2px}
 dl.kv dd{margin:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -553,19 +553,40 @@ main:has(.mvSplit.open){max-width:100vw}
 .pfSplit.open .pfMain .profileHead{flex-wrap:wrap}
 /* Profile column (org chart, employees) and the order column beside it */
 :root{--pkW:0px;--pkD:0px;--pkT:46vw;--pkDT:34vw;--pkPad:0px}
-.peek,.peekDoc{position:fixed;top:var(--mvStick,0px);bottom:0;z-index:30;overflow:hidden;background:var(--bg);border-left:1px solid var(--line-2);box-shadow:-14px 0 34px rgba(6,30,69,.16);transition:width .45s var(--io),right .45s var(--io),box-shadow .45s}
-.peek{right:var(--pkD);width:var(--pkW)}
+.peek,.peekDoc,.orgSide{position:fixed;top:var(--mvStick,0px);bottom:0;z-index:30;overflow:hidden;background:var(--bg);border-left:1px solid var(--line-2);box-shadow:-14px 0 34px rgba(6,30,69,.16);transition:width .45s var(--io),right .45s var(--io),box-shadow .45s}
+.peek,.orgSide{right:var(--pkD);width:var(--pkW)}
 .peekDoc{right:0;width:var(--pkD);z-index:31;background:var(--soft)}
-.peek.closing,.peekDoc.closing{box-shadow:none}
+.peek.closing,.peekDoc.closing,.orgSide.closing{box-shadow:none}
 .peekIn{position:absolute;top:0;bottom:0;left:0;display:flex;flex-direction:column}
-.peek .peekIn{width:var(--pkT)}
+.peek .peekIn,.orgSide .peekIn{width:var(--pkT)}
+.osBody{flex:1;overflow:auto;padding:14px 14px 60px 20px;overscroll-behavior:contain;background-color:var(--bg);background-image:radial-gradient(circle,rgba(13,71,161,.10) 1.4px,transparent 1.7px);background-size:26px 26px}
+.osBody .org{gap:14px}
+.osBody .od{overflow:visible;width:max-content;min-width:100%}
+.osBody .odB{overflow:visible}
+.oc.osOn{outline:3px solid var(--orange);outline-offset:2px}
+.oc.ocPulse{position:relative;z-index:6;animation:ocPulse 1.6s cubic-bezier(.4,0,.2,1)}
+@keyframes ocPulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(247,147,30,0)}28%{transform:scale(1.16);box-shadow:0 0 0 5px rgba(247,147,30,.6),0 0 36px 10px rgba(247,147,30,.55)}62%{transform:scale(1.16);box-shadow:0 0 0 5px rgba(247,147,30,.45),0 0 30px 8px rgba(247,147,30,.4)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(247,147,30,0)}}
+/* Organization panel on the profile */
+.relGrid{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2.4fr);gap:14px 22px;align-items:start}
+.relCol{display:grid;gap:8px;min-width:0;align-content:start}
+.relPeers{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.relPeers:not(.all) > .relC:nth-child(n+13){display:none}
+.relC{display:flex;gap:10px;align-items:center;text-align:left;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font:inherit;color:inherit;transition:border-color .2s,box-shadow .2s,transform .2s}
+.relC:hover{border-color:var(--orange);box-shadow:0 6px 16px rgba(6,30,69,.12);transform:translateY(-1px)}
+.relC .av{width:40px;height:40px;flex:none}
+.relC.big .av{width:54px;height:54px}
+.relT{display:grid;min-width:0}
+.relT b{font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.relT small{font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.relMore{justify-self:start}
+@media (max-width:780px){.relGrid{grid-template-columns:1fr}}
 .peekDoc .peekIn{width:var(--pkDT)}
 .pkGrip{position:absolute;left:0;top:0;bottom:0;width:10px;z-index:3;cursor:col-resize;touch-action:none}
 .pkGrip span{position:absolute;left:2px;top:calc(50% - 30px);width:5px;height:60px;border-radius:9px;background:var(--line-2);opacity:.7;transition:background .2s,height .2s,top .2s}
 .pkGrip:hover span,html.pkDrag .pkGrip span{background:var(--orange);opacity:1;height:84px;top:calc(50% - 42px)}
 html.pkDrag,html.pkDrag *{user-select:none}
 html.pkDrag iframe{pointer-events:none}
-html.pkDrag .peek,html.pkDrag .peekDoc,html.pkDrag main{transition:none!important}
+html.pkDrag .peek,html.pkDrag .peekDoc,html.pkDrag .orgSide,html.pkDrag main{transition:none!important}
 .peekBar{display:flex;align-items:center;gap:10px;padding:8px 10px 8px 18px;background:var(--grad);color:#fff;flex:none}
 .peekTitle{flex:1;min-width:0;font:700 .88rem var(--cond);letter-spacing:.06em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .peekBody{flex:1;overflow:auto;padding:18px 18px 60px 22px;display:flex;flex-direction:column;gap:18px;overscroll-behavior:contain}
@@ -582,8 +603,8 @@ html.peeking main{max-width:calc(1640px + var(--pkPad));padding-right:calc(32px 
 tr.peekOn > td{background:var(--accent-soft)}
 tr.peekOn > td:first-child{box-shadow:inset 4px 0 0 var(--orange)}
 @media (max-width:780px){
-  .peek,.peekDoc{top:0}
-  .peek{right:0}
+  .peek,.peekDoc,.orgSide{top:0}
+  .peek,.orgSide{right:0}
   html.peeking main{padding-right:13px}
   .pfMain{min-height:0}
 }
@@ -834,8 +855,16 @@ html.classic .mvSplit{transition-property:grid-template-columns!important;transi
 html.classic .mvSplit .mvRight{transition-property:opacity,transform,visibility,height,border-width!important;transition-duration:.35s,.45s,0s,0s,0s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important;transition-delay:0s,0s,.45s,.45s,.45s!important}
 html.classic .mvSplit.open .mvRight{transition-delay:.08s,0s,0s,0s,0s!important}
 html.classic .otFit.orgMorph{transition-property:transform!important;transition-duration:.55s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
+html.classic .oc.ocPulse{animation:ocPulse 1.6s cubic-bezier(.4,0,.2,1)!important}
+html.classic .orgSide{transition-property:width,right!important;transition-duration:.45s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
+html.classic .orgSide{border-color:#A0A0A0;box-shadow:-4px 0 10px rgba(0,0,0,.15)}
+html.classic .oc.osOn{outline:2px solid #3399FF;outline-offset:1px}
+html.classic .relC{border-radius:0;border-color:#A0A0A0;padding:3px 6px;background:#fff}
+html.classic .relC:hover{transform:none;box-shadow:none;background:#E5F3FB;border-color:#3399FF}
+html.classic .relC .av{width:32px;height:32px}
+html.classic .relC.big .av{width:42px;height:42px}
 html.classic .peekBody.swap{animation:pkSwap .3s cubic-bezier(.4,0,.2,1)!important}
-html.classic.pkDrag .peek,html.classic.pkDrag .peekDoc,html.classic.pkDrag main,html.classic .mvSplit.drag{transition:none!important}
+html.classic.pkDrag .peek,html.classic.pkDrag .peekDoc,html.classic.pkDrag .orgSide,html.classic.pkDrag main,html.classic .mvSplit.drag{transition:none!important}
 html.classic .cal{transition:opacity .18s cubic-bezier(.32,.72,0,1),transform .18s cubic-bezier(.32,.72,0,1)!important}
 html.classic .cal *{transition:background-color .17s cubic-bezier(.32,.72,0,1),color .17s cubic-bezier(.32,.72,0,1),transform .17s cubic-bezier(.32,.72,0,1),box-shadow .17s cubic-bezier(.32,.72,0,1)!important}
 html.classic .cal-pk{font-size:22px}
@@ -1914,7 +1943,7 @@ function afterRender() {
   if (S.view === 'reports') wireEmpPicker('srEmp');
   if (S.view === 'movements') wireMovements();
   if (S.view === 'profile' && S.id) { loadPhoto(S.id); wireSplit(); }
-  renderPeek();
+  renderPeek(); renderOrgSide();
 }
 /* Redraw after background data arrives, unless nothing changed or the person is typing on the page */
 function softRender() {
@@ -2126,6 +2155,7 @@ function viewProfile(pid, peek) {
         ${canEdit() ? `<button class="btn primary" data-act="jobChange" data-id="${esc(id)}" title="${c.separated ? 'Reemploy or record a new job' : 'Promotion, transfer, step increment, reassignment, renewal…'}">Change</button>
         ${canEdit() && !c.separated ? `<button class="btn" data-act="jobReassign" data-id="${esc(id)}" title="Move this person to another office, section or unit">Reassign</button>` : ''}
           <div class="btnStack"><button class="btn" data-act="editPerson" data-id="${esc(id)}">Edit details</button><button class="subtle" data-act="nameChange" data-id="${esc(id)}">Name change</button></div>` : ''}
+        ${orgSpot(id) ? `<button class="btn" data-act="orgShow" data-id="${esc(id)}" title="Open the org chart beside this profile and find this person">Show in org chart</button>` : ''}
         <button class="btn" data-act="printSR" data-id="${esc(id)}">Service record</button>
         <button class="btn" data-act="coe" data-id="${esc(id)}">Certificate of employment</button>
         ${canEdit() && !c.separated ? `<button class="btn danger" data-act="remove" data-id="${esc(id)}" title="Retirement, resignation, death and other causes">${ICON.trash} Remove</button>` : ''}
@@ -2148,6 +2178,7 @@ function viewProfile(pid, peek) {
       <dt>Service start</dt><dd>${esc(fmtDate(c.start))}</dd>
       <dt>Years of service</dt><dd>${c.years === '' ? '—' : esc(c.years)}</dd>
     </dl></section>
+  ${orgPanel(id)}
   <div class="grid2">
     <section class="panel"><div class="panelHead"><h3>${hi('idcard')}Personal</h3></div>
       <dl class="kv two">
@@ -2543,7 +2574,7 @@ function pkSizes() {
   return phone ? { w: W, d: doc ? W : 0, pad: false } : { w: Math.round(W * w), d: Math.round(W * d), pad: true };
 }
 function pkSet(open) {
-  const r = pkRoot(), z = pkSizes(), on = open && !!S.peek;
+  const r = pkRoot(), z = pkSizes(), on = open && (!!S.peek || !!S.orgSide);
   r.style.setProperty('--pkT', z.w + 'px'); r.style.setProperty('--pkDT', (z.d || Math.round(window.innerWidth * PK.d)) + 'px');
   r.style.setProperty('--pkW', (on ? z.w : 0) + 'px'); r.style.setProperty('--pkD', (on ? z.d : 0) + 'px');
   r.style.setProperty('--pkPad', (on && z.pad ? z.w + z.d : 0) + 'px');
@@ -2553,7 +2584,7 @@ function renderPeek() {
   const r = $('#peekRoot'); if (!r) return;
   const on = !!(S.peek && PEEK_VIEWS.includes(S.view) && IX.emp[S.peek]);
   document.querySelectorAll('.peekOn').forEach(b => b.classList.remove('peekOn'));
-  if (!on) { S.peek = null; if (r.firstChild) pkShut(); return; }
+  if (!on) { S.peek = null; if (r.querySelector('.peek')) pkShut(); return; }
   clearTimeout(PEEK_T); mvStick();
   document.querySelectorAll('#view [data-act="profile"][data-id="' + S.peek + '"]').forEach(b => b.classList.add('peekOn'));
   let pk = r.querySelector('.peek');
@@ -2582,7 +2613,7 @@ function pkShut(instant) {
   if (instant) pkRoot().classList.add('pkDrag');
   pkSet(false);
   clearTimeout(PEEK_T);
-  PEEK_T = setTimeout(() => { if (S.peek) return; r.innerHTML = ''; PEEK_HTML = ''; pkRoot().classList.remove('peeking', 'pkDrag'); }, instant ? 0 : 470);
+  PEEK_T = setTimeout(() => { if (S.peek) return; r.querySelectorAll('.peek,.peekDoc').forEach(x => x.remove()); PEEK_HTML = ''; pkRoot().classList.remove('pkDrag'); if (!r.querySelector('.orgSide')) pkRoot().classList.remove('peeking'); }, instant ? 0 : 470);
 }
 /* The third column: a scanned order opened from the profile column */
 function pkDoc(file, ref, link) {
@@ -2629,7 +2660,98 @@ function pkWire(g) {
   });
   g.addEventListener('dblclick', () => { if (g.dataset.k === 'd') PK.d = 0.34; else PK.w = 0.46; pkSet(true); });
 }
-window.addEventListener('resize', () => { if (S.peek) pkSet(true); });
+window.addEventListener('resize', () => { if (S.peek || S.orgSide) pkSet(true); });
+/* ── Where a person sits: their immediate supervisor and peers, and the org chart column on the profile page ── */
+/* The chart's index with everyone (not only plantilla), and who leads an office the same way the chart decides it */
+function orgAll() {
+  const keep = S.orgKind; S.orgKind = 'all'; let O; try { O = orgIndex(); } finally { S.orgKind = keep; }
+  const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
+  O.roots = roots; O.apex = roots.find(c => /director/i.test(IX.off[c]['Office Name'])) || '';
+  O.asst = O.apex ? (IX.offKids[O.apex] || []).map(o => String(o['Office Code'])).find(c => /assistant/i.test(IX.off[c]['Office Name'])) || '' : '';
+  O.lead = k => orgLevel(IX.off[k]) === 'Unit' ? orgUnitHead(k, O) : O.head(k);
+  return O;
+}
+/* The person's BOE office (none for separated people, people outside BOE or with no office) */
+const orgSpot = id => { const c = IX.cur[id]; if (!c || c.separated) return ''; const k = String(c.officeCode); return k !== '' && IX.off[k] && !isOutside(k) ? k : ''; };
+/* Immediate supervisor = the nearest head above them (the head of their own office, or of the office above when they lead it).
+   Peers = the others in their office; for a head, the heads of the neighbouring offices. */
+function orgRelations(id) {
+  const code = orgSpot(id); if (!code) return null;
+  const O = orgAll(), path = IX.offPath[code] || [], idOf = e => e ? String(e['Employee Number']) : '';
+  const isHead = idOf(O.lead(code)) === String(id);
+  let sup = null;
+  for (let i = path.length - 1 - (isHead ? 1 : 0); i >= 0 && !sup; i--) { const k = sv(path[i]['Office Code']), h = O.lead(k); if (h && idOf(h) !== String(id)) sup = { e: h, off: k }; }
+  if (!sup && O.apex && path.length && sv(path[0]['Office Code']) !== O.apex) { const h = O.head(O.apex); if (h && idOf(h) !== String(id)) sup = { e: h, off: O.apex }; }
+  let peers = [];
+  if (isHead) {
+    const parent = path.length > 1 ? sv(path[path.length - 2]['Office Code']) : '';
+    const sibs = parent ? (IX.offKids[parent] || []).map(o => String(o['Office Code'])) : O.roots.filter(k => k !== O.apex);
+    peers = sibs.filter(k => k !== code).map(k => ({ e: O.lead(k), off: k })).filter(x => x.e && idOf(x.e) !== String(id));
+  } else peers = (O.at[code] || []).filter(e => idOf(e) !== String(id) && (!sup || idOf(e) !== idOf(sup.e))).map(e => ({ e: e, off: code }));
+  return { sup: sup, peers: peers, isHead: isHead, code: code };
+}
+function orgPanel(id) {
+  const R = orgRelations(id); if (!R) return '';
+  const pos = e => IX.cur[e['Employee Number']].position || 'Position not on record';
+  const chip = (e, sub, big) => `<button type="button" class="relC${big ? ' big' : ''}" data-act="profile" data-id="${esc(e['Employee Number'])}" title="Open ${esc(fullName(e))}">${avatar(e)}<span class="relT"><b>${esc(fullName(e))}</b><small>${esc(sub)}</small></span></button>`;
+  return `<section class="panel orgRel"><div class="panelHead"><h3>${hi('org')}Organization</h3><span class="label">${esc(offLetterName(R.code))}</span></div>
+    <div class="relGrid">
+      <div class="relCol"><div class="label">Immediate supervisor</div>${R.sup ? chip(R.sup.e, pos(R.sup.e) + ' · ' + IX.off[R.sup.off]['Office Name'], true) : '<span class="muted">None above them on record</span>'}</div>
+      <div class="relCol"><div class="label">${R.isHead ? 'Peers · heads of the neighbouring offices' : 'Peers'} · ${R.peers.length}</div>
+        <div class="relPeers">${R.peers.map(x => chip(x.e, R.isHead ? IX.off[x.off]['Office Name'] : pos(x.e))).join('') || '<span class="muted">No one else in this office</span>'}</div>
+        ${R.peers.length > 12 ? `<button type="button" class="subtle relMore" data-act="relMore">Show all ${R.peers.length}</button>` : ''}</div>
+    </div></section>`;
+}
+/* Glide a chart to a person, then make their card grow, glow and settle */
+function orgFocus(box, id) {
+  const card = (box || $('#view')).querySelector('.oc[data-id="' + id + '"]'); if (!card) return;
+  document.querySelectorAll('.oc.osOn').forEach(c => c.classList.remove('osOn'));
+  if (box) {
+    const b = box.getBoundingClientRect(), r = card.getBoundingClientRect();
+    box.scrollTo({ top: box.scrollTop + r.top - b.top - (box.clientHeight - r.height) / 2, left: box.scrollLeft + r.left - b.left - (box.clientWidth - r.width) / 2, behavior: 'smooth' });
+  } else card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+  setTimeout(() => { card.classList.remove('ocPulse'); void card.offsetWidth; card.classList.add('ocPulse', 'osOn'); setTimeout(() => card.classList.remove('ocPulse'), 1700); }, 700);
+}
+let OS_HTML = '', OS_T = null;
+/* The person's division as a chart (their own office's division; the whole Director's office for OD) */
+function orgSideHtml(id) {
+  const code = orgSpot(id); if (!code) return null;
+  const O = orgAll(), div = sv((IX.offPath[code] || [])[0]['Office Code']);
+  const keep = XO.hideField; if (orgIsField(code)) XO.hideField = false;   // show the field workers when the person is one
+  let html; try { ORG_K = 0; html = orgNode(div, O); } finally { XO.hideField = keep; }
+  return { div: div, html: `<div class="org" style="${orgVars(1, 1, 250)}">${html}</div>` };
+}
+function renderOrgSide() {
+  const r = $('#peekRoot'); if (!r) return;
+  const on = !!(S.orgSide && S.view === 'profile' && S.id && IX.emp[S.id]);
+  let el = r.querySelector('.orgSide');
+  if (!on) {
+    S.orgSide = false;
+    if (el && !el.classList.contains('closing')) {
+      el.classList.add('closing'); pkSet(false); clearTimeout(OS_T);
+      OS_T = setTimeout(() => { if (S.orgSide) return; el.remove(); OS_HTML = ''; if (!r.querySelector('.peek,.orgSide')) pkRoot().classList.remove('peeking'); }, 470);
+    }
+    return;
+  }
+  clearTimeout(OS_T); mvStick();
+  if (!el) {
+    r.insertAdjacentHTML('beforeend', `<aside class="orgSide" role="dialog" aria-label="Org chart"><div class="pkGrip" data-k="w" title="Drag to resize · double-click to reset" aria-hidden="true"><span></span></div>
+      <div class="peekIn"><div class="peekBar"><span class="peekTitle osTitle">Org chart</span>
+        <button type="button" class="svcClose" data-act="orgSideClose" aria-label="Close the org chart" title="Close (Esc)">×</button></div>
+      <div class="osBody"></div></div></aside>`);
+    el = r.querySelector('.orgSide'); pkWire(el.querySelector('.pkGrip')); OS_HTML = '';
+  }
+  const fresh = el.classList.contains('closing') || !OS_HTML;
+  el.classList.remove('closing');
+  const built = orgSideHtml(S.id), body = el.querySelector('.osBody');
+  const html = built ? built.html : '<p class="empty">This person is not on the BOE org chart (separated, outside BOE or no office on record).</p>';
+  if (html !== OS_HTML) { body.innerHTML = html; OS_HTML = html; }
+  el.querySelector('.osTitle').textContent = built ? 'Org chart · ' + IX.off[built.div]['Office Name'] : 'Org chart';
+  void el.offsetWidth; pkRoot().classList.add('peeking'); pkSet(true);
+  const id = S.id;
+  // once the column has opened: a short pause, fit the chart, glide to the person and make them pulse
+  setTimeout(() => { if (!S.orgSide || S.id !== id) return; fitOrg(); orgFocus(body, id); }, fresh ? 600 : 120);
+}
 /* ═══════════════════════ organizational chart ═══════════════════════ */
 /* Drawn from the Offices tree and where each person works today. The head of a division or section is the person
    designated OIC there, else the highest-graded plantilla employee assigned straight to that office. Units list everyone:
@@ -5649,7 +5771,14 @@ document.addEventListener('click', ev => {
     if (PENDING.length || SYNCING) return toast('Wait a moment: your changes are still saving.', 'err', 4000);
     return signOut('You are signed out.');
   }
-  if (act === 'profile' && PEEK_VIEWS.includes(S.view) && !a.closest('#peekRoot')) { S.peek = id; return renderPeek(); }
+  if (act === 'profile' && PEEK_VIEWS.includes(S.view) && (!a.closest('#peekRoot') || a.closest('.peek'))) { S.peek = id; return renderPeek(); }
+  if (act === 'orgShow') {
+    if (S.view === 'profile') { S.orgSide = true; return renderOrgSide(); }
+    if (S.view === 'org') return orgFocus(null, id);
+    S.peek = id; go('org'); return setTimeout(() => orgFocus(null, id), 1250);
+  }
+  if (act === 'orgSideClose') { S.orgSide = false; return renderOrgSide(); }
+  if (act === 'relMore') { const p = a.closest('.relCol').querySelector('.relPeers'); p.classList.toggle('all'); a.textContent = p.classList.contains('all') ? 'Show fewer' : 'Show all ' + p.children.length; return; }
   if (act === 'peekClose') return pkShut();
   if (act === 'pkDocClose') return pkDocClose();
   if (act === 'peekFull') { const p = S.peek; pkShut(true); return go('profile', p); }
@@ -5766,6 +5895,7 @@ document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape' && $('#modalRoot').innerHTML) closeModal();
   else if (ev.key === 'Escape' && document.querySelector('#peekRoot .peekDoc:not(.closing)')) pkDocClose();
   else if (ev.key === 'Escape' && S.peek) pkShut();
+  else if (ev.key === 'Escape' && S.orgSide) { S.orgSide = false; renderOrgSide(); }
   else if (ev.key === 'Escape' && ev.target.id === 'q' && ev.target.value) $('#qClear').click();
   if (ev.key === 'Enter' && ev.target.matches('tr[data-act="profile"]')) { if (PEEK_VIEWS.includes(S.view)) { S.peek = ev.target.dataset.id; renderPeek(); } else go('profile', ev.target.dataset.id); }
   if (ev.target.id === 'q') {
