@@ -2188,7 +2188,6 @@ function viewProfile(pid, peek) {
       <dt>Service start</dt><dd>${esc(fmtDate(c.start))}</dd>
       <dt>Years of service</dt><dd>${c.years === '' ? '—' : esc(c.years)}</dd>
     </dl></section>
-  ${orgPanel(id)}
   <div class="grid2">
     <section class="panel"><div class="panelHead"><h3>${hi('idcard')}Personal</h3></div>
       <dl class="kv two">
@@ -2209,7 +2208,8 @@ function viewProfile(pid, peek) {
   <section class="panel${peek ? '' : ' svcPanel'}">
     <div class="panelHead"><h3>${hi('history')}Service history</h3><span class="label">${h.length} ${h.length === 1 ? 'entry' : 'entries'} · newest first</span></div>
     ${timeline}
-  </section>`;
+  </section>
+  ${orgPanel(id)}`;
   if (peek) return body;
   /* The whole profile slides left and the scanned order takes the right side, full height under the top bar.
      Drag the divider to resize; on a phone the order comes up from the bottom instead. */
@@ -2685,31 +2685,55 @@ function orgAll() {
 /* The person's BOE office (none for separated people, people outside BOE or with no office) */
 const orgSpot = id => { const c = IX.cur[id]; if (!c || c.separated) return ''; const k = String(c.officeCode); return k !== '' && IX.off[k] && !isOutside(k) ? k : ''; };
 /* Immediate supervisor = the nearest head above them (the head of their own office, or of the office above when they lead it).
-   Peers = the others in their office; for a head, the heads of the neighbouring offices. */
+   Peers = the others in their office; for a head, the heads of the neighbouring offices.
+   The Director's office follows its chart: the leads of its groups (Technical Staff, Clerical Staff, the offices under the
+   Director, the Assistant Director's staff) report to the Assistant Director, and each group's members to their lead. */
+const orgTech = e => { const c = IX.cur[e['Employee Number']], p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
 function orgRelations(id) {
   const code = orgSpot(id); if (!code) return null;
+  id = String(id);
   const O = orgAll(), path = IX.offPath[code] || [], idOf = e => e ? String(e['Employee Number']) : '';
-  const isHead = idOf(O.lead(code)) === String(id);
+  const pos = e => IX.cur[e['Employee Number']].position || 'Position not on record';
+  const offName = k => IX.off[k]['Office Name'];
+  // ── the Director's office
+  if (O.apex && path.length && sv(path[0]['Office Code']) === O.apex) {
+    const dir = O.head(O.apex), ad = O.asst ? O.head(O.asst) : null, apexName = offName(O.apex);
+    const rest = (O.at[O.apex] || []).filter(e => e !== dir), groups = [];
+    const mk = (label, list) => { if (!list.length) return; const lead = list.find(e => IX.cur[e['Employee Number']].kind === 'plantilla') || list[0]; groups.push({ label: label, lead: lead, members: list.filter(e => e !== lead) }); };
+    mk(apexName + ' - Technical Staff', rest.filter(orgTech));
+    mk(apexName + ' - Clerical Staff', rest.filter(e => !orgTech(e)));
+    if (O.asst) { const ar = (O.at[O.asst] || []).filter(e => e !== ad), al = ar.find(orgTech); if (ar.length) groups.push({ label: offName(O.asst) + ' - staff', lead: al || null, members: ar.filter(e => e !== al) }); }
+    const leads = groups.filter(g => g.lead).map(g => ({ e: g.lead, sub: g.label }))
+      .concat((IX.offKids[O.apex] || []).map(o => String(o['Office Code'])).filter(k => k !== O.asst).map(k => ({ e: O.lead(k), sub: offName(k), k: k })).filter(x => x.e));
+    const top = ad ? { e: ad, sub: pos(ad) + ' · ' + offName(O.asst) } : dir ? { e: dir, sub: pos(dir) + ' · ' + apexName } : null;
+    if (idOf(dir) === id) return { sup: null, peers: O.roots.filter(k => k !== O.apex).map(k => ({ e: O.head(k), sub: offName(k) })).filter(x => x.e), isHead: true, code: code };
+    if (ad && idOf(ad) === id) return { sup: dir ? { e: dir, sub: pos(dir) + ' · ' + apexName } : null, peers: [], isHead: true, code: code };
+    const asLead = leads.find(x => idOf(x.e) === id);
+    if (asLead) return { sup: top, peers: leads.filter(x => x !== asLead), isHead: true, code: code };
+    const g = groups.find(x => x.members.some(e => idOf(e) === id));
+    if (g) return { sup: g.lead ? { e: g.lead, sub: pos(g.lead) + ' · ' + g.label } : top, peers: g.members.filter(e => idOf(e) !== id).map(e => ({ e: e, sub: pos(e) })), isHead: false, code: code };
+    // anyone else (e.g. inside the offices under the Director) falls through to the usual rule
+  }
+  const isHead = idOf(O.lead(code)) === id;
   let sup = null;
-  for (let i = path.length - 1 - (isHead ? 1 : 0); i >= 0 && !sup; i--) { const k = sv(path[i]['Office Code']), h = O.lead(k); if (h && idOf(h) !== String(id)) sup = { e: h, off: k }; }
-  if (!sup && O.apex && path.length && sv(path[0]['Office Code']) !== O.apex) { const h = O.head(O.apex); if (h && idOf(h) !== String(id)) sup = { e: h, off: O.apex }; }
+  for (let i = path.length - 1 - (isHead ? 1 : 0); i >= 0 && !sup; i--) { const k = sv(path[i]['Office Code']), h = O.lead(k); if (h && idOf(h) !== id) sup = { e: h, sub: pos(h) + ' · ' + offName(k) }; }
+  if (!sup && O.apex && path.length && sv(path[0]['Office Code']) !== O.apex) { const h = O.head(O.apex); if (h && idOf(h) !== id) sup = { e: h, sub: pos(h) + ' · ' + offName(O.apex) }; }
   let peers = [];
   if (isHead) {
     const parent = path.length > 1 ? sv(path[path.length - 2]['Office Code']) : '';
     const sibs = parent ? (IX.offKids[parent] || []).map(o => String(o['Office Code'])) : O.roots.filter(k => k !== O.apex);
-    peers = sibs.filter(k => k !== code).map(k => ({ e: O.lead(k), off: k })).filter(x => x.e && idOf(x.e) !== String(id));
-  } else peers = (O.at[code] || []).filter(e => idOf(e) !== String(id) && (!sup || idOf(e) !== idOf(sup.e))).map(e => ({ e: e, off: code }));
+    peers = sibs.filter(k => k !== code).map(k => ({ e: O.lead(k), sub: offName(k) })).filter(x => x.e && idOf(x.e) !== id);
+  } else peers = (O.at[code] || []).filter(e => idOf(e) !== id && (!sup || idOf(e) !== idOf(sup.e))).map(e => ({ e: e, sub: pos(e) }));
   return { sup: sup, peers: peers, isHead: isHead, code: code };
 }
 function orgPanel(id) {
   const R = orgRelations(id); if (!R) return '';
-  const pos = e => IX.cur[e['Employee Number']].position || 'Position not on record';
   const chip = (e, sub, big) => `<button type="button" class="relC${big ? ' big' : ''}" data-act="profile" data-id="${esc(e['Employee Number'])}" title="Open ${esc(fullName(e))}">${avatar(e)}<span class="relT"><b>${esc(fullName(e))}</b><small>${esc(sub)}</small></span></button>`;
   return `<section class="panel orgRel"><div class="panelHead"><h3>${hi('org')}Organization</h3><span class="label">${esc(offLetterName(R.code))}</span></div>
     <div class="relGrid">
-      <div class="relCol"><div class="label">Immediate supervisor</div>${R.sup ? chip(R.sup.e, pos(R.sup.e) + ' · ' + IX.off[R.sup.off]['Office Name'], true) : '<span class="muted">None above them on record</span>'}</div>
-      <div class="relCol"><div class="label">${R.isHead ? 'Peers · heads of the neighbouring offices' : 'Peers'} · ${R.peers.length}</div>
-        <div class="relPeers">${R.peers.map(x => chip(x.e, R.isHead ? IX.off[x.off]['Office Name'] : pos(x.e))).join('') || '<span class="muted">No one else in this office</span>'}</div>
+      <div class="relCol"><div class="label">Immediate supervisor</div>${R.sup ? chip(R.sup.e, R.sup.sub, true) : '<span class="muted">None above them on record</span>'}</div>
+      <div class="relCol"><div class="label">${R.isHead ? 'Peers · fellow heads' : 'Peers'} · ${R.peers.length}</div>
+        <div class="relPeers">${R.peers.map(x => chip(x.e, x.sub)).join('') || '<span class="muted">No peers on record</span>'}</div>
         ${R.peers.length > 12 ? `<button type="button" class="subtle relMore" data-act="relMore">Show all ${R.peers.length}</button>` : ''}</div>
     </div></section>`;
 }
