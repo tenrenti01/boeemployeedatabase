@@ -2619,6 +2619,7 @@ function renderPeek() {
 }
 function pkShut(instant) {
   const r = $('#peekRoot'); S.peek = null;
+  document.querySelectorAll('#view .osOn, #view .peekOn').forEach(x => x.classList.remove('osOn', 'peekOn', 'ocPulse'));   // let go of the highlighted person
   r.querySelectorAll('.peek,.peekDoc').forEach(x => x.classList.add('closing'));
   if (instant) pkRoot().classList.add('pkDrag');
   pkSet(false);
