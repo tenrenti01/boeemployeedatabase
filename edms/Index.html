@@ -3718,6 +3718,11 @@ function checkRequired(list) {
   });
   return ok;
 }
+/* After saving a change: stay on the Org Chart / Employees page with the profile column open when it was open there */
+function goAfterSave(id) {
+  if (S.peek && PEEK_VIEWS.includes(S.view)) { if (id && IX.emp[id]) S.peek = String(id); return render(); }
+  go('profile', id);
+}
 function openForm(title, sub, inner, onSave, saveLabel) {
   openModal(`<header><div><span class="label">${esc(sub)}</span><h2>${esc(title)}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
     <form id="theForm" novalidate><div class="body">${inner}<div class="formErr" id="formErr" hidden></div></div>
@@ -3732,7 +3737,7 @@ function openForm(title, sub, inner, onSave, saveLabel) {
     if (LOCAL[run.fn] && !run.wait) {
       let r;
       try { r = queueSave(run.fn, run.payload); } catch (e) { err.textContent = e.message; err.hidden = false; return; }
-      closeModal(); toast(run.done || 'Saved'); if (run.go) go(run.go); else go('profile', r.id);
+      closeModal(); toast(run.done || 'Saved'); if (run.go) go(run.go); else goAfterSave(r.id);
       return;
     }
     btn.disabled = true; btn.textContent = PENDING.length ? 'Finishing other saves…' : 'Checking…';
@@ -3746,7 +3751,7 @@ function openForm(title, sub, inner, onSave, saveLabel) {
         try { extra = (await run.after(res)) || ''; } catch (e2) { extra = ' — but the scan did not upload: ' + e2.message; }
       }
       closeModal(); toast((run.done || 'Saved') + extra, extra ? 'err' : '', extra ? 7000 : 0);
-      if (run.go) go(run.go); else go('profile', res.id);
+      if (run.go) go(run.go); else goAfterSave(res.id);
     } catch (e) {
       err.textContent = e.message; err.hidden = false; btn.disabled = false; btn.textContent = saveLabel || 'Save';
     }
