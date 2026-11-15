@@ -3488,6 +3488,10 @@ function viewReports() {
       <p class="muted">Item numbers with no one in them, by office.</p>${btns('vac')}</section>
     <section class="panel"><div class="panelHead"><h3>${hi('calendar')}Retirement forecast</h3><span class="label">next 5 years</span></div>
       <p class="muted">Who turns ${D.retireAge} in the next five years, by year.</p>${btns('ret')}</section>
+    <section class="panel"><div class="panelHead"><h3>${hi('globe')}BOE personnel assigned outside</h3><span class="label">${orgPeople(outsideRows().length)}</span></div>
+      <p class="muted">BOE employees now working in another DPWH office: their BOE plantilla office, where they are assigned, since when and the order.</p>${btns('out')}</section>
+    <section class="panel"><div class="panelHead"><h3>${hi('people')}External personnel assigned to BOE</h3><span class="label">${orgPeople(externalRows().length)}</span></div>
+      <p class="muted">People from other offices detailed to BOE (a mother unit on file): where they come from and where they work in BOE.</p>${btns('ext')}</section>
   </div>`;
 }
 /* Which report, with the choices from the Reports page or the profile */
@@ -3548,6 +3552,20 @@ function docVacancies() {
     <table style="margin-top:14px"><thead><tr><th>#</th><th>Item number</th><th>Position</th><th>SG</th><th>Office</th><th>Authorized monthly</th></tr></thead><tbody>
     ${v.map((s, i) => { const pos = IX.pos[s['Position Title']], off = IX.off[s['Office Code']]; return `<tr><td class="num">${i + 1}</td><td>${esc(s['Item Number'])}</td><td>${esc(s['Position Title'])}</td><td class="num">${esc(pos ? pos['Salary Grade'] : '')}</td><td>${esc(off ? off['Office Name'] : '')}</td><td class="num">${peso(s['Authorized Monthly (PHP)'])}</td></tr>`; }).join('')}
     </tbody></table><p style="margin-top:8px"><b>Total vacant: ${v.length}</b></p>${docFoot()}</div>`;
+}
+function docOutside() {
+  const r = outsideRows();
+  return `<div class="doc">${docHead('BOE PERSONNEL ASSIGNED OUTSIDE', 'Assigned to other DPWH offices · as of ' + fmtDate(D.today))}
+    <table style="margin-top:14px"><thead><tr><th>#</th><th>Name</th><th>Position</th><th>Status</th><th>BOE plantilla office</th><th>Assigned to</th><th>Since</th><th>Order</th></tr></thead><tbody>
+    ${r.map((x, i) => `<tr><td class="num">${i + 1}</td><td>${esc(fullName(x.e))}</td><td>${esc(x.c.position || '')}</td><td>${esc(x.c.status || '')}</td><td>${esc(x.home)}</td><td>${esc(x.to)}</td><td>${esc(x.since)}</td><td>${esc(x.ref)}</td></tr>`).join('') || '<tr><td colspan="8">No one is assigned outside BOE.</td></tr>'}
+    </tbody></table><p style="margin-top:8px"><b>Total: ${r.length}</b></p>${docFoot()}</div>`;
+}
+function docExternal() {
+  const r = externalRows();
+  return `<div class="doc">${docHead('EXTERNAL PERSONNEL ASSIGNED TO BOE', 'Detailed from other offices · as of ' + fmtDate(D.today))}
+    <table style="margin-top:14px"><thead><tr><th>#</th><th>Name</th><th>Position</th><th>Status</th><th>Mother unit</th><th>Assigned in BOE</th><th>Since</th></tr></thead><tbody>
+    ${r.map((x, i) => `<tr><td class="num">${i + 1}</td><td>${esc(fullName(x.e))}</td><td>${esc(x.c.position || '')}</td><td>${esc(x.c.status || '')}</td><td>${esc(x.from)}</td><td>${esc(x.at)}</td><td>${esc(x.since)}</td></tr>`).join('') || '<tr><td colspan="7">No external personnel on record.</td></tr>'}
+    </tbody></table><p style="margin-top:8px"><b>Total: ${r.length}</b></p>${docFoot()}</div>`;
 }
 function docRetirement() {
   const g = retireGroups();
@@ -5122,6 +5140,22 @@ const REPORTS = {
       rows: v.map((s, i) => { const pos = IX.pos[s['Position Title']], off = IX.off[s['Office Code']]; return [i + 1, s['Item Number'], s['Position Title'], pos ? pos['Salary Grade'] : '', off ? off['Office Name'] : '', s['Authorized Monthly (PHP)'] === '' ? '' : peso(s['Authorized Monthly (PHP)'])]; }),
       total: 'Total vacant: ' + v.length };
   },
+  out() {
+    const r = outsideRows();
+    return { file: 'personnel-assigned-outside', title: 'BOE PERSONNEL ASSIGNED OUTSIDE', subtitle: 'Assigned to other DPWH offices · as of ' + fmtDate(D.today),
+      columns: [{ h: '#', w: 4, a: 'right' }, { h: 'Name', w: 18, wrap: true }, { h: 'Position', w: 15, wrap: true }, { h: 'Status', w: 10, wrap: true }, { h: 'BOE plantilla office', w: 14, wrap: true },
+        { h: 'Assigned to', w: 20, wrap: true }, { h: 'Since', w: 9, wrap: true }, { h: 'Order', w: 10, wrap: true }],
+      rows: r.map((x, i) => [i + 1, fullName(x.e), x.c.position || '', x.c.status || '', x.home, x.to, x.since, x.ref]),
+      total: 'Total: ' + r.length };
+  },
+  ext() {
+    const r = externalRows();
+    return { file: 'external-personnel-in-boe', title: 'EXTERNAL PERSONNEL ASSIGNED TO BOE', subtitle: 'Detailed from other offices · as of ' + fmtDate(D.today),
+      columns: [{ h: '#', w: 4, a: 'right' }, { h: 'Name', w: 20, wrap: true }, { h: 'Position', w: 17, wrap: true }, { h: 'Status', w: 11, wrap: true }, { h: 'Mother unit', w: 16, wrap: true },
+        { h: 'Assigned in BOE', w: 22, wrap: true }, { h: 'Since', w: 10, wrap: true }],
+      rows: r.map((x, i) => [i + 1, fullName(x.e), x.c.position || '', x.c.status || '', x.from, x.at, x.since]),
+      total: 'Total: ' + r.length };
+  },
   ret() {
     const g = retireGroups();
     const row = x => { const c = IX.cur[x.e['Employee Number']]; return [x.r < g.now ? 'Already past (' + fmtDate(iso(x.r)) + ')' : fmtDate(iso(x.r)), fullName(x.e), c.position, c.status, c.officeCode]; };
@@ -5132,6 +5166,20 @@ const REPORTS = {
       total: 'Grand total: ' + (g.pl.length + g.co.length) };
   }
 };
+/* BOE people working in another DPWH office (assigned to an "Outside BOE" office), and people from other offices
+   detailed into BOE (a Mother Unit on file). Both lists: current, not separated. */
+function outsideRows() {
+  return active().filter(e => isOutside(IX.cur[e['Employee Number']].officeCode)).map(e => {
+    const c = IX.cur[e['Employee Number']], ref = c.entry ? sv(c.entry['Order / Reference']) : '';
+    return { e: e, c: c, to: offLetterName(c.officeCode), home: c.seatOffice !== '' && IX.off[c.seatOffice] ? IX.off[c.seatOffice]['Office Name'] : '—', since: c.since ? fmtDate(c.since) : '', ref: ref };
+  }).sort((a, b) => a.to.localeCompare(b.to) || fullName(a.e).localeCompare(fullName(b.e)));
+}
+function externalRows() {
+  return active().filter(e => sv(e['Mother Unit'])).map(e => {
+    const c = IX.cur[e['Employee Number']];
+    return { e: e, c: c, from: sv(e['Mother Unit']), at: String(c.officeCode) !== '' && IX.off[c.officeCode] ? offLetterName(c.officeCode) : '—', since: c.since ? fmtDate(c.since) : '' };
+  }).sort((a, b) => a.from.localeCompare(b.from) || fullName(a.e).localeCompare(fullName(b.e)));
+}
 /* Who turns the retirement age in the next five years, split into plantilla and CoS / JO */
 function retireGroups() {
   const now = toDate(D.today), years = [0, 1, 2, 3, 4].map(k => now.getFullYear() + k);
@@ -5953,6 +6001,8 @@ document.addEventListener('click', ev => {
     if (rep === 'sr') return x && preview('Service record — ' + fullName(IX.emp[x]), docServiceRecord(x), `data-rep="sr" data-id="${esc(x)}"`);
     if (rep === 'ml') return preview('Masterlist', docMasterlist(x, y), `data-rep="ml" data-off="${esc(x)}" data-kind="${esc(y)}"`);
     if (rep === 'vac') return preview('Vacant plantilla seats', docVacancies(), 'data-rep="vac"');
+    if (rep === 'out') return preview('BOE personnel assigned outside', docOutside(), 'data-rep="out"');
+    if (rep === 'ext') return preview('External personnel assigned to BOE', docExternal(), 'data-rep="ext"');
     return preview('Retirement forecast', docRetirement(), 'data-rep="ret"');
   }
   if (act === 'repPdf') {
