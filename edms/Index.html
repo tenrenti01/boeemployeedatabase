@@ -833,6 +833,7 @@ html.classic main{transition-property:padding-right,max-width!important;transiti
 html.classic .mvSplit{transition-property:grid-template-columns!important;transition-duration:.45s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
 html.classic .mvSplit .mvRight{transition-property:opacity,transform,visibility,height,border-width!important;transition-duration:.35s,.45s,0s,0s,0s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important;transition-delay:0s,0s,.45s,.45s,.45s!important}
 html.classic .mvSplit.open .mvRight{transition-delay:.08s,0s,0s,0s,0s!important}
+html.classic .otFit.orgMorph{transition-property:transform!important;transition-duration:.55s!important;transition-timing-function:cubic-bezier(.4,0,.2,1)!important}
 html.classic .peekBody.swap{animation:pkSwap .3s cubic-bezier(.4,0,.2,1)!important}
 html.classic.pkDrag .peek,html.classic.pkDrag .peekDoc,html.classic.pkDrag main,html.classic .mvSplit.drag{transition:none!important}
 html.classic .cal{transition:opacity .18s cubic-bezier(.32,.72,0,1),transform .18s cubic-bezier(.32,.72,0,1)!important}
@@ -1127,24 +1128,14 @@ body.wide main{max-width:none}
 .otK{position:relative;padding:20px 7px 0;display:flex;justify-content:center;min-width:0}
 .otK::before{content:"";position:absolute;top:0;left:0;right:0;height:20px;border-top:2px solid var(--wire)}
 .otK::after{content:"";position:absolute;top:0;left:calc(50% - 1px);width:2px;height:20px;background:var(--wire)}
-.otK:first-of-type::before{left:calc(50% - 1px);border-left:2px solid var(--wire);border-top-left-radius:12px}
-.otK:last-of-type::before{right:calc(50% - 1px);border-right:2px solid var(--wire);border-top-right-radius:12px}
-.otK:first-of-type::after,.otK:last-of-type::after{display:none}
-.otK:only-of-type::before{display:none}
-.otK:only-of-type::after{display:block}
+.otK:first-child::before{left:calc(50% - 1px);border-left:2px solid var(--wire);border-top-left-radius:12px}
+.otK:last-child::before{right:calc(50% - 1px);border-right:2px solid var(--wire);border-top-right-radius:12px}
+.otK:first-child::after,.otK:last-child::after{display:none}
+.otK:only-child::before{display:none}
+.otK:only-child::after{display:block}
 .org{--wire:#9DB2D3}
 .org .oStem{background:var(--wire);flex:none}
-.otKids.tuck{display:grid;grid-template-rows:auto 1fr;align-items:start;justify-content:center}
-.otKids.tuck > .tS{align-self:stretch}
-.otLane{position:absolute;top:0;bottom:0;right:-1px;width:2px;background:var(--wire);z-index:1}
-.otLane.atL{right:auto;left:-1px}
-.otTuck{position:relative;padding-top:24px;display:flex;justify-content:center;align-self:start}
-.otTuck.mid{justify-self:center}
-.otTuck.side{justify-self:stretch}
-.otTuck::before{content:"";position:absolute;top:0;height:24px;box-sizing:border-box}
-.otTuck.mid::before{left:calc(50% - 1px);width:2px;background:var(--wire)}
-.otTuck.side.L::before{left:calc(50% - 1px);right:-1px;border-top:2px solid var(--wire);border-left:2px solid var(--wire);border-top-left-radius:12px;margin-top:-2px}
-.otTuck.side.R::before{left:-1px;right:calc(50% - 1px);border-top:2px solid var(--wire);border-right:2px solid var(--wire);border-top-right-radius:12px;margin-top:-2px}
+.otFit.orgMorph{transition:transform .55s cubic-bezier(.4,0,.2,1)}
 .otL{width:var(--ocW,250px);display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}
 .otL > .oc.head,.otS > .oc.head,.ot > .oc.head{width:var(--ocW,250px);min-width:0;max-width:none}
 .ot > .ouH{width:var(--ocW,250px);margin-bottom:6px}
@@ -1195,7 +1186,7 @@ html.classic .org .oc,html.classic .org .oc.cos,html.classic .org .oc.head{borde
 .ot > .otSH{margin-bottom:8px}
 .otUnder{width:var(--ocW,250px);display:grid;gap:6px}
 .otS > .oc.head,.otS > .oVac{max-width:100%}
-@media (max-width:680px){.otKids.tuck{display:flex}.otLane,.otTuck::before{display:none}.otTuck{padding-top:8px;transform:none!important}.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oc.ghost,.ouH.ghost,.otSH.ghost,.oSkip{display:none}.otL > .oc.head,.otS > .oc.head,.ot > .oc.head,.ot > .ouH{width:100%}}
+@media (max-width:680px){.ot.root{width:100%}.otKids{flex-direction:column;align-items:stretch;width:100%}.otK{padding:8px 0 0}.otK::before,.otK::after{display:none}.otL,.otS{width:100%}.ot{align-items:stretch}.oc.ghost,.ouH.ghost,.otSH.ghost,.oSkip{display:none}.otL > .oc.head,.otS > .oc.head,.ot > .oc.head,.ot > .ouH{width:100%}}
 html.classic .org{--wire:#808080}
 html.classic .otSH,html.classic .ouH{border-radius:0;font:bold 11px/1.15 Tahoma,"Segoe UI",Arial,sans-serif;text-transform:none;letter-spacing:0}
 html.classic .otSH small,html.classic .ouH small{font:bold 10px Tahoma,"Segoe UI",Arial,sans-serif;color:#fff}
@@ -2556,7 +2547,7 @@ function pkSet(open) {
   r.style.setProperty('--pkT', z.w + 'px'); r.style.setProperty('--pkDT', (z.d || Math.round(window.innerWidth * PK.d)) + 'px');
   r.style.setProperty('--pkW', (on ? z.w : 0) + 'px'); r.style.setProperty('--pkD', (on ? z.d : 0) + 'px');
   r.style.setProperty('--pkPad', (on && z.pad ? z.w + z.d : 0) + 'px');
-  if (S.view === 'org') { clearTimeout(PEEK_DT); PEEK_DT = setTimeout(fitOrg, 480); }
+  if (S.view === 'org') { clearTimeout(PEEK_DT); PEEK_DT = setTimeout(fitOrgSmooth, 600); }   // column move .45s + a .15s pause
 }
 function renderPeek() {
   const r = $('#peekRoot'); if (!r) return;
@@ -2684,59 +2675,6 @@ const orgMid = e => orgSg(e) >= 19 && orgSg(e) < 22;     // unit-head rank (Engi
 const orgPeople = n => n + (n === 1 ? ' person' : ' people');
 /* The chart is drawn as a tree: a head on top, a line down, and the offices under it side by side on one level. */
 const orgVac = what => `<div class="oNone oVac"><b>Vacant</b><span>${esc(what)} not on record</span></div>`;
-/* Staff of an office who belong to no unit no longer get a column of their own. They sit under the two neighbouring
-   columns that end highest, and the line from the head runs down between those two columns to them. hs = how tall each
-   column is (in people); returns the left column of the pair, or -1 when there are fewer than two columns. */
-function tuckAt(hs) { const p = tuckPlan(hs); return p ? p.at : -1; }
-/* Where the staff go: under the two neighbouring columns that end highest. When those two end about level the staff sit
-   centred below both (mode 'mid'); otherwise they sit under the shorter one (mode 'L' = left column, 'R' = right),
-   and the line comes down between the two columns and turns to them. */
-function tuckPlan(hs) {
-  if (hs.length < 2) return null;
-  let best = null, bv = Infinity; const mid = (hs.length - 2) / 2;
-  for (let i = 0; i < hs.length - 1; i++) {
-    const a = hs[i], b = hs[i + 1], even = Math.abs(a - b) <= 1;
-    const v = (even ? Math.max(a, b) : Math.min(a, b)) + Math.abs(i - mid) * 0.01;
-    if (v < bv) { bv = v; best = { at: i, mode: even ? 'mid' : a < b ? 'L' : 'R', top: even ? Math.max(a, b) : Math.min(a, b) }; }
-  }
-  return best;
-}
-/* The grid that holds the columns plus the tucked staff. cls = class names for the on-screen chart or the download. */
-function tuckGrid(kids, plan, tuck, c) {
-  const { at, mode } = plan, short = mode === 'mid' ? -1 : mode === 'L' ? at : at + 1;
-  return `<div class="${c.kids} tuck" style="grid-template-columns:repeat(${kids.length},auto)">${kids.map((k, i) => {
-    const row1 = mode === 'mid' ? (i === at || i === at + 1) : i === short;
-    const lane = mode === 'mid' ? i === at : i === short;
-    return `<div class="${c.k}${row1 ? ' tS' : ''}" style="grid-column:${i + 1};grid-row:${row1 ? '1' : '1 / span 2'}">${k}${lane ? `<i class="${c.lane}${mode === 'R' ? ' atL' : ''}"></i>` : ''}</div>`;
-  }).join('')}<section class="${c.tuck} ${mode === 'mid' ? 'mid' : 'side ' + mode}" style="grid-column:${mode === 'mid' ? (at + 1) + ' / span 2' : short + 1};grid-row:2">${tuck}</section></div>`;
-}
-/* How tall an office's column is, counted in cards */
-function orgEst(code, O) {
-  const ks = orgKidsOf(code, O), own = (O.at[code] || []).length;
-  if (!ks.length) return own + 2;
-  const hs = ks.map(k => orgEst(k, O)), p = own > 1 ? tuckPlan(hs) : null;
-  return 3 + Math.max(Math.max.apply(null, hs), p ? p.top + own + 1 : 0);
-}
-/* After layout: slide each tucked staff block so its centre sits on the line coming down between its two columns */
-function alignTuck(root) {
-  root.querySelectorAll('.otTuck.mid,.xtuck.mid').forEach(t => { t.style.transform = ''; });
-  root.querySelectorAll('.otTuck.mid,.xtuck.mid').forEach(t => {
-    const lane = t.parentNode.querySelector(':scope > .tS > .otLane, :scope > .tS > .xlane'); if (!lane) return;
-    const z = (t.getBoundingClientRect().width / (t.offsetWidth || 1)) || 1, a = lane.getBoundingClientRect(), b = t.getBoundingClientRect();
-    t.style.transform = 'translateX(' + (((a.left + a.width / 2) - (b.left + b.width / 2)) / z).toFixed(1) + 'px)';
-  });
-}
-/* Columns side by side; with staff, the staff go under the two shortest neighbouring columns (see tuckAt) */
-function orgKidsT(kids, hs, staff) {
-  const plan = staff ? tuckPlan(hs) : null;
-  if (!plan) return orgKids((staff ? [staff.col] : []).concat(kids));
-  return '<i class="oStem"></i>' + tuckGrid(kids, plan, staff.tuck, { kids: 'otKids', k: 'otK', lane: 'otLane', tuck: 'otTuck' });
-}
-/* The tucked staff block: a header, anyone of section-chief or unit-head rank first, then everyone else */
-function orgTuckCol(name, list) {
-  const top = list.filter(e => orgBig(e) || orgMid(e)), rest = list.filter(e => top.indexOf(e) < 0);
-  return `<div class="otL">${orgUH(name, list.length)}${top.map(e => orgCard(e, true)).join('')}${rest.length ? `<div class="ouB">${rest.map(e => orgCard(e)).join('')}</div>` : ''}</div>`;
-}
 const orgKids = kids => kids.length ? `<i class="oStem"></i><div class="otKids">${kids.map(k => `<div class="otK">${k}</div>`).join('')}</div>` : '';
 let ORG_K = 0;
 const orgUH = (name, n, ghost) => { const or = XO.color === 'orange' || (XO.color === 'alt' && !ghost && ORG_K++ % 2 === 1); return `<div class="ouH${or ? ' or' : ''}${ghost ? ' ghost' : ''}"${ghost ? ' aria-hidden="true"' : ''}><b>${esc(name)}</b>${ghost ? '' : `<small>${n}</small>`}</div>`; };
@@ -2780,8 +2718,7 @@ function orgNode(code, O, deepParent) {
   const hasKids = k => orgKidsOf(k, O).length > 0;
   if (lvl === 'Unit') {
     // a unit with sub-units: its head, then the sub-units side by side
-    if (kids.length) return `<div class="ot">${orgUH(name, O.count(code))}${head ? orgCard(head, true) : orgGhost(true)}${orgKidsT(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k), null, true)), kids.map(k => under(k).length + 1),
-      rest.length ? { col: orgUnit('Sub-unit staff', rest, null, true), tuck: orgTuckCol('Sub-unit staff', rest) } : null)}</div>`;
+    if (kids.length) return `<div class="ot">${orgUH(name, O.count(code))}${head ? orgCard(head, true) : orgGhost(true)}${orgKids((rest.length ? [orgUnit('Sub-unit staff', rest, null, true)] : []).concat(kids.map(k => orgUnit(IX.off[k]['Office Name'], under(k), null, true))))}</div>`;
     const col = orgUnit(name, rest, head);
     // a unit straight under a division sits on the unit level, not the section level
     return deepParent ? `<div class="ot">${orgSH('', 0, true)}${orgGhost(true)}<i class="oSkip"></i>${col}</div>` : col;
@@ -2789,8 +2726,8 @@ function orgNode(code, O, deepParent) {
   if (lvl !== 'Division') {
     const headHtml = head ? orgCard(head, true) : orgVac('Section chief');
     if (!kids.length) return orgLead(name, O.count(code), headHtml, rest);
-    const staff = rest.length ? { col: orgUnit('Section staff', rest), tuck: orgTuckCol('Section staff', rest) } : null;
-    return `<div class="ot">${orgSH(name, O.count(code))}${headHtml}${orgKidsT(kids.map(k => orgNode(k, O)), kids.map(k => orgEst(k, O)), staff)}</div>`;
+    const cols = (rest.length ? [orgUnit('Section staff', rest)] : []).concat(kids.map(k => orgNode(k, O)));
+    return `<div class="ot">${orgSH(name, O.count(code))}${headHtml}${orgKids(cols)}</div>`;
   }
   const vac = D.seats.filter(s => !IX.holder[s['Item Number']] && inOffice(s['Office Code'], code));
   let tree;
@@ -2800,16 +2737,18 @@ function orgNode(code, O, deepParent) {
     const tech = e => { const c = C(e), p = IX.pos[c.position]; return /^engineer\b/i.test(String(c.position)) || /^technical/i.test(String(c.kind === 'contract' && c.tech ? c.tech : p ? p['Technical / Non-Technical'] : '')); };
     const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0]; return orgLead(label, list.length, orgCard(lead, true), list.filter(e => e !== lead)); };
     const asstHead = O.asst ? O.head(O.asst) : null, asstRest = O.asst ? (O.at[O.asst] || []).filter(e => e !== asstHead) : [];
-    const level = [group('OD-Technical', rest.filter(tech))]
+    // The Assistant Director's own staff: a technical person among them stands on the same line as the other leads
+    const asstLead = asstRest.find(tech);
+    const level = [group(name + ' - Technical Staff', rest.filter(tech))]
       .concat(kids.filter(k => k !== O.asst).map(k => orgNode(k, O)))
-      .concat([group('OD-Clerical', rest.filter(e => !tech(e))), asstRest.length ? orgLead(IX.off[O.asst]['Office Name'] + ' · staff', asstRest.length, '', asstRest) : '']).filter(Boolean);
+      .concat([group(name + ' - Clerical Staff', rest.filter(e => !tech(e))),
+        asstRest.length ? orgLead(IX.off[O.asst]['Office Name'] + ' - staff', asstRest.length, asstLead ? orgCard(asstLead, true) : '', asstRest.filter(e => e !== asstLead)) : '']).filter(Boolean);
     const asst = O.asst ? `<i class="oStem"></i>${asstHead ? orgCard(asstHead, true, IX.off[O.asst]['Office Name']) : orgVac('Assistant Director')}` : '';
     tree = `${head ? orgCard(head, true, name) : orgVac('Director')}${asst}${orgKids(level)}`;
   } else {
     const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && hasKids(k));
-    const sName = /division/i.test(name) ? 'Division staff' : 'Office staff';
-    const staff = rest.length ? { col: orgDivStaff(sName, rest, deep), tuck: orgTuckCol(sName, rest) } : null;
-    tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKidsT(kids.map(k => orgNode(k, O, deep)), kids.map(k => orgEst(k, O)), staff)}`;
+    const cols = (rest.length ? [orgDivStaff(/division/i.test(name) ? 'Division staff' : 'Office staff', rest, deep)] : []).concat(kids.map(k => orgNode(k, O, deep)));
+    tree = `${head ? orgCard(head, true) : orgVac('Division chief')}${orgKids(cols)}`;
   }
   return `<section class="od"><div class="odH"><h2>${esc(name)}</h2><span>${orgPeople(O.count(code))}${vac.length ? ` · <span title="${esc(vac.map(s => s['Item Number'] + ' ' + s['Position Title']).join('\n'))}">${vac.length} vacant ${vac.length === 1 ? 'item' : 'items'}</span>` : ''}${(() => { const f = XO.hideField ? (IX.offKids[code] || []).map(o => String(o['Office Code'])).filter(orgIsField).reduce((n, k) => n + O.count(k), 0) : 0; return f ? ' · ' + f + ' field workers not shown' : ''; })()}</span></div>
       <div class="odB"><div class="otFit"><div class="ot root" style="${orgVars(1, 1, 250)}">${tree}</div></div></div></section>`;
@@ -2829,8 +2768,8 @@ function fitOrg() {
   const bar = document.querySelector('.top'); if (bar) document.documentElement.style.setProperty('--topH', (/sticky|fixed/.test(getComputedStyle(bar).position) ? bar.offsetHeight : 0) + 'px');
   document.querySelectorAll('.ot.root').forEach(t => {
     const set = (a, b, w) => { t.style.cssText = orgVars(a, b, w); t.classList.toggle('n2s', a === 2); t.classList.toggle('n2h', b === 2); };
-    set(1, 1, 250); t.style.zoom = '';
-    if (window.innerWidth <= 680) return alignTuck(t);
+    set(1, 1, 250);
+    if (window.innerWidth <= 680) return;
     const room = t.parentNode.clientWidth, wide = () => t.getBoundingClientRect().width;
     const over = sel => Array.from(t.querySelectorAll(sel)).reduce((m, b) => Math.max(m, b.scrollWidth - b.clientWidth), 0);
     const small = '.oc:not(.head):not(.ghost) .ocT b', big = '.oc.head:not(.ghost) .ocT b';
@@ -2842,12 +2781,28 @@ function fitOrg() {
       const a = over(small) > 0 ? 2 : 1, b = over(big) > 0 ? 2 : 1;
       if (a + b > 2) set(a, b, want);
     }
-    alignTuck(t);
     const need = wide();
     if (need > room + 1) t.style.zoom = String(Math.max(0.6, Math.floor(room / need * 100) / 100));
   });
 }
 window.addEventListener('resize', () => { if (S.view === 'org') fitOrg(); });
+/* After a side column opens or closes: re-fit the chart, then let it grow or shrink smoothly from its old size to the new one */
+function fitOrgSmooth() {
+  const fits = Array.from(document.querySelectorAll('.otFit')).map(f => {
+    f.classList.remove('orgMorph'); f.style.transform = '';
+    const t = f.querySelector('.ot.root'); return t ? { f: f, t: t, r0: t.getBoundingClientRect() } : null;
+  }).filter(Boolean);
+  fitOrg();
+  fits.forEach(x => {
+    const r1 = x.t.getBoundingClientRect(), pr = x.f.getBoundingClientRect();
+    if (!r1.width || (Math.abs(r1.width - x.r0.width) < 2 && Math.abs(r1.left - x.r0.left) < 2)) return;
+    x.f.style.transformOrigin = (r1.left - pr.left) + 'px ' + (r1.top - pr.top) + 'px';
+    x.f.style.transform = 'translate(' + (x.r0.left - r1.left) + 'px,' + (x.r0.top - r1.top) + 'px) scale(' + (x.r0.width / r1.width) + ')';
+    void x.f.offsetWidth;
+    x.f.classList.add('orgMorph'); x.f.style.transform = '';
+    setTimeout(() => { x.f.classList.remove('orgMorph'); x.f.style.transformOrigin = ''; }, 650);
+  });
+}
 function viewOrg() {
   const roots = IX.offTree.filter(t => t.depth === 0).map(t => t.code);
   if (!roots.length) return '<p class="empty">No offices on record yet. Add divisions, sections and units on the Admin page.</p>';
@@ -2906,22 +2861,11 @@ const XO_CSS = `
 .xo .xk{position:relative;padding:26px 9px 0;display:flex;justify-content:center}
 .xo .xk::before{content:"";position:absolute;top:0;left:0;right:0;height:26px;border-top:3px solid var(--wire)}
 .xo .xk::after{content:"";position:absolute;top:0;left:calc(50% - 1.5px);width:3px;height:26px;background:var(--wire)}
-.xo .xk:first-of-type::before{left:calc(50% - 1.5px);border-left:3px solid var(--wire);border-top-left-radius:16px}
-.xo .xk:last-of-type::before{right:calc(50% - 1.5px);border-right:3px solid var(--wire);border-top-right-radius:16px}
-.xo .xk:first-of-type::after,.xo .xk:last-of-type::after{display:none}
-.xo .xk:only-of-type::before{display:none}
-.xo .xk:only-of-type::after{display:block}
-.xo .xkids.tuck{display:grid;grid-template-rows:auto 1fr;align-items:start;justify-content:center}
-.xo .xkids.tuck > .tS{align-self:stretch}
-.xo .xlane{position:absolute;top:0;bottom:0;right:-1.5px;width:3px;background:var(--wire);z-index:1}
-.xo .xlane.atL{right:auto;left:-1.5px}
-.xo .xtuck{position:relative;padding-top:30px;display:flex;justify-content:center;align-self:start}
-.xo .xtuck.mid{justify-self:center}
-.xo .xtuck.side{justify-self:stretch}
-.xo .xtuck::before{content:"";position:absolute;top:0;height:30px;box-sizing:border-box}
-.xo .xtuck.mid::before{left:calc(50% - 1.5px);width:3px;background:var(--wire)}
-.xo .xtuck.side.L::before{left:calc(50% - 1.5px);right:-1.5px;border-top:3px solid var(--wire);border-left:3px solid var(--wire);border-top-left-radius:16px;margin-top:-3px}
-.xo .xtuck.side.R::before{left:-1.5px;right:calc(50% - 1.5px);border-top:3px solid var(--wire);border-right:3px solid var(--wire);border-top-right-radius:16px;margin-top:-3px}
+.xo .xk:first-child::before{left:calc(50% - 1.5px);border-left:3px solid var(--wire);border-top-left-radius:16px}
+.xo .xk:last-child::before{right:calc(50% - 1.5px);border-right:3px solid var(--wire);border-top-right-radius:16px}
+.xo .xk:first-child::after,.xo .xk:last-child::after{display:none}
+.xo .xk:only-child::before{display:none}
+.xo .xk:only-child::after{display:block}
 .xo .xsh{align-self:stretch;min-width:300px;height:60px;padding:6px 14px;border-radius:14px;background:#0F2A5C;color:#fff;display:flex;gap:10px;align-items:center;justify-content:center;box-shadow:var(--sh)}
 .xo .xsh b{font:700 19px/1.08 var(--ft);letter-spacing:.05em;text-transform:uppercase;text-align:center}
 .xo .xsh i,.xo .xuh i{font:700 13px var(--fb);background:rgba(255,255,255,.22);border-radius:999px;min-width:26px;height:26px;padding:0 7px;display:flex;align-items:center;justify-content:center;flex:none}
@@ -3018,13 +2962,6 @@ function xoDivStaff(name, list, X, deep) {
   return `<div class="xn">${bar}${top}<i class="xskip"></i><div class="xleaf"><div class="xuh ghost"></div>${mid.length ? mid.map(e => xoCard(e, '', X, 'mid')).join('') : '<div class="xgapm"></div>'}<div class="xub">${rest.map(e => xoCard(e, '', X)).join('')}</div></div></div>`;
 }
 /* Children side by side on one level, wired to the box above them */
-function xoKidsT(kids, hs, staff) {
-  const plan = staff ? tuckPlan(hs) : null;
-  if (!plan) return xoKids((staff ? [staff.col] : []).concat(kids));
-  return '<i class="xstem"></i>' + tuckGrid(kids, plan, staff.tuck, { kids: 'xkids', k: 'xk', lane: 'xlane', tuck: 'xtuck' });
-}
-/* Tucked staff in the download: chief / unit-head rank first, then everyone else */
-const xoTuckCol = (name, list, X) => { const top = list.filter(e => orgBig(e) || orgMid(e)); return xoLeaf(name, top.concat(list.filter(e => top.indexOf(e) < 0)), X, { plain: true }); };
 const xoKids = kids => kids.length ? `<i class="xstem"></i><div class="xkids">${kids.map(k => `<div class="xk">${k}</div>`).join('')}</div>` : '';
 function xoRole(code, h) {
   const name = IX.off[code]['Office Name'], lvl = orgLevel(IX.off[code]);
@@ -3051,22 +2988,20 @@ function xoNode(code, O, X, root, deepParent) {
     }
     // a unit with sub-units: its head, then its own staff and the sub-units side by side
     const or = XO.color === 'orange' || (XO.color === 'alt' && X.k++ % 2 === 1);
-    const sub = kids.map(k => xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X, { plain: true }));
-    const st = rest.length ? { col: xoLeaf('Sub-unit Staff', rest, X, { plain: true }), tuck: xoLeaf('Sub-unit Staff', rest, X, { plain: true }) } : null;
-    return `<div class="xn">${root ? '' : `<div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${O.count(code)}</i></div>`}${head ? xoCard(head, '', X, 'mid') : '<div class="xgapm"></div>'}${xoKidsT(sub, kids.map(k => xoUnder(k, O).length + 1), st)}</div>`;
+    const sub = (rest.length ? [xoLeaf('Sub-unit Staff', rest, X, { plain: true })] : []).concat(kids.map(k => xoLeaf(IX.off[k]['Office Name'], xoUnder(k, O), X, { plain: true })));
+    return `<div class="xn">${root ? '' : `<div class="xuh${or ? ' or' : ''}"><b>${esc(name)}</b><i>${O.count(code)}</i></div>`}${head ? xoCard(head, '', X, 'mid') : '<div class="xgapm"></div>'}${xoKids(sub)}</div>`;
   }
-  const below = [], hs = kids.map(k => orgEst(k, O));
-  let st = null;
+  const below = [];
   if (lvl === 'Division') {
     const deep = kids.some(k => orgLevel(IX.off[k]) !== 'Unit' && orgKidsOf(k, O).length > 0);
-    if (rest.length) st = { col: xoDivStaff('Division Staff', rest, X, deep), tuck: xoTuckCol('Division Staff', rest, X) };
+    if (rest.length) below.push(xoDivStaff('Division Staff', rest, X, deep));
     kids.forEach(k => below.push(xoNode(k, O, X, false, deep)));
   } else {
-    if (rest.length && kids.length) st = { col: xoLeaf('Section Staff', rest, X), tuck: xoTuckCol('Section Staff', rest, X) };
+    if (rest.length && kids.length) below.push(xoLeaf('Section Staff', rest, X));
     kids.forEach(k => below.push(xoNode(k, O, X, false)));
   }
   const stack = !kids.length && lvl !== 'Division' && rest.length ? `<div class="xstack ind">${rest.map(e => xoCard(e, '', X)).join('')}</div>` : '';
-  return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKidsT(below, hs, st)}</div>`;
+  return `<div class="xn">${root ? '' : xoBar(code, O)}<div class="xtop">${xoHead(code, O, X)}</div>${stack}${xoKids(below)}</div>`;
 }
 /* The top of the bureau: Director, then the Assistant Director, then one level holding the Director's own staff,
    the other offices under the Director (ADMIN) and every division in `divs` */
@@ -3078,10 +3013,11 @@ function xoApex(O, X, divs, root) {
   // A column led by one person (first plantilla), the rest straight below and a little indented
   const group = (label, list) => { if (!list.length) return ''; const lead = list.find(e => C(e).kind === 'plantilla') || list[0], others = list.filter(e => e !== lead);
     return `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(label)}</b><i>${list.length}</i></div><div class="xtop">${xoCard(lead, '', X, true)}</div>${others.length ? `<div class="xstack ind">${others.map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>`; };
-  const level = [group('OD-Technical', rest.filter(tech))]
+  const apexName = IX.off[apex]['Office Name'], asstLead = asstRest.find(tech), asstOthers = asstRest.filter(e => e !== asstLead);
+  const level = [group(apexName + ' - Technical Staff', rest.filter(tech))]
     .concat(orgKidsOf(apex, O).filter(k => k !== O.asst).map(k => xoNode(k, O, X, false)))
-    .concat([group('OD-Clerical', rest.filter(e => !tech(e))),
-      asstRest.length ? `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(IX.off[O.asst]['Office Name'])} · Staff</b><i>${asstRest.length}</i></div><div class="xtop"><div class="xgap"></div></div><div class="xstack ind">${asstRest.map(e => xoCard(e, '', X)).join('')}</div></div>` : ''])
+    .concat([group(apexName + ' - Clerical Staff', rest.filter(e => !tech(e))),
+      asstRest.length ? `<div class="xn"><div class="xsh${xoSec()}"><b>${esc(IX.off[O.asst]['Office Name'])} - Staff</b><i>${asstRest.length}</i></div><div class="xtop">${asstLead ? xoCard(asstLead, '', X, true) : '<div class="xgap"></div>'}</div>${asstOthers.length ? `<div class="xstack ind">${asstOthers.map(e => xoCard(e, '', X)).join('')}</div>` : ''}</div>` : ''])
     .concat(divs.filter(c => c !== apex).map(c => xoNode(c, O, X, false))).filter(Boolean);
   const asst = O.asst ? `<i class="xstem"></i><div class="xtop">${xoHead(O.asst, O, X)}</div>` : '';
   return `<div class="xn"><div class="xtop">${top ? xoCard(top, xoRole(apex, top), X) : xoHead(apex, O, X)}</div>${asst}${xoKids(level)}</div>`;
@@ -3162,7 +3098,6 @@ async function xoCanvas(onStep) {
     const el = d.body.firstElementChild;
     try { await d.fonts.ready; } catch (e) { /* older browsers */ }
     await Promise.all(Array.from(d.images).map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
-    alignTuck(el);
     const box = el.getBoundingClientRect(); W = Math.ceil(box.width); H = Math.ceil(box.height);
     XO_LAST = { html: el.outerHTML, W: W, H: H };
     xml = new XMLSerializer().serializeToString(el);
