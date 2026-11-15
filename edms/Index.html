@@ -571,6 +571,12 @@ html.peeking main{max-width:none;margin:0 50vw 0 0;transition:margin .4s var(--i
 .fgrid:has(.offPick){align-items:start}
 .offOut{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:8px;border:1px dashed var(--line-2);border-radius:10px;background:var(--soft)}
 html.classic .offOut{border-radius:0;padding:4px}
+/* Org chart download: the dialog's bottom bar becomes an orange progress bar */
+footer.xoBusy{position:relative;isolation:isolate;overflow:hidden}
+footer.xoBusy::before{content:"";position:absolute;inset:0 auto 0 0;z-index:-1;width:var(--xoP,0%);background:linear-gradient(90deg,#FFB547,#F7931E 45%,#E8590C);transition:width .45s var(--io)}
+footer.xoBusy::after{content:"";position:absolute;inset:0 auto 0 0;z-index:-1;width:var(--xoP,0%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent) 0 0/180px 100% no-repeat;animation:xoShine 1.4s linear infinite;transition:width .45s var(--io)}
+@keyframes xoShine{from{background-position:-180px 0}to{background-position:calc(100% + 180px) 0}}
+footer.xoBusy #xoNote{color:#1A1A1A;font-weight:600;font-variant-numeric:tabular-nums;white-space:pre}
 /* Photo crop */
 .photoPick{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
 .cropBox{position:relative;width:280px;height:280px;border-radius:20px;overflow:hidden;background:var(--soft);box-shadow:var(--shadow-card-hi);display:grid;place-items:center}
@@ -2928,7 +2934,7 @@ async function xoFonts() {
 /* Draw the sheet off-screen and return it as a canvas, as sharp as the browser allows (up to 2x) */
 async function xoCanvas(onStep) {
   const say = onStep || (() => {});
-  say('Preparing…');
+  say('Preparing…', 0.02);
   const X = { ids: {}, k: 0, fonts: await xoFonts() };
   // No logo saved on the Admin page: use the two that ship with the site
   const asset = async f => { try { const b = await (await fetch(f)).blob(); return await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(String(fr.result)); fr.onerror = () => r(''); fr.readAsDataURL(b); }); } catch (e) { return ''; } };
@@ -2937,11 +2943,12 @@ async function xoCanvas(onStep) {
   if (XO.hd) {
     xoBuild(X);
     const need = Object.keys(X.ids).filter(id => PHOTO[id] === undefined && (D.thumbs || {})[id]);
-    let done = 0;
-    const next = async () => { while (need.length) { await loadPhoto(need.shift()); say('Getting photos… ' + (++done)); } };
+    let done = 0; const total = need.length;
+    if (total) say('Getting photos… 0 of ' + total, 0.05);
+    const next = async () => { while (need.length) { await loadPhoto(need.shift()); done++; say('Getting photos… ' + done + ' of ' + total, 0.05 + 0.75 * done / total); } };
     await Promise.all([1, 2, 3, 4, 5, 6].map(next));
   }
-  say('Drawing…');
+  say('Drawing the chart…', 0.85);
   X.ids = {}; X.k = 0;
   const built = xoBuild(X); let W = built.W;
   const fr = document.createElement('iframe');
@@ -3060,7 +3067,14 @@ async function orgDownloadGo() {
   xoRead();
   err.hidden = true; btn.disabled = true;
   try {
-    const cv = await xoCanvas(t => { if (note) note.textContent = t; });
+    /* The dialog's bottom bar fills up in orange as the download goes along */
+    const bar = note && note.closest('footer');
+    const step = (t, f) => {
+      if (note) note.textContent = t + (f !== undefined ? '  ' + Math.round(f * 100) + '%' : '');
+      if (bar) { bar.classList.add('xoBusy'); if (f !== undefined) bar.style.setProperty('--xoP', (f * 100).toFixed(1) + '%'); }
+    };
+    const cv = await xoCanvas(step);
+    step('Saving the file…', 0.95);
     const now = new Date(), p = n => String(n).padStart(2, '0');
     const name = 'BOE-OrgChart-' + (XO.office || 'Whole-Bureau') + '_' + now.getFullYear() + '-' + p(now.getMonth() + 1) + '-' + p(now.getDate()) + '_' + p(now.getHours()) + p(now.getMinutes());
     if (XO.fmt === 'pdf') {
@@ -3072,8 +3086,10 @@ async function orgDownloadGo() {
       if (!blob) throw new Error('The chart is too big to save as one picture. Pick a division or a section instead.');
       download(name + '.png', 'image/png', blob);
     }
+    step('Done', 1); await new Promise(r => setTimeout(r, 350));
     closeModal(); if (S.view === 'org') render();
   } catch (e) {
+    const bar = note && note.closest('footer'); if (bar) { bar.classList.remove('xoBusy'); bar.style.removeProperty('--xoP'); }
     if ((e.printView || /SecurityError|insecure|tainted/i.test(String(e.name) + ' ' + String(e.message))) && XO_LAST) { closeModal(); xoPrintView(); return toast('This phone cannot save the picture directly. Use Print, then Save as PDF.'); }
     err.textContent = e.message || 'The chart could not be made.'; err.hidden = false; btn.disabled = false; if (note) note.textContent = '';
   }
