@@ -32,7 +32,8 @@ const APP = {
     seats: 'Plantilla Seats', pos: 'Positions', off: 'Offices', pay: 'Pay Rates', users: 'Users', log: 'Change Log'
   },
   // Tabs added by upgradeSheets (UpgradeSheets.gs). The app still works without them, minus photos, causes and licenses.
-  OPT: { photos: 'Photos', sepd: 'Separation Details', causes: 'Separation Causes', settings: 'Settings', lic: 'PRC Licenses' },
+  OPT: { photos: 'Photos', sepd: 'Separation Details', causes: 'Separation Causes', settings: 'Settings', lic: 'PRC Licenses',
+    cmo: 'Committee Orders', cmm: 'Committee Members' },
   DEFAULT_CAUSES: ['Retirement (compulsory, age 65)', 'Retirement (optional)', 'Resignation', 'Death', 'End of contract',
     'Transfer to another agency', 'Dropped from the rolls', 'Dismissal', 'Others'],
   MAX_IMAGE_CHARS: 49000,   // a Sheets cell holds up to 50,000 characters
@@ -50,7 +51,9 @@ const APP = {
     'Plantilla Seats': ['Item Number', 'Office Code'],
     'Offices': ['Office Code', 'Parent Code'],
     'Separation Details': ['Entry ID'],
-    'PRC Licenses': ['License ID', 'Employee Number', 'License Number']
+    'PRC Licenses': ['License ID', 'Employee Number', 'License Number'],
+    'Committee Orders': ['Assignment No.', 'Order No.', 'Year', 'Supersedes'],
+    'Committee Members': ['Membership No.', 'Assignment No.', 'Employee Number']
   },
   // Division → Section → Unit. An office with no Level is a Division, so sheets from before the upgrade still work.
   ORG_LEVELS: ['Division', 'Section', 'Unit'],
@@ -61,6 +64,9 @@ const APP = {
   ORDER_FOLDER: '1MVb_PHe2CiOUKcX5mbJNgYhPY4KmFTpP',   // scanned special orders land here
   LICENSE_FOLDER: '1BFWGeEXosU2b7FeVWD8QyyvANBbYi7Pw', // scanned PRC licenses land here
   LICENSE_PREFIX: 'LIC', LICENSE_DIGITS: 5,
+  // Committees: one row per issuance (Committee Orders), one row per person named in it (Committee Members)
+  CMO_PREFIX: 'CA', CMO_DIGITS: 4, CMM_PREFIX: 'CM', CMM_DIGITS: 5,
+  COMMITTEE_ORDER_TYPES: ['Office Order', 'Special Order', 'Department Order'],
   MAX_ORDER_CHARS: 14000000,                           // about 10 MB once base64 is unpacked
   ORDER_TYPES: ['application/pdf', 'image/jpeg', 'image/png'],
   PLANTILLA_TYPES: ['Original (New)', 'Promotion', 'Reclassification', 'Retitled', 'Retained', 'Reemployment', 'Transfer', 'Step increment'],
@@ -102,7 +108,8 @@ const APP_API_ = {
   saveSeat: a => saveSeat(a), saveOrderFile: a => saveOrderFile(a), removeOrderFile: a => removeOrderFile(a),
   saveLicense: a => saveLicense(a), removeLicense: a => removeLicense(a), saveOffice: a => saveOffice(a), deleteOffice: a => deleteOffice(a),
   updateEntry: a => updateEntry(a), deleteEntry: a => deleteEntry(a), deleteEmployee: a => deleteEmployee(a),
-  setMasterPassword: a => setMasterPassword(a), saveSettings: a => saveSettings(a)
+  setMasterPassword: a => setMasterPassword(a), saveSettings: a => saveSettings(a),
+  saveCommitteeOrder: a => saveCommitteeOrder(a), removeCommitteeOrder: a => removeCommitteeOrder(a)
 };
 
 /* Opening the /exec link in a browser just says the server is up (and makes the Accounts tab the first time).
@@ -386,6 +393,7 @@ function getBootstrap() {
     orderFolder: app_orderFolderId_(settings),
     licenseFolder: app_licenseFolderId_(settings),
     lic: opt(O.lic),
+    cmo: opt(O.cmo), cmm: opt(O.cmm), committeeOrderTypes: APP.COMMITTEE_ORDER_TYPES,
     publicLink: /^(on|yes|true)$/i.test(settings['Public Test Link'] || ''), retireAge: APP.RETIRE_AGE, needsUpgrade: missingOpt, thumbs: thumbs, sepd: opt(O.sepd),
     today: Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'),
     employees: pack(T.emp), ids: pack(T.ids), emails: pack(T.emails), elig: pack(T.elig), edu: pack(T.edu), pwd: pack(T.pwd), names: pack(T.names),
@@ -746,6 +754,146 @@ function removeLicense(p) {
     if (url) { const m = url.match(/[-\w]{25,}/); if (m) { try { const f = DriveApp.getFileById(m[0]); name = f.getName(); f.setTrashed(true); app_undo_(() => f.setTrashed(false)); } catch (e) { /* already gone */ } } }
     app_deleteWhere_(ss, APP.OPT.lic, 'License ID', [app_s_(p.licenseId)]);
     return { id: eid, record: p.licenseId, details: name + ' removed' };
+  });
+}
+
+/* ───────────────────────── committees ───────────────────────── */
+/* "Committee Orders" has one row per issuance (Office / Special / Department Order, number and year): the
+   committee it creates or reconstitutes, the order it supersedes, and the one scanned file.
+   "Committee Members" has one row per person named in that order, tied to it by Assignment No.
+   An order that another order supersedes is history; the newest one in the chain is the committee as it stands. */
+function saveCommitteeOrder(p) {
+  return app_write_('Committee order saved', ss => {
+    const O = APP.OPT;
+    if (!ss.getSheetByName(O.cmo) || !ss.getSheetByName(O.cmm)) throw new Error('The "Committee Orders" and "Committee Members" tabs are not in the sheet yet.');
+    app_require_(p.committee, 'Committee name');
+    app_require_(p.orderNo, 'Order number');
+    app_require_(p.year, 'Year');
+    const type = app_s_(p.orderType);
+    if (APP.COMMITTEE_ORDER_TYPES.indexOf(type) < 0) throw new Error('Pick the kind of order: ' + APP.COMMITTEE_ORDER_TYPES.join(', ') + '.');
+    if (!/^\d{4}$/.test(app_s_(p.year))) throw new Error('Year must be four digits, like 2024.');
+    const issued = app_date_(p.dateIssued);
+    const orders = app_read_(ss, O.cmo).rows;
+    const isNew = !app_s_(p.assignmentId);
+    const id = isNew ? app_nextId_(ss, O.cmo, 'Assignment No.', APP.CMO_PREFIX, APP.CMO_DIGITS) : app_s_(p.assignmentId);
+    if (!isNew && !orders.some(r => app_s_(r['Assignment No.']) === id)) throw new Error('Assignment ' + id + ' was not found.');
+    const sup = app_s_(p.supersedes);
+    if (sup) {
+      if (sup === id) throw new Error('An order cannot supersede itself.');
+      if (!orders.some(r => app_s_(r['Assignment No.']) === sup)) throw new Error('The superseded order ' + sup + ' was not found.');
+      const other = orders.find(r => app_s_(r['Supersedes']) === sup && app_s_(r['Assignment No.']) !== id);
+      if (other) throw new Error(sup + ' is already superseded by ' + app_s_(other['Assignment No.']) + '. Supersede that one instead.');
+      for (let at = sup, hops = 0; at && hops < 200; hops++) {     // no loops: A supersedes B supersedes A
+        const r = orders.find(x => app_s_(x['Assignment No.']) === at);
+        at = r ? app_s_(r['Supersedes']) : '';
+        if (at === id) throw new Error('That would make the orders supersede each other in a circle.');
+      }
+    }
+    const dupe = orders.find(r => app_s_(r['Assignment No.']) !== id && app_s_(r['Order Type']) === type &&
+      app_s_(r['Order No.']).replace(/^0+/, '') === app_s_(p.orderNo).replace(/^0+/, '') && app_s_(r['Year']) === app_s_(p.year) &&
+      app_s_(r['Committee']).toLowerCase() === app_s_(p.committee).toLowerCase());
+    if (dupe) throw new Error('That order is already on file for this committee as ' + app_s_(dupe['Assignment No.']) + '.');
+
+    const row = { 'Assignment No.': id, 'Committee': app_s_(p.committee), 'Order Type': type, 'Order No.': app_s_(p.orderNo), 'Year': app_s_(p.year),
+      'Date Issued': issued, 'Subject': app_s_(p.subject), 'Supersedes': sup, 'Remarks': app_s_(p.remarks) };
+
+    const b64 = String(p.bytes || '').replace(/^data:[^,]*,/, '');
+    if (b64) {
+      const ftype = app_s_(p.mimeType).toLowerCase();
+      if (APP.ORDER_TYPES.indexOf(ftype) < 0) throw new Error('Attach a PDF, JPG or PNG. That file is a ' + (ftype || 'kind we don\'t know') + '.');
+      if (b64.length > APP.MAX_ORDER_CHARS) throw new Error('That file is bigger than 10 MB. Scan it at a lower quality, or split it.');
+      const settings = {};
+      app_readOpt_(ss, O.settings).rows.forEach(r => { settings[app_s_(r['Key'])] = app_s_(r['Value']); });
+      const folderId = app_orderFolderId_(settings);
+      if (!folderId) throw new Error('No Drive folder is set for order files. Put one on the Admin page.');
+      let folder;
+      try { folder = DriveApp.getFolderById(folderId); }
+      catch (e) { throw new Error('Could not open the Drive folder for order files. Check the folder link on the Admin page, and that this account can open it.'); }
+      const ext = { 'application/pdf': '.pdf', 'image/jpeg': '.jpg', 'image/png': '.png' }[ftype] || '';
+      const tidy = v => app_s_(v).replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+      const name = [id, app_committeeRef_(row), tidy(p.committee)].filter(Boolean).join(' - ').slice(0, 180) + ext;
+      const file = folder.createFile(Utilities.newBlob(Utilities.base64Decode(b64), ftype, name));
+      try { file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (e) { /* some Drives forbid link sharing; keep the file */ }
+      app_undo_(() => { try { file.setTrashed(true); } catch (e) { /* already gone */ } });
+      row['Order File'] = file.getUrl();
+    } else if (p.removeFile) row['Order File'] = '';
+    app_upsert_(ss, O.cmo, 'Assignment No.', id, row);   // merges only the keys given, so an edit without a new scan keeps the file
+
+    let count = null;
+    if (Array.isArray(p.members)) {
+      const emps = {};
+      app_read_(ss, APP.T.emp).rows.forEach(e => { emps[e['Employee Number']] = e; });
+      const wanted = p.members.map((m, i) => {
+        const eid = app_s_(m.employeeId) ? app_empNo_(m.employeeId) : '';
+        if (eid && !emps[eid]) throw new Error('Member ' + (i + 1) + ': employee ' + eid + ' is not in the masterlist.');
+        const e = emps[eid];
+        const nm = app_s_(m.name) || (e ? [app_s_(e['First Name']), app_s_(e['Middle Name']) ? app_s_(e['Middle Name'])[0] + '.' : '', app_s_(e['Last Name']), app_s_(e['Suffix'])].filter(Boolean).join(' ') : '');
+        if (!nm) throw new Error('Member ' + (i + 1) + ' has no name.');
+        return { 'Assignment No.': id, 'Employee Number': eid, 'Name on Order': nm, 'Group': app_s_(m.group), 'Role': app_s_(m.role) || 'Member', 'Sort': i + 1, 'Remarks': app_s_(m.remarks) };
+      });
+      app_committeeMembers_(ss, id, wanted);
+      count = wanted.length;
+    }
+    return { id: id, record: id, action: isNew ? (sup ? 'Committee reconstituted' : 'Committee order added') : 'Committee order updated',
+      details: app_s_(p.committee) + ' · ' + app_committeeRef_(row) + (sup ? ' (supersedes ' + sup + ')' : '') + (count === null ? '' : ' · ' + count + ' member' + (count === 1 ? '' : 's')) };
+  });
+}
+
+/* "OO 020 s 2024" */
+function app_committeeRef_(row) {
+  const short = { 'Office Order': 'OO', 'Special Order': 'SO', 'Department Order': 'DO' }[app_s_(row['Order Type'])] || app_s_(row['Order Type']);
+  return [short, app_s_(row['Order No.']), 's', app_s_(row['Year'])].filter(Boolean).join(' ');
+}
+
+/* Makes the Committee Members rows of one order match the wanted list: rows already there are rewritten in place
+   (they keep their Membership No.), extra ones are deleted, new ones are added in one write. */
+function app_committeeMembers_(ss, id, wanted) {
+  const name = APP.OPT.cmm;
+  const t = app_read_(ss, name), sh = t.sh, H = t.headers;
+  const mine = t.rows.filter(r => app_s_(r['Assignment No.']) === id).sort((a, b) => a._row - b._row);
+  const text = (APP.TEXT_COLS[name] || []).map(h => H.indexOf(h)).filter(c => c >= 0);
+  const line = o => H.map(h => o[h] === undefined || o[h] === null ? '' : o[h]);
+  const keep = Math.min(mine.length, wanted.length);
+  for (let i = 0; i < keep; i++) {
+    const o = Object.assign({}, wanted[i], { 'Membership No.': mine[i]['Membership No.'] });
+    const now = line(o), was = H.map(h => h ? (mine[i][h] === undefined ? '' : mine[i][h]) : '');
+    if (now.every((v, c) => String(v) === String(was[c]))) continue;
+    const rg = sh.getRange(mine[i]._row, 1, 1, H.length);
+    const old = rg.getValues();
+    app_put_(rg, [now], H);
+    app_undo_(() => rg.setValues(old));
+  }
+  mine.slice(keep).map(r => r._row).sort((a, b) => b - a).forEach(r => app_deleteRowSafe_(sh, r));
+  const add = wanted.slice(keep);
+  if (add.length) {
+    let max = 0;
+    const re = new RegExp('^' + APP.CMM_PREFIX + '(\\d+)$');
+    t.rows.forEach(r => { const m = app_s_(r['Membership No.']).match(re); if (m) max = Math.max(max, Number(m[1])); });
+    const first = sh.getLastRow() + 1;
+    if (first + add.length - 1 > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), add.length + 100);
+    text.forEach(c => sh.getRange(first, c + 1, add.length, 1).setNumberFormat('@'));
+    const rg = sh.getRange(first, 1, add.length, H.length);
+    app_put_(rg, add.map((o, i) => line(Object.assign({}, o, { 'Membership No.': APP.CMM_PREFIX + String(max + 1 + i).padStart(APP.CMM_DIGITS, '0') }))), H);
+    app_undo_(() => rg.clearContent());
+  }
+}
+
+/* Deletes one order with its members and bins its scan. An order that superseded another gives way:
+   whatever superseded THIS one now points at the one this superseded. Needs the master password: it is a record. */
+function removeCommitteeOrder(p) {
+  return app_write_('Committee order removed', ss => {
+    app_checkPassword_(p.password);
+    const O = APP.OPT, id = app_s_(p.assignmentId);
+    const t = app_read_(ss, O.cmo);
+    const row = t.rows.find(r => app_s_(r['Assignment No.']) === id);
+    if (!row) throw new Error('Assignment ' + id + ' was not found.');
+    const prev = app_s_(row['Supersedes']);
+    t.rows.filter(r => app_s_(r['Supersedes']) === id).forEach(r => app_setCell_({ sh: t.sh, headers: t.headers, row: r }, 'Supersedes', prev));
+    const url = app_s_(row['Order File']);
+    if (url) { const m = url.match(/[-\w]{25,}/); if (m) { try { const f = DriveApp.getFileById(m[0]); f.setTrashed(true); app_undo_(() => f.setTrashed(false)); } catch (e) { /* already gone */ } } }
+    const n = app_deleteWhere_(ss, O.cmm, 'Assignment No.', [id]);
+    app_deleteWhere_(ss, O.cmo, 'Assignment No.', [id]);
+    return { id: id, record: id, details: app_s_(row['Committee']) + ' · ' + app_committeeRef_(row) + ' removed with ' + n + ' member' + (n === 1 ? '' : 's') };
   });
 }
 

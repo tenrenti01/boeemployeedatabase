@@ -815,6 +815,72 @@ footer.xoBusy #xoNote{color:#1A1A1A;font-weight:600;font-variant-numeric:tabular
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
 
+/* ═══ Committees ═══ */
+.cmWrap{display:grid;grid-template-columns:minmax(230px,290px) minmax(0,1fr);gap:18px;align-items:start}
+.cmMain{display:grid;gap:18px;min-width:0}
+.cmSide{position:sticky;top:calc(var(--topH,0px) + 12px)}
+.cmPicks{display:grid;gap:6px}
+.cmPick{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:2px;padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--line);border-left:4px solid var(--line-2);background:var(--card);transition:background .2s,border-color .2s}
+.cmPick b{font-size:.92rem;color:var(--head);line-height:1.25}
+.cmPick span{font-size:.78rem;color:var(--muted)}
+.cmPick:hover{background:var(--soft)}
+.cmPick.on{border-left-color:var(--orange);background:var(--plantilla-soft)}
+.cmPick:focus-visible,.cmC:focus-visible,.cmHist:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.cmTitle{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.cmTitle h2{margin:2px 0 0;font:700 1.7rem/1.1 var(--cond);letter-spacing:.02em;color:var(--head);text-wrap:balance}
+.cmTools{display:flex;gap:6px;align-items:center}
+.cmMeta{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;font-size:.9rem}
+.cmSubj{margin:0;font-size:.95rem}
+.cmNote{margin:0;font-size:.85rem}
+.cmWarn{margin:0;font-size:.85rem;font-weight:600;color:var(--warn);background:var(--warn-soft);padding:6px 11px;border-radius:var(--r-sm);justify-self:start}
+.cmChartP{overflow-x:auto}
+.cmChart{display:grid;justify-items:center;gap:0;min-width:0}
+.cmApex,.cmRow{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.cmStem{display:block;width:2px;height:20px;background:var(--line-2)}
+.cmGroups{display:grid;grid-template-columns:repeat(var(--n),minmax(210px,1fr));gap:14px;width:100%;align-items:start}
+.cmG{border:1px solid var(--line);border-top:4px solid var(--navy-2);border-radius:var(--r-sm);background:var(--soft);padding:12px;display:grid;gap:10px;min-width:0;align-content:start}
+.cmG.wide{width:100%}
+.cmG h4{margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:700 1.02rem var(--cond);letter-spacing:.09em;text-transform:uppercase;color:var(--head)}
+.cmG h4 span{font:600 .78rem var(--body);letter-spacing:0;color:var(--muted)}
+.cmLeads{display:grid;gap:8px}
+.cmSub{font:600 .72rem var(--cond);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);border-top:1px dashed var(--line-2);padding-top:8px}
+.cmList{display:grid;gap:6px}
+.cmList.cols{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.cmC{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;min-width:0;width:100%;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--plantilla);border-radius:10px;padding:6px 9px;text-align:left}
+button.cmC{cursor:pointer;transition:box-shadow .25s var(--ease),transform .25s var(--ease)}
+button.cmC:hover{box-shadow:var(--shadow-card);transform:translateY(-1px)}
+.cmC .av{width:36px;height:36px;border-radius:10px;font-size:.8rem}
+.cmC.big{width:auto;min-width:min(100%,250px);max-width:380px;border-left-width:1px;border-top:3px solid var(--orange);padding:10px 14px;box-shadow:var(--shadow-card)}
+.cmG .cmC.big{width:100%;max-width:none}
+.cmC.big .av{width:56px;height:56px;border-radius:14px;font-size:1.05rem}
+.cmC.off{border-left-color:var(--hatch);background:var(--soft)}
+.cmC.big.off{border-top-color:var(--hatch)}
+.cmC.off .av{background:var(--hatch);box-shadow:none}
+.cmT{display:grid;gap:1px;min-width:0}
+.cmT b{font-size:.84rem;line-height:1.25;color:var(--ink);overflow-wrap:anywhere}
+.cmT b em{font-style:normal;font-weight:600;color:var(--muted);font-size:.76rem}
+.cmC.big .cmT b{font-size:.94rem}
+.cmR{font:600 .76rem var(--cond);letter-spacing:.12em;text-transform:uppercase;color:var(--orange-2)}
+.cmP{font-size:.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmF{margin-top:2px}
+.cmHist{cursor:pointer}
+.cmHist.on{background:var(--plantilla-soft)}
+.cmEdH{margin:18px 0 8px;font:700 1.1rem var(--cond);letter-spacing:.08em;text-transform:uppercase;color:var(--head)}
+.cmEdH .muted{font:400 .82rem var(--body);letter-spacing:0;text-transform:none}
+.cmEd{display:grid;gap:6px}
+.cmEh,.cmEr{display:grid;grid-template-columns:24px minmax(0,2.3fr) minmax(0,1.2fr) minmax(0,1.3fr) minmax(0,.8fr) 96px;gap:8px;align-items:start}
+.cmEh{font-size:.74rem;font-weight:600;color:var(--muted);padding:0 2px}
+.cmEn{font-size:.8rem;color:var(--muted);padding-top:9px;text-align:right}
+.cmEw{display:grid;gap:2px;min-width:0}
+.cmEr input{width:100%;min-width:0}
+.cmSt{font-style:normal;font-size:.72rem;color:var(--warn);min-height:1em}
+.cmSt.ok{color:var(--people)}
+.cmEt{display:flex;gap:2px;padding-top:3px}
+.cmEt .iconBtn[disabled]{opacity:.3;cursor:default}
+.cmEa{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px;font-size:.82rem}
+@media (max-width:1100px){.cmGroups{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}}
+@media (max-width:900px){.cmWrap{grid-template-columns:1fr}.cmSide{position:static}.cmPicks{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}}
+@media (max-width:680px){.cmTitle h2{font-size:1.35rem}.cmEh{display:none}.cmEr{grid-template-columns:22px minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:10px;padding:8px}.cmEr .cmEw{grid-column:2/-1}.cmEr .cmRem{grid-column:2/3}.cmEr .cmEt{grid-column:3/4;justify-content:flex-end}.cmEr .cmGrp{grid-column:2/3}.cmC.big{min-width:0;width:100%}}
 /* ═══ Simple view: plain grey desktop-program look, same as the OKB approval queue.
    It is the default; "Modern view" in the top bar switches back (remembered per computer). ═══ */
 .themeBtn .tOn{display:none}
@@ -1296,10 +1362,42 @@ html.classic .oLegend i{border-radius:0;background:#3A6EA5}
 html.classic .oLegend i.c{background:#D08A3A}
 html.classic .oOut{font:11px Tahoma,"Segoe UI",Arial,sans-serif}
 @media (max-width:1700px){html:not(.classic) .who{display:none}html:not(.classic) .tabs button{padding:8px 7px;letter-spacing:.05em}html:not(.classic) .tabs button::after{left:7px;right:7px}}
-@media (max-width:1420px){html:not(.classic) .tabs button{padding:8px 5px;font-size:.9rem;letter-spacing:.03em}html:not(.classic) .tabs button::after{left:5px;right:5px}}
-@media (max-width:1320px){html:not(.classic) .topIn{flex-wrap:wrap}}
+@media (max-width:1540px){html:not(.classic) .tabs button{padding:8px 5px;font-size:.9rem;letter-spacing:.03em}html:not(.classic) .tabs button::after{left:5px;right:5px}}
+@media (max-width:1440px){html:not(.classic) .topIn{flex-wrap:wrap}}
 @media (max-width:680px){.osU.under{margin-left:12px;padding-left:8px}.odB{padding:10px}.oc.head{min-width:0;width:100%;max-width:none}.osU{grid-template-columns:1fr}}
 @media print{html.classic body{background:#fff}}
+html.classic .cmWrap,html.classic .cmMain{gap:8px}
+html.classic .cmPick{border-radius:0;border:1px solid #A0A0A0;border-left:3px solid #A0A0A0;padding:4px 8px;background:#fff}
+html.classic .cmPick b{font-size:12px;color:#000}
+html.classic .cmPick span{font-size:11px;color:#444}
+html.classic .cmPick:hover{background:#EAF6FD}
+html.classic .cmPick.on{border-left-color:#3C7FB1;background:#D9F0FC}
+html.classic .cmTitle h2{font:bold 16px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;color:#000}
+html.classic .cmMeta,html.classic .cmSubj{font-size:12px}
+html.classic .cmNote,html.classic .cmWarn{font-size:11px}
+html.classic .cmWarn{border-radius:0;border:1px solid #D08A3A;color:#8A4A00;background:#FFF6E8;padding:2px 6px}
+html.classic .cmStem{background:#A0A0A0;height:14px}
+html.classic .cmGroups{gap:8px}
+html.classic .cmG{border-radius:0;border:1px solid #A0A0A0;border-top:3px solid #3C7FB1;background:#F0F0F0;padding:6px;gap:6px}
+html.classic .cmG h4{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none;color:#000}
+html.classic .cmG h4 span{font:11px Tahoma,"Segoe UI",Arial,sans-serif;color:#444}
+html.classic .cmSub{font:11px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none;color:#444;border-top-color:#A0A0A0;padding-top:4px}
+html.classic .cmList{gap:3px}
+html.classic .cmC{border-radius:0;border:1px solid #A0A0A0;border-left:3px solid #3C7FB1;padding:3px 6px;gap:6px}
+html.classic button.cmC:hover{box-shadow:none;transform:none;background:#EAF6FD}
+html.classic .cmC .av{width:28px;height:28px;border-radius:0}
+html.classic .cmC.big{border-left-width:1px;border-top:3px solid #3C7FB1;box-shadow:none;padding:6px 8px}
+html.classic .cmC.big .av{width:44px;height:44px;border-radius:0}
+html.classic .cmC.off{border-left-color:#A0A0A0;background:#F0F0F0}
+html.classic .cmC.big.off{border-top-color:#A0A0A0}
+html.classic .cmT b{font-size:12px;color:#000}
+html.classic .cmC.big .cmT b{font-size:13px}
+html.classic .cmR{font:bold 11px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none;color:#1F4E79}
+html.classic .cmP,html.classic .cmT b em{font-size:11px;color:#444}
+html.classic .cmHist.on{background:#D9F0FC}
+html.classic .cmEdH{font:bold 12px Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none;color:#000;margin:10px 0 4px}
+html.classic .cmEh,html.classic .cmSt,html.classic .cmEa{font-size:11px}
+html.classic .cmEr,html.classic .cmEh{gap:4px}
 </style>
 <script>try{if(localStorage.getItem('boe.theme')!=='modern')document.documentElement.classList.add('classic')}catch(e){document.documentElement.classList.add('classic')}</script>
 </head>
@@ -1313,6 +1411,7 @@ html.classic .oOut{font:11px Tahoma,"Segoe UI",Arial,sans-serif}
       <button type="button" data-go="movements">Movements</button>
       <button type="button" data-go="seats">Plantilla Seats</button>
       <button type="button" data-go="org">Org Chart</button>
+      <button type="button" data-go="committees">Committees</button>
       <button type="button" data-go="reports">Reports</button>
       <button type="button" data-go="admin" id="usersTab" hidden>Admin</button>
     </nav>
@@ -1538,8 +1637,13 @@ function index(d) {
     ids: group(d.ids, 'Employee Number'), elig: group(d.elig, 'Employee Number'), edu: group(d.edu, 'Employee Number'),
     pwd: group(d.pwd, 'Employee Number'), names: group(d.names, 'Employee Number'), emails: group(d.emails || [], 'Employee Number'), sepd: by(d.sepd || [], 'Entry ID'), rates: {}, cur: {}, holder: {},
     lic: group(d.lic || [], 'Employee Number'),
+    cmo: by(d.cmo || [], 'Assignment No.'), cmm: group(d.cmm || [], 'Assignment No.'), cmNext: {}, cmOf: {},
     offKids: {}, offTree: [], offPath: {}, offUnder: {}
   };
+  // Committees: members in chart order; which order superseded which; each person's memberships
+  Object.keys(ix.cmm).forEach(k => ix.cmm[k].sort((a, b) => (Number(a['Sort']) || 0) - (Number(b['Sort']) || 0)));
+  (d.cmo || []).forEach(o => { const p = sv(o['Supersedes']); if (p && ix.cmo[p]) ix.cmNext[p] = o['Assignment No.']; });
+  (d.cmm || []).forEach(m => { const e = sv(m['Employee Number']); if (e) (ix.cmOf[e] = ix.cmOf[e] || []).push(m); });
   // Offices are a tree: Division → Section → Unit. Parent Code is blank for a division.
   d.off.forEach(o => { const p = sv(o['Parent Code']); (ix.offKids[p] = ix.offKids[p] || []).push(o); });
   const walk = (parent, depth, path) => (ix.offKids[parent] || []).forEach(o => {
@@ -1955,7 +2059,7 @@ function go(view, id) {
   const parts = String(view).split('/');
   S.view = parts[0] || 'dashboard'; S.id = id || parts[1] || null;
   if (S.view === 'users') S.view = 'admin';
-  if (!['dashboard', 'employees', 'profile', 'movements', 'seats', 'org', 'reports', 'admin'].includes(S.view)) S.view = 'dashboard';
+  if (!['dashboard', 'employees', 'profile', 'movements', 'seats', 'org', 'committees', 'reports', 'admin'].includes(S.view)) S.view = 'dashboard';
   if ($('#modalRoot').innerHTML) closeModal();
   if (S.view === 'profile' && S.id) { rememberProfile(S.id); if (S.q) rememberSearch(S.q); }
   try { history.replaceState(null, '', '#' + S.view + (S.id ? '/' + S.id : '')); } catch (e) { /* some frames block this */ }
@@ -1963,7 +2067,7 @@ function go(view, id) {
   render(true); window.scrollTo(0, 0);
 }
 let LAST_HTML = '';
-const VIEWS = () => ({ dashboard: viewDashboard, employees: viewEmployees, profile: viewProfile, movements: viewMovements, seats: viewSeats, org: viewOrg, reports: viewReports, admin: viewAdmin });
+const VIEWS = () => ({ dashboard: viewDashboard, employees: viewEmployees, profile: viewProfile, movements: viewMovements, seats: viewSeats, org: viewOrg, committees: viewCommittees, reports: viewReports, admin: viewAdmin });
 function render(animate) {
   const v = $('#view'), html = VIEWS()[S.view]();
   LAST_HTML = html; v.innerHTML = html;
@@ -2234,6 +2338,7 @@ function viewProfile(pid, peek) {
     <div class="panelHead"><h3>${hi('history')}Service history</h3><span class="label">${h.length} ${h.length === 1 ? 'entry' : 'entries'} · newest first</span></div>
     ${timeline}
   </section>
+  ${committeesPanel(id)}
   ${orgPanel(id)}`;
   if (peek) return body;
   /* The whole profile slides left and the scanned order takes the right side, full height under the top bar.
@@ -3726,6 +3831,211 @@ async function attachOrder(pickId, entryId) {
   catch (e) { toast('Saved, but the scan did not upload: ' + e.message, 'err', 6000); }
 }
 
+/* ═══════════════════════ committees ═══════════════════════ */
+/* Two tabs in the sheet: "Committee Orders" (one row per issuance: Office / Special / Department Order, number, year,
+   the order it supersedes, the one scanned file) and "Committee Members" (one row per person, tied by Assignment No.).
+   The newest order in a chain of superseding orders is the committee as it stands; the older ones are its history. */
+const CM_ROLES = ['Chairperson', 'Chairman', 'Co-Chairperson', 'Vice Chairperson', 'Vice Chairman', 'Committee Chairman', 'Committee Deputy Chairman',
+  'Committee Adjutant', 'Secretary', 'Team Leader', 'Head, Secretariat', 'Secretariat', 'Member'];
+const CM_SHORT = { 'Office Order': 'OO', 'Special Order': 'SO', 'Department Order': 'DO' };
+const cmRef = o => o ? (o['Order Type'] || 'Order') + ' No. ' + sv(o['Order No.']) + ', s. ' + sv(o['Year']) : '';
+const cmShort = o => o ? (CM_SHORT[o['Order Type']] || o['Order Type'] || '') + ' ' + sv(o['Order No.']) + ' s. ' + sv(o['Year']) : '';
+const cmHead = id => { let at = id, n = 0; while (IX.cmNext[at] && n++ < 200) at = IX.cmNext[at]; return at; };
+const cmChain = head => { const out = []; let at = head, n = 0; while (at && IX.cmo[at] && n++ < 200) { out.push(IX.cmo[at]); at = sv(IX.cmo[at]['Supersedes']); } return out; };
+const cmHeads = () => (D.cmo || []).filter(o => !IX.cmNext[o['Assignment No.']]).sort((a, b) => sv(a['Committee']).localeCompare(sv(b['Committee'])));
+const cmLead = m => !/^member$/i.test(sv(m['Role']) || 'Member');
+const cmPrinted = e => [e['First Name'], e['Middle Name'] ? e['Middle Name'][0] + '.' : '', e['Last Name'], e['Suffix']].filter(Boolean).join(' ');
+/* What the database says about a member today: not in it, separated, or assigned outside */
+function cmFlag(m) {
+  const id = sv(m['Employee Number']), e = id ? IX.emp[id] : null;
+  if (!e) return { key: 'none', pill: '<span class="pill vacant">Not in database</span>' };
+  const c = IX.cur[id] || {};
+  if (c.separated) return { key: 'sep', pill: '<span class="pill sep">Separated</span>' };
+  if (c.kind === 'none' || !c.kind) return { key: 'nojob', pill: '<span class="pill sep">No job on record</span>' };
+  return { key: '', pill: '' };
+}
+function cmCard(m, big) {
+  const id = sv(m['Employee Number']), e = id ? IX.emp[id] : null, c = e ? (IX.cur[id] || {}) : {}, f = cmFlag(m);
+  const name = sv(m['Name on Order']) || (e ? cmPrinted(e) : '—');
+  const ini = name.replace(/[^A-Za-zÑñ ]/g, '').split(/\s+/).filter(Boolean);
+  const av = e ? avatar(e) : '<div class="av">' + esc(((ini[0] || ' ')[0] + ((ini[ini.length - 1] || ' ')[0])).toUpperCase()) + '</div>';
+  const role = sv(m['Role']) || 'Member';
+  const sub = e && !c.separated ? [c.position, c.officeCode].filter(Boolean).join(' · ') : '';
+  const inner = `${av}<span class="cmT"><b>${esc(name)}${m['Remarks'] ? ' <em>' + esc(m['Remarks']) + '</em>' : ''}</b>${big || cmLead(m) ? `<span class="cmR">${esc(role)}</span>` : ''}${sub ? `<span class="cmP">${esc(sub)}</span>` : ''}${f.pill ? `<span class="cmF">${f.pill}</span>` : ''}</span>`;
+  const cls = 'cmC' + (big ? ' big' : '') + (cmLead(m) ? ' lead' : '') + (f.key ? ' off' : '');
+  return e ? `<button type="button" class="${cls}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${inner}</button>` : `<div class="${cls}">${inner}</div>`;
+}
+function cmChart(list) {
+  const top = list.filter(m => !sv(m['Group'])), groups = [], seen = {};
+  list.forEach(m => { const g = sv(m['Group']); if (g && !seen[g]) { seen[g] = 1; groups.push(g); } });
+  const first = top[0], rest = top.slice(1);
+  const lead = rest.filter(cmLead), plain = rest.filter(m => !cmLead(m));
+  return `<div class="cmChart">
+    ${first ? `<div class="cmApex">${cmCard(first, true)}</div>` : ''}
+    ${lead.length ? `<i class="cmStem"></i><div class="cmRow">${lead.map(m => cmCard(m, true)).join('')}</div>` : ''}
+    ${plain.length ? `<i class="cmStem"></i><div class="cmG wide"><h4>Members<span>${plain.length}</span></h4><div class="cmList cols">${plain.map(m => cmCard(m)).join('')}</div></div>` : ''}
+    ${groups.length ? `<i class="cmStem"></i><div class="cmGroups" style="--n:${groups.length}">${groups.map(g => {
+      const all = list.filter(m => sv(m['Group']) === g), L = all.filter(cmLead), M = all.filter(m => !cmLead(m));
+      return `<div class="cmG"><h4>${esc(g)}<span>${all.length}</span></h4>${L.length ? `<div class="cmLeads">${L.map(m => cmCard(m, true)).join('')}</div>` : ''}${M.length ? `<div class="cmSub">Members</div><div class="cmList">${M.map(m => cmCard(m)).join('')}</div>` : ''}</div>`;
+    }).join('')}</div>` : ''}
+    ${!list.length ? '<p class="empty">No members are listed on this order yet.' + (canEdit() ? ' Use Edit to add them.' : '') + '</p>' : ''}
+  </div>`;
+}
+function viewCommittees() {
+  if (D.cmo === undefined) return `<section class="panel"><div class="panelHead"><h3>${hi('people')}Committees</h3></div>
+    <p class="empty">The server does not know about committees yet. Paste the new App.gs into Apps Script and deploy a New version, then reload this page.</p></section>`;
+  if (S.cmtNew) {                                   // just saved: open that committee
+    const hit = D.cmo.find(x => sv(x['Committee']) + '|' + sv(x['Order No.']) + '|' + sv(x['Year']) === S.cmtNew);
+    if (hit) { S.cmt = cmHead(hit['Assignment No.']); S.cmtOrder = ''; }
+    S.cmtNew = '';
+  }
+  const heads = cmHeads();
+  const add = canEdit() ? `<button class="btn small primary" data-act="cmNew">＋ New committee</button>` : '';
+  if (!heads.length) return `<section class="panel"><div class="panelHead"><h3>${hi('people')}Committees</h3><span class="actions" style="margin-left:auto">${add}</span></div>
+    <p class="empty">No committees on file yet.${canEdit() ? ' Use ＋ New committee to record the first order.' : ''}</p></section>`;
+  if (!S.cmt || !IX.cmo[S.cmt] || IX.cmNext[S.cmt]) S.cmt = S.cmt && IX.cmo[S.cmt] ? cmHead(S.cmt) : heads[0]['Assignment No.'];
+  const chain = cmChain(S.cmt);
+  if (!S.cmtOrder || !chain.some(o => o['Assignment No.'] === S.cmtOrder)) S.cmtOrder = S.cmt;
+  const o = IX.cmo[S.cmtOrder], oid = o['Assignment No.'], isHead = oid === S.cmt, list = IX.cmm[oid] || [];
+  const newer = IX.cmNext[oid] ? IX.cmo[IX.cmNext[oid]] : null, older = sv(o['Supersedes']) ? IX.cmo[sv(o['Supersedes'])] : null;
+  const file = sv(o['Order File']);
+  const nNone = list.filter(m => cmFlag(m).key === 'none').length, nGone = list.filter(m => /^(sep|nojob)$/.test(cmFlag(m).key)).length;
+  const side = heads.map(h => { const id = h['Assignment No.'], n = (IX.cmm[id] || []).length;
+    return `<button type="button" class="cmPick${id === S.cmt ? ' on' : ''}" data-act="cmPick" data-id="${esc(id)}"><b>${esc(h['Committee'])}</b><span>${esc(cmShort(h))} · ${n} member${n === 1 ? '' : 's'}</span></button>`; }).join('');
+  const tools = canEdit() ? `<span class="actions cmTools"><button class="btn small" data-act="cmEdit" data-id="${esc(oid)}">${ICON.pen} Edit</button>${isHead ? `<button class="btn small primary" data-act="cmRecon" data-id="${esc(oid)}" title="Record a new order that supersedes this one">Reconstitute</button>` : ''}<button class="iconBtn del" data-act="cmRemove" data-id="${esc(oid)}" aria-label="Remove this order" title="Remove this order (master password)">${ICON.trash}</button></span>` : '';
+  return `<div class="cmWrap">
+    <aside class="panel cmSide"><div class="panelHead"><h3>${hi('people')}Committees</h3><span class="label">${heads.length}</span></div>
+      <div class="cmPicks">${side}</div>${add ? `<div>${add}</div>` : ''}</aside>
+    <div class="cmMain">
+      <section class="panel cmHeadP">
+        <div class="cmTitle"><div><span class="label">${esc(oid)} · ${isHead ? 'Current composition' : 'Earlier composition'}</span><h2>${esc(o['Committee'])}</h2></div>${tools}</div>
+        <div class="cmMeta">
+          <span class="pill ${isHead ? 'filled' : 'sep'}">${isHead ? 'In force' : 'Superseded'}</span>
+          <b>${esc(cmRef(o))}</b>${o['Date Issued'] ? `<span>issued ${esc(fmtDate(o['Date Issued']))}</span>` : '<span class="muted">date not on record</span>'}
+          <span>${list.length} member${list.length === 1 ? '' : 's'}</span>
+          ${file ? `<a class="orderLink" href="${esc(file)}" target="_blank" rel="noopener" data-act="docPop" data-file="${esc(file)}" data-ref="${esc(cmRef(o))}">${ICON.clip} Open the order</a>` : '<span class="muted">No scanned order attached yet</span>'}
+        </div>
+        ${o['Subject'] ? `<p class="cmSubj">${esc(o['Subject'])}</p>` : ''}
+        ${newer ? `<div class="current">Superseded by <a href="#" data-act="cmOrder" data-id="${esc(newer['Assignment No.'])}"><b>${esc(cmRef(newer))}</b></a>. This is how the committee stood before that.</div>` : ''}
+        ${older ? `<p class="muted cmNote">Supersedes <a href="#" data-act="cmOrder" data-id="${esc(older['Assignment No.'])}">${esc(cmRef(older))}</a>.</p>` : ''}
+        ${o['Remarks'] ? `<p class="muted cmNote">${esc(o['Remarks'])}</p>` : ''}
+        ${nNone || nGone ? `<p class="cmWarn">${[nNone ? nNone + ' not in the database' : '', nGone ? nGone + ' no longer active' : ''].filter(Boolean).join(' · ')}</p>` : ''}
+      </section>
+      <section class="panel cmChartP">${cmChart(list)}</section>
+      ${chain.length > 1 ? `<section class="panel"><div class="panelHead"><h3>${hi('history')}Orders for this committee</h3><span class="label">${chain.length} on file</span></div>
+        <div class="list">${chain.map(x => { const xid = x['Assignment No.'], n = (IX.cmm[xid] || []).length;
+          return `<div class="li cmHist${xid === oid ? ' on' : ''}" data-act="cmOrder" data-id="${esc(xid)}" role="button" tabindex="0"><span class="main"><b>${esc(cmRef(x))}</b><span>${x['Date Issued'] ? esc(fmtDate(x['Date Issued'])) + ' · ' : ''}${n} member${n === 1 ? '' : 's'}${x['Subject'] ? ' · ' + esc(x['Subject']) : ''}</span></span><span class="pill ${xid === S.cmt ? 'filled' : 'sep'}">${xid === S.cmt ? 'In force' : 'Superseded'}</span></div>`; }).join('')}</div></section>` : ''}
+    </div></div>`;
+}
+/* On a person's record: the committees they sit on today (the order in force only) */
+function committeesPanel(id) {
+  if (!D.cmo) return '';
+  const rows = (IX.cmOf[id] || []).filter(m => IX.cmo[m['Assignment No.']] && !IX.cmNext[m['Assignment No.']]);
+  if (!rows.length) return '';
+  return `<section class="panel"><div class="panelHead"><h3>${hi('people')}Committees</h3><span class="label">${rows.length} in force</span></div>
+    <div class="list">${rows.map(m => { const o = IX.cmo[m['Assignment No.']];
+      return `<div class="li cmHist" data-act="cmOpen" data-id="${esc(o['Assignment No.'])}" role="button" tabindex="0"><span class="main"><b>${esc(o['Committee'])}</b><span>${esc([sv(m['Role']) || 'Member', sv(m['Group'])].filter(Boolean).join(' · '))} · ${esc(cmRef(o))}</span></span>${ICON.chev}</div>`; }).join('')}</div></section>`;
+}
+/* The form: the order on top, the people named in it below. mode: 'new' | 'edit' | 'recon' (a new order superseding one) */
+let CMF = [];
+const cmLabel = id => { const e = IX.emp[id]; return e ? fullName(e) + ' — ' + id : ''; };
+function cmParse(v, was) {
+  v = sv(v);
+  const m = v.match(/—\s*(\d{4})\s*$/), e = m ? IX.emp[m[1]] : null;
+  if (e) return { emp: m[1], name: was && was.emp === m[1] && was.name ? was.name : cmPrinted(e) };
+  return { emp: '', name: v };
+}
+function cmEdRead() {
+  document.querySelectorAll('#cmEd .cmEr').forEach(r => {
+    const i = Number(r.dataset.i), row = CMF[i]; if (!row) return;
+    const p = cmParse($('.cmWho', r).value, row);
+    row.emp = p.emp; row.name = p.name;
+    row.group = sv($('.cmGrp', r).value); row.role = sv($('.cmRole', r).value); row.remarks = sv($('.cmRem', r).value);
+  });
+}
+function cmEdDraw(focus) {
+  const box = $('#cmEd'); if (!box) return;
+  const groups = Array.from(new Set(CMF.map(r => r.group).filter(Boolean)));
+  box.innerHTML = `<datalist id="cmGroups">${groups.map(g => `<option value="${esc(g)}">`).join('')}</datalist>
+    <div class="cmEh"><span>#</span><span>Person (pick from the list, or type the name as printed)</span><span>Group / unit</span><span>Role</span><span>Note</span><span></span></div>
+    ${CMF.map((r, i) => `<div class="cmEr" data-i="${i}"><span class="cmEn">${i + 1}</span>
+      <span class="cmEw"><input type="text" class="cmWho" list="cmPeople" value="${esc(r.emp ? cmLabel(r.emp) : r.name)}" placeholder="Name" autocomplete="off"><em class="cmSt${r.emp ? ' ok' : ''}">${r.emp ? (r.name ? 'on the order as ' + esc(r.name) : 'in database') : (r.name ? 'not in database' : '')}</em></span>
+      <input type="text" class="cmGrp" list="cmGroups" value="${esc(r.group)}" placeholder="none" autocomplete="off">
+      <input type="text" class="cmRole" list="cmRoles" value="${esc(r.role)}" placeholder="Member" autocomplete="off">
+      <input type="text" class="cmRem" value="${esc(r.remarks)}" autocomplete="off">
+      <span class="cmEt"><button type="button" class="iconBtn" data-act="cmRowUp" data-i="${i}" title="Move up" aria-label="Move up" ${i ? '' : 'disabled'}>↑</button><button type="button" class="iconBtn" data-act="cmRowDn" data-i="${i}" title="Move down" aria-label="Move down" ${i < CMF.length - 1 ? '' : 'disabled'}>↓</button><button type="button" class="iconBtn del" data-act="cmRowDel" data-i="${i}" title="Take off the list" aria-label="Take off the list">${ICON.trash}</button></span></div>`).join('')}
+    ${CMF.length ? '' : '<p class="empty">Nobody listed yet.</p>'}
+    <div class="cmEa"><button type="button" class="btn small" data-act="cmRowAdd">＋ Add a person</button><span class="muted">${CMF.length} listed · the order here is the order on the chart</span></div>`;
+  if (focus !== undefined) { const el = box.querySelector('.cmEr[data-i="' + focus + '"] .cmWho'); if (el) el.focus(); }
+}
+function cmRowAct(act, i) {
+  cmEdRead();
+  if (act === 'cmRowAdd') { const last = CMF[CMF.length - 1]; CMF.push({ emp: '', name: '', group: last ? last.group : '', role: 'Member', remarks: '' }); return cmEdDraw(CMF.length - 1); }
+  if (act === 'cmRowDel') CMF.splice(i, 1);
+  if (act === 'cmRowUp' && i > 0) CMF.splice(i - 1, 0, CMF.splice(i, 1)[0]);
+  if (act === 'cmRowDn' && i < CMF.length - 1) CMF.splice(i + 1, 0, CMF.splice(i, 1)[0]);
+  cmEdDraw();
+}
+function formCommittee(mode, orderId) {
+  const src = orderId ? IX.cmo[orderId] : null;
+  if (mode !== 'new' && !src) return;
+  const edit = mode === 'edit', recon = mode === 'recon';
+  CMF = src ? (IX.cmm[orderId] || []).map(m => ({ emp: IX.emp[sv(m['Employee Number'])] ? sv(m['Employee Number']) : '', name: sv(m['Name on Order']), group: sv(m['Group']), role: sv(m['Role']) || 'Member', remarks: sv(m['Remarks']) })) : [];
+  const names = Array.from(new Set((D.cmo || []).map(o => sv(o['Committee'])).filter(Boolean))).sort();
+  const types = D.committeeOrderTypes || Object.keys(CM_SHORT);
+  const supNow = edit ? sv(src['Supersedes']) : recon ? orderId : '';
+  const supOpts = (D.cmo || []).filter(o => o['Assignment No.'] !== (edit ? orderId : '') && (!IX.cmNext[o['Assignment No.']] || IX.cmNext[o['Assignment No.']] === (edit ? orderId : '') || o['Assignment No.'] === supNow))
+    .map(o => [o['Assignment No.'], o['Assignment No.'] + ' · ' + sv(o['Committee']) + ' · ' + cmShort(o)]);
+  const fileNow = edit ? sv(src['Order File']) : '';
+  openForm(edit ? 'Edit committee order' : recon ? 'Reconstitute the committee' : 'New committee',
+    edit ? orderId + ' · ' + cmRef(src) : recon ? 'A new order that supersedes ' + cmRef(src) : 'The order that creates it, and the people it names', `
+    <div class="fgrid">
+      ${field('cName', 'Committee *', txt('cName', src ? src['Committee'] : '', 'list="cmNames" placeholder="e.g. Health and Safety Committee" autocomplete="off"') + `<datalist id="cmNames">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>`, 'span2')}
+      ${field('cDate', 'Date issued', dt('cDate', edit ? src['Date Issued'] : ''), 'span2')}
+      ${field('cType', 'Kind of order *', sel('cType', types, edit || recon ? src['Order Type'] : 'Office Order'), 'span2')}
+      ${field('cNo', 'Order no. *', txt('cNo', edit ? src['Order No.'] : '', 'placeholder="e.g. 020" inputmode="numeric" autocomplete="off"'), '')}
+      ${field('cYear', 'Year (series) *', txt('cYear', edit ? src['Year'] : String(D.today).slice(0, 4), 'placeholder="2026" inputmode="numeric" maxlength="4" autocomplete="off"'), '')}
+      ${field('cSubj', 'Subject / title of the order', txt('cSubj', edit ? src['Subject'] : ''), 'span2')}
+      ${field('cSup', 'Supersedes', sel('cSup', supOpts, supNow, 'Nothing: this order creates the committee'), 'span2', 'The superseded order stays on file as history.')}
+      ${field('cFile', 'Scanned order', (fileNow ? `<div class="filePick"><a class="clipLink" href="${esc(fileNow)}" target="_blank" rel="noopener">${ICON.clip} Open the one on file</a></div>` : '') + filePick('cFile'), 'span2',
+        fileNow ? 'Choosing a file replaces the one on file. The old file stays in Drive.' : 'One file for the whole order: PDF, JPG or PNG up to 10 MB.')}
+      ${field('cRem', 'Remarks', txt('cRem', edit ? src['Remarks'] : ''), 'span2')}
+    </div>
+    <h3 class="cmEdH">Members${recon ? ' <span class="muted">copied from the superseded order: change, add or take off as the new order says</span>' : ''}</h3>
+    <datalist id="cmPeople">${D.employees.map(e => `<option value="${esc(cmLabel(e['Employee Number']))}">`).join('')}</datalist>
+    <datalist id="cmRoles">${CM_ROLES.map(r => `<option value="${esc(r)}">`).join('')}</datalist>
+    <div class="cmEd" id="cmEd"></div>`, async () => {
+    if (!checkRequired([['cName', 'Enter the committee name'], ['cNo', 'Enter the order number'], ['cYear', 'Four digits, like 2024', v => /^\d{4}$/.test(v)]])) return null;
+    cmEdRead();
+    const members = CMF.filter(r => r.emp || r.name).map(r => ({ employeeId: r.emp, name: r.name, group: r.group, role: r.role || 'Member', remarks: r.remarks }));
+    const payload = { assignmentId: edit ? orderId : '', committee: dv('cName'), orderType: dv('cType'), orderNo: dv('cNo'), year: dv('cYear'),
+      dateIssued: dv('cDate'), subject: dv('cSubj'), supersedes: dv('cSup'), remarks: dv('cRem'), members: members };
+    const file = await readFilePick('cFile');
+    if (file) Object.assign(payload, file);
+    S.cmt = edit ? cmHead(orderId) : ''; S.cmtOrder = edit ? orderId : ''; S.cmtNew = edit ? '' : payload.committee + '|' + payload.orderNo + '|' + payload.year;
+    return { fn: 'saveCommitteeOrder', payload: payload, done: edit ? 'Committee order updated' : recon ? 'Committee reconstituted' : 'Committee added', wait: true, go: 'committees' };
+  }, edit ? 'Save the order' : recon ? 'Save the new order' : 'Add the committee', true);
+  wireFilePick('cFile');
+  cmEdDraw();
+  $('#cmEd').addEventListener('input', ev => {
+    const w = ev.target.closest('.cmWho'); if (!w) return;
+    const st = w.parentNode.querySelector('.cmSt'), p = cmParse(w.value);
+    st.className = 'cmSt' + (p.emp ? ' ok' : ''); st.textContent = p.emp ? 'in database' : (p.name ? 'not in database' : '');
+  });
+}
+function formRemoveCommittee(orderId) {
+  const o = IX.cmo[orderId]; if (!o) return;
+  const n = (IX.cmm[orderId] || []).length, newer = IX.cmNext[orderId] ? IX.cmo[IX.cmNext[orderId]] : null, older = sv(o['Supersedes']) ? IX.cmo[sv(o['Supersedes'])] : null;
+  openForm('Remove committee order', orderId, `
+    <div class="current"><b>${esc(o['Committee'])}</b><br>${esc(cmRef(o))} · ${n} member${n === 1 ? '' : 's'}</div>
+    <p class="muted">The order and its member rows are removed, and the scan moves to the Drive bin.${newer ? '' : older ? ' ' + esc(cmRef(older)) + ' becomes the order in force again.' : ' This is the only order of the committee, so the committee disappears.'}</p>
+    <div class="fgrid">${pwField()}</div>`, () => {
+    if (!checkRequired([['mPw', 'Enter the master password']])) return null;
+    S.cmt = older ? older['Assignment No.'] : newer ? S.cmt : ''; S.cmtOrder = '';
+    return { fn: 'removeCommitteeOrder', payload: { password: $('#mPw').value, assignmentId: orderId }, done: 'Committee order removed', wait: true, go: 'committees' };
+  }, 'Remove the order');
+}
+
 /* ═══════════════════════ pick a person ═══════════════════════ */
 /* A box you type into instead of a dropdown holding every name. The chosen
    Employee Number sits in a hidden input with the id you asked for, so code
@@ -4061,10 +4371,10 @@ function goAfterSave(id) {
   }
   go('profile', id);
 }
-function openForm(title, sub, inner, onSave, saveLabel) {
+function openForm(title, sub, inner, onSave, saveLabel, wide) {
   openModal(`<header><div><span class="label">${esc(sub)}</span><h2>${esc(title)}</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
     <form id="theForm" novalidate><div class="body">${inner}<div class="formErr" id="formErr" hidden></div></div>
-    <footer><span class="muted" style="font-size:.85rem">* required · shows at once, saves to the masterlist in the background</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary" id="saveBtn">${esc(saveLabel || 'Save')}</button></div></footer></form>`);
+    <footer><span class="muted" style="font-size:.85rem">* required · shows at once, saves to the masterlist in the background</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="submit" class="btn primary" id="saveBtn">${esc(saveLabel || 'Save')}</button></div></footer></form>`, wide);
   $('#theForm').addEventListener('submit', async ev => {
     ev.preventDefault();
     const btn = $('#saveBtn'), err = $('#formErr');
@@ -6193,6 +6503,14 @@ document.addEventListener('click', ev => {
   if (act === 'editEntry') return formEditEntry(a.dataset.entry);
   if (act === 'deleteEntry') return formDeleteEntry(a.dataset.entry);
   if (act === 'rmOrderFile') return formRemoveOrderFile(a.dataset.entry);
+  if (act === 'cmPick') { S.cmt = id; S.cmtOrder = ''; render(); return window.scrollTo(0, 0); }
+  if (act === 'cmOrder') { ev.preventDefault(); S.cmtOrder = id; render(); return window.scrollTo(0, 0); }
+  if (act === 'cmOpen') { S.cmt = id; S.cmtOrder = ''; return go('committees'); }
+  if (act === 'cmNew') return formCommittee('new');
+  if (act === 'cmEdit') return formCommittee('edit', id);
+  if (act === 'cmRecon') return formCommittee('recon', id);
+  if (act === 'cmRemove') return formRemoveCommittee(id);
+  if (/^cmRow/.test(act)) return cmRowAct(act, Number(a.dataset.i));
   if (act === 'addLicense') return formLicense(id, '');
   if (act === 'editLicense') return formLicense(id, a.dataset.lic);
   if (act === 'rmLicense') return formRemoveLicense(a.dataset.lic);
