@@ -833,7 +833,10 @@ footer.xoBusy #xoNote{color:#1A1A1A;font-weight:600;font-variant-numeric:tabular
 .cmSubj{margin:0;font-size:.95rem}
 .cmNote{margin:0;font-size:.85rem}
 .cmWarn{margin:0;font-size:.85rem;font-weight:600;color:var(--warn);background:var(--warn-soft);padding:6px 11px;border-radius:var(--r-sm);justify-self:start}
-.cmChartP{overflow-x:auto}
+.cmSep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.cmOrg .od{box-shadow:var(--shadow-card)}
+.org .oc.cmOff{opacity:.72}
+.org .oc.cmOff .av{filter:grayscale(1)}
 .cmChart{display:grid;justify-items:center;gap:0;min-width:0}
 .cmApex,.cmRow{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 .cmStem{display:block;width:2px;height:20px;background:var(--line-2)}
@@ -3185,7 +3188,7 @@ function fitOrg() {
     if (need > room + 1) t.style.zoom = String(Math.max(0.6, Math.floor(room / need * 100) / 100));
   });
 }
-window.addEventListener('resize', () => { if (S.view === 'org') fitOrg(); });
+window.addEventListener('resize', () => { if (S.view === 'org' || S.view === 'committees') fitOrg(); });
 /* After a side column opens or closes: re-fit the chart, then let it grow or shrink smoothly from its old size to the new one */
 function fitOrgSmooth() {
   const fits = Array.from(document.querySelectorAll('.otFit')).map(f => {
@@ -3473,7 +3476,8 @@ async function xoFonts() {
   return XO_FONTS;
 }
 /* Draw the sheet off-screen and return it as a canvas, as sharp as the browser allows (up to 2x) */
-async function xoCanvas(onStep) {
+async function xoCanvas(onStep, build) {
+  build = build || xoBuild;
   const say = onStep || (() => {});
   say('Preparing…', 0.02);
   const X = { ids: {}, k: 0, fonts: await xoFonts() };
@@ -3482,7 +3486,7 @@ async function xoCanvas(onStep) {
   if (!D.logo) X.logo1 = await asset('assets/dpwh-logo.png');
   if (!D.logo2) X.logo2 = await asset('assets/bagong-pilipinas.png');
   if (XO.hd) {
-    xoBuild(X);
+    build(X);
     const need = Object.keys(X.ids).filter(id => PHOTO[id] === undefined && (D.thumbs || {})[id]);
     let done = 0; const total = need.length;
     if (total) say('Getting photos… 0 of ' + total, 0.05);
@@ -3491,7 +3495,7 @@ async function xoCanvas(onStep) {
   }
   say('Drawing the chart…', 0.85);
   X.ids = {}; X.k = 0;
-  const built = xoBuild(X); let W = built.W;
+  const built = build(X); let W = built.W;
   const fr = document.createElement('iframe');
   fr.setAttribute('aria-hidden', 'true'); fr.tabIndex = -1;
   fr.style.cssText = 'position:fixed;left:-40000px;top:0;width:30000px;height:200px;border:0;visibility:hidden';
@@ -3549,8 +3553,8 @@ function xoPrintView() {
   fit();
 }
 /* One-page PDF that is just the picture, on a page of the same shape (A4 width; taller charts get a longer page) */
-function xoPdf(jpeg, w, h) {
-  const pw = XO.orient === 'portrait' ? 595.28 : 841.89, ph = Math.round(pw * h / w * 100) / 100;
+function xoPdf(jpeg, w, h, orient) {
+  const pw = (orient || XO.orient) === 'portrait' ? 595.28 : 841.89, ph = Math.round(pw * h / w * 100) / 100;
   const enc = s => new TextEncoder().encode(s), parts = [], offs = []; let len = 0;
   const put = b => { parts.push(b); len += b.length; };
   const obj = (n, body, stream) => { offs[n] = len; put(enc(n + ' 0 obj\n' + body + (stream ? '\nstream\n' : '\nendobj\n'))); if (stream) { put(stream); put(enc('\nendstream\nendobj\n')); } };
@@ -3865,21 +3869,46 @@ function cmCard(m, big) {
   const cls = 'cmC' + (big ? ' big' : '') + (cmLead(m) ? ' lead' : '') + (f.key ? ' off' : '');
   return e ? `<button type="button" class="${cls}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${inner}</button>` : `<div class="${cls}">${inner}</div>`;
 }
-function cmChart(list) {
+/* The committee chart is drawn like the organizational chart: the same cards, lines, colours and Chart settings (XO).
+   Chairperson on top, the other officers without a group on the next level, then one column per group
+   (its leaders on the leaders' level, then its members). Members without a group get their own "Members" column. */
+function cmParts(list) {
   const top = list.filter(m => !sv(m['Group'])), groups = [], seen = {};
   list.forEach(m => { const g = sv(m['Group']); if (g && !seen[g]) { seen[g] = 1; groups.push(g); } });
-  const first = top[0], rest = top.slice(1);
-  const lead = rest.filter(cmLead), plain = rest.filter(m => !cmLead(m));
-  return `<div class="cmChart">
-    ${first ? `<div class="cmApex">${cmCard(first, true)}</div>` : ''}
-    ${lead.length ? `<i class="cmStem"></i><div class="cmRow">${lead.map(m => cmCard(m, true)).join('')}</div>` : ''}
-    ${plain.length ? `<i class="cmStem"></i><div class="cmG wide"><h4>Members<span>${plain.length}</span></h4><div class="cmList cols">${plain.map(m => cmCard(m)).join('')}</div></div>` : ''}
-    ${groups.length ? `<i class="cmStem"></i><div class="cmGroups" style="--n:${groups.length}">${groups.map(g => {
-      const all = list.filter(m => sv(m['Group']) === g), L = all.filter(cmLead), M = all.filter(m => !cmLead(m));
-      return `<div class="cmG"><h4>${esc(g)}<span>${all.length}</span></h4>${L.length ? `<div class="cmLeads">${L.map(m => cmCard(m, true)).join('')}</div>` : ''}${M.length ? `<div class="cmSub">Members</div><div class="cmList">${M.map(m => cmCard(m)).join('')}</div>` : ''}</div>`;
-    }).join('')}</div>` : ''}
-    ${!list.length ? '<p class="empty">No members are listed on this order yet.' + (canEdit() ? ' Use Edit to add them.' : '') + '</p>' : ''}
-  </div>`;
+  const first = top[0] || null, rest = top.slice(1);
+  return { first: first, leads: rest.filter(cmLead), plain: rest.filter(m => !cmLead(m)),
+    groups: groups.map(g => { const all = list.filter(m => sv(m['Group']) === g); return { name: g, all: all, L: all.filter(cmLead), M: all.filter(m => !cmLead(m)) }; }) };
+}
+/* A member as an org-chart card. role = the line in orange under the name (officers and leaders). */
+function cmOc(m, head, role) {
+  const id = sv(m['Employee Number']), e = id ? IX.emp[id] : null, c = e ? (IX.cur[id] || {}) : {}, f = cmFlag(m);
+  const name = (sv(m['Name on Order']) || (e ? cmPrinted(e) : '—')).toUpperCase();
+  const ini = name.replace(/[^A-ZÑ ]/g, '').split(/\s+/).filter(Boolean);
+  const av = e ? avatar(e) : '<div class="av">' + esc(((ini[0] || ' ')[0] + ((ini[ini.length - 1] || ' ')[0])).toUpperCase()) + '</div>';
+  const live = e && !c.separated && c.kind && c.kind !== 'none';
+  const pos = live ? (XO.pos ? String(c.position || 'Position not on record') : '') + (XO.sg && c.sg !== '' && c.sg !== undefined ? (XO.pos ? ' ' : '') + '(SG ' + c.sg + ')' : '') : '';
+  const from = live && XO.from && c.officeCode !== '' ? String(c.officeCode) : '';
+  const tags = f.pill ? f.pill : (XO.kind && live ? (c.kind === 'contract' ? `<span class="pill contract">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</span>` : `<span class="pill plantilla">${esc(c.status || 'Permanent')}</span>`) : '') +
+    (from ? `<span class="pill warn" title="Office: ${esc(from)}">(${esc(from)})</span>` : '');
+  const inner = `${av}<span class="ocT"><b title="${esc(name)}">${esc(name)}</b>${XO.pos || XO.sg ? `<span class="ocP" title="${esc(pos)}">${esc(pos) || '&nbsp;'}</span>` : ''}${XO.item ? `<span class="mono ocP">${live && c.item ? esc(c.item) : '&nbsp;'}</span>` : ''}${role ? `<span class="ocR">${esc(role)}${m['Remarks'] ? ' · ' + esc(m['Remarks']) : ''}</span>` : ''}${XO.kind || XO.from || f.pill ? `<span class="ocTags">${tags}</span>` : ''}</span>`;
+  const cls = 'oc ' + (live && c.kind === 'contract' ? 'cos' : 'plan') + (head ? ' head' : '') + (role ? ' r' : '') + (f.key ? ' cmOff' : '');
+  return e ? `<button type="button" class="${cls}" data-act="profile" data-id="${esc(id)}" title="Open the record of ${esc(fullName(e))}">${inner}</button>` : `<div class="${cls}" title="Not in the database">${inner}</div>`;
+}
+const cmGhost = () => '<div class="oc head r ghost" aria-hidden="true"><div class="av"></div><span class="ocT"><b>&nbsp;</b>' + (XO.pos || XO.sg ? '<span class="ocP">&nbsp;</span>' : '') + (XO.item ? '<span class="mono ocP">&nbsp;</span>' : '') + '<span class="ocR">&nbsp;</span>' + (XO.kind || XO.from ? '<span class="ocTags"></span>' : '') + '</span></div>';
+function cmChart(list, o) {
+  if (!list.length) return `<p class="empty">No members are listed on this order yet.${canEdit() ? ' Use Edit to add them.' : ''}</p>`;
+  const P = cmParts(list); ORG_K = 0;
+  const role = m => sv(m['Role']) || 'Member';
+  const nL = Math.max(0, ...P.groups.map(g => g.L.length));
+  const col = (name, n, L, M, cont) => `<div class="otL">${orgUH(name, n, cont)}${L.map(m => cmOc(m, true, role(m))).join('')}${Array(Math.max(0, nL - L.length)).fill(cmGhost()).join('')}<div class="ouB">${M.map(m => cmOc(m)).join('')}</div></div>`;
+  const cols = [];
+  // members with no group: one column, or a few side by side when the list is long
+  if (P.plain.length) { const per = Math.max(8, Math.ceil(P.plain.length / 4)); for (let i = 0; i < P.plain.length; i += per) cols.push(col('Members', P.plain.length, [], P.plain.slice(i, i + per), i > 0)); }
+  P.groups.forEach(g => cols.push(col(g.name, g.all.length, g.L, g.M)));
+  const leads = P.leads.length ? `<i class="oStem"></i><div class="otKids">${P.leads.map(m => `<div class="otK"><div class="otL">${cmOc(m, true, role(m))}</div></div>`).join('')}</div>` : '';
+  const tree = `${P.first ? cmOc(P.first, true, role(P.first)) : ''}${leads}${orgKids(cols)}`;
+  return `<div class="org cmOrg"><section class="od"><div class="odH"><h2>${esc(o['Committee'])}</h2><span>${orgPeople(list.length)} · ${esc(cmRef(o))}</span></div>
+    <div class="odB"><div class="otFit"><div class="ot root" style="${orgVars(1, 1, 250)}">${tree}</div></div></div></section></div>`;
 }
 function viewCommittees() {
   if (D.cmo === undefined) return `<section class="panel"><div class="panelHead"><h3>${hi('people')}Committees</h3></div>
@@ -3902,7 +3931,9 @@ function viewCommittees() {
   const nNone = list.filter(m => cmFlag(m).key === 'none').length, nGone = list.filter(m => /^(sep|nojob)$/.test(cmFlag(m).key)).length;
   const side = heads.map(h => { const id = h['Assignment No.'], n = (IX.cmm[id] || []).length;
     return `<button type="button" class="cmPick${id === S.cmt ? ' on' : ''}" data-act="cmPick" data-id="${esc(id)}"><b>${esc(h['Committee'])}</b><span>${esc(cmShort(h))} · ${n} member${n === 1 ? '' : 's'}</span></button>`; }).join('');
-  const tools = canEdit() ? `<span class="actions cmTools"><button class="btn small" data-act="cmEdit" data-id="${esc(oid)}">${ICON.pen} Edit</button>${isHead ? `<button class="btn small primary" data-act="cmRecon" data-id="${esc(oid)}" title="Record a new order that supersedes this one">Reconstitute</button>` : ''}<button class="iconBtn del" data-act="cmRemove" data-id="${esc(oid)}" aria-label="Remove this order" title="Remove this order (master password)">${ICON.trash}</button></span>` : '';
+  const look = `<button class="btn small" data-act="cmLook" title="Choose what each box shows and the colours (the same settings as the org chart)">Chart settings</button><button class="btn small primary" data-act="cmDl" data-id="${esc(oid)}" title="Save this chart as a PDF or a JPEG picture">${ICON.dl} Download</button>`;
+  setTimeout(fitOrg, 0);
+  const tools = `<span class="actions cmTools">${look}${canEdit() ? `<span class="cmSep"></span><button class="btn small" data-act="cmEdit" data-id="${esc(oid)}">${ICON.pen} Edit</button>${isHead ? `<button class="btn small primary" data-act="cmRecon" data-id="${esc(oid)}" title="Record a new order that supersedes this one">Reconstitute</button>` : ''}<button class="iconBtn del" data-act="cmRemove" data-id="${esc(oid)}" aria-label="Remove this order" title="Remove this order (master password)">${ICON.trash}</button>` : ''}</span>`;
   return `<div class="cmWrap">
     <aside class="panel cmSide"><div class="panelHead"><h3>${hi('people')}Committees</h3><span class="label">${heads.length}</span></div>
       <div class="cmPicks">${side}</div>${add ? `<div>${add}</div>` : ''}</aside>
@@ -3921,11 +3952,107 @@ function viewCommittees() {
         ${o['Remarks'] ? `<p class="muted cmNote">${esc(o['Remarks'])}</p>` : ''}
         ${nNone || nGone ? `<p class="cmWarn">${[nNone ? nNone + ' not in the database' : '', nGone ? nGone + ' no longer active' : ''].filter(Boolean).join(' · ')}</p>` : ''}
       </section>
-      <section class="panel cmChartP">${cmChart(list)}</section>
+      ${cmChart(list, o)}
       ${chain.length > 1 ? `<section class="panel"><div class="panelHead"><h3>${hi('history')}Orders for this committee</h3><span class="label">${chain.length} on file</span></div>
         <div class="list">${chain.map(x => { const xid = x['Assignment No.'], n = (IX.cmm[xid] || []).length;
           return `<div class="li cmHist${xid === oid ? ' on' : ''}" data-act="cmOrder" data-id="${esc(xid)}" role="button" tabindex="0"><span class="main"><b>${esc(cmRef(x))}</b><span>${x['Date Issued'] ? esc(fmtDate(x['Date Issued'])) + ' · ' : ''}${n} member${n === 1 ? '' : 's'}${x['Subject'] ? ' · ' + esc(x['Subject']) : ''}</span></span><span class="pill ${xid === S.cmt ? 'filled' : 'sep'}">${xid === S.cmt ? 'In force' : 'Superseded'}</span></div>`; }).join('')}</div></section>` : ''}
     </div></div>`;
+}
+/* ── committee chart download: the org chart's print sheet (header box, dotted page, gradient headers), as PDF or JPEG ── */
+const XC = { fmt: 'pdf', orient: 'landscape' };
+try { Object.assign(XC, JSON.parse(localStorage.getItem('boe.cmDl') || '{}')); } catch (e) { /* first visit */ }
+function cmXoCard(m, role, X, big) {
+  const id = sv(m['Employee Number']), e = id ? IX.emp[id] : null, c = e ? (IX.cur[id] || {}) : {}, f = cmFlag(m);
+  if (e) X.ids[id] = 1;
+  const name = (sv(m['Name on Order']) || (e ? cmPrinted(e) : '—')).toUpperCase();
+  const local = e ? (D._photoLocal || {})[id] : undefined;
+  const src = e ? ((XO.hd ? (local !== undefined ? local : PHOTO[id]) : '') || (D.thumbs || {})[id] || '') : '';
+  const ini = name.replace(/[^A-ZÑ ]/g, '').split(/\s+/).filter(Boolean);
+  const pic = /^data:image\//.test(src) ? `<img src="${esc(src)}" alt="" />` : `<span class="xav">${esc(e ? initials(e) : ((ini[0] || ' ')[0] + ((ini[ini.length - 1] || ' ')[0])))}</span>`;
+  const live = e && !c.separated && c.kind && c.kind !== 'none';
+  const line = live ? [XO.pos ? esc(c.position || 'Position not on record') : '', XO.sg && c.sg !== '' && c.sg !== undefined ? 'SG ' + esc(c.sg) : ''].filter(Boolean).join(' · ') : '';
+  const flag = f.key === 'none' ? 'Not in database' : f.key === 'sep' ? 'Separated' : f.key === 'nojob' ? 'No job on record' : '';
+  const tags = flag ? `<i class="from">${flag}</i>` : (XO.kind && live ? (c.kind === 'contract' ? `<i class="cos">${/job order$/i.test(c.status) && !/contract/i.test(c.status) ? 'Job Order' : 'CoS'}</i>` : `<i>${esc(c.status || 'Permanent')}</i>`) : '') +
+    (live && XO.from && c.officeCode !== '' ? `<i class="from">(${esc(c.officeCode)})</i>` : '');
+  return `<div class="xpc${big ? ' chief' : ''}${big === 'mid' ? ' mid' : ''}">${role ? `<i class="xrole">${esc(role)}</i>` : ''}${pic}<div class="xpt"><b>${esc(name)}</b>${line ? `<span>${line}</span>` : ''}${XO.item && live && c.item ? `<span class="xitem">${esc(c.item)}</span>` : ''}${tags ? `<span class="xtags">${tags}</span>` : ''}</div></div>`;
+}
+function cmXoBuild(X) {
+  const o = IX.cmo[X.cm], list = IX.cmm[X.cm] || [], P = cmParts(list), role = m => sv(m['Role']) || 'Member';
+  const agency = String(D.agency || 'Bureau of Equipment'), aw = agency.split(' ');
+  const nL = Math.max(0, ...P.groups.map(g => g.L.length));
+  // a group column: gradient header, its leaders (mid cards with their role tag), empty slots so members line up, then members
+  const leaf = (name, n, L, M, cont) => { const or = XO.color === 'orange' || (XO.color === 'alt' && !cont && X.k++ % 2 === 1);
+    return `<div class="xleaf"><div class="xuh${or ? ' or' : ''}${cont ? ' ghost' : ''}"><b>${esc(name)}</b><i>${n}</i></div>${L.map(m => cmXoCard(m, role(m), X, 'mid')).join('')}${Array(Math.max(0, nL - L.length)).fill('<div class="xgapm"></div>').join('')}<div class="xub">${M.map(m => cmXoCard(m, '', X)).join('')}</div></div>`; };
+  const cols = [];
+  if (P.plain.length) { const per = Math.max(8, Math.ceil(P.plain.length / 4)); for (let i = 0; i < P.plain.length; i += per) cols.push(leaf('Members', P.plain.length, [], P.plain.slice(i, i + per), i > 0)); }
+  P.groups.forEach(g => cols.push(leaf(g.name, g.all.length, g.L, g.M)));
+  const leads = P.leads.length ? `<i class="xstem"></i><div class="xkids">${P.leads.map(m => `<div class="xk">${cmXoCard(m, role(m), X, true)}</div>`).join('')}</div>` : '';
+  const body = `<div class="xn"><div class="xtop">${P.first ? cmXoCard(P.first, role(P.first), X, true) : ''}</div>${leads}${xoKids(cols)}</div>`;
+  const W = XC.orient === 'portrait' ? 1100 : 1500, minH = Math.round(XC.orient === 'portrait' ? W * 1.4142 : W / 1.4142);
+  const logo = src => /^data:image\//.test(String(src || '')) ? `<img src="${esc(src)}" alt="" />` : '';
+  const sub = [cmRef(o), o['Date Issued'] ? 'issued ' + fmtDate(o['Date Issued']) : '', orgPeople(list.length), IX.cmNext[X.cm] ? 'superseded' : ''].filter(Boolean).join(' · ');
+  return { W, html: `<div class="xo" style="width:max-content;min-width:${W}px;min-height:${minH}px;--wire:${esc(XO.wire)}"><style>${X.fonts || ''}${XO_CSS}.xo .xpc.chief{height:auto;min-height:136px}.xo .xpc.chief.mid{height:auto;min-height:104px}.xo .xk>.xpc.chief{margin-top:12px}.xo .xleaf>.xpc.mid{margin-top:8px}.xo .xuh.ghost{visibility:hidden}<\/style>
+    <div class="xhd">${logo(D.logo || X.logo1)}${logo(D.logo2 || X.logo2)}<div class="xbrand"><b>${esc(aw.slice(0, -1).join(' '))} <em>${esc(aw[aw.length - 1])}</em></b><span>${esc(D.department || 'Department of Public Works and Highways')}</span></div><div class="xas">Committee Chart</div></div>
+    <h1>${xoTitle(o['Committee'])}</h1><div class="xsub">${esc(sub)}</div>${o['Subject'] ? `<div class="xsub" style="margin-top:4px">${esc(o['Subject'])}</div>` : ''}
+    <div class="xbody">${body}</div>
+    ${XO.date ? `<div class="xft">Generated ${esc(fmtDate(D.today))}</div>` : ''}</div>` };
+}
+function formCmDownload(id) {
+  const chk = (k, l) => `<label style="display:flex;gap:8px;align-items:center;font-weight:400;cursor:pointer"><input type="checkbox" id="xo_${k}" ${XO[k] ? 'checked' : ''} style="width:16px;height:16px;flex:none"> ${l}</label>`;
+  const o = IX.cmo[id];
+  openModal(`<header><div><span class="label">${esc(o['Committee'])}</span><h2>Download the committee chart</h2></div><button class="x" data-act="close" aria-label="Close">×</button></header>
+    <div class="body">
+      <div class="fgrid">
+        ${field('xcFmt', 'File type', sel('xcFmt', [['pdf', 'PDF'], ['jpg', 'Picture (JPEG)']], XC.fmt))}
+        ${field('xcOrient', 'Page', sel('xcOrient', [['landscape', 'Landscape'], ['portrait', 'Portrait']], XC.orient), '', 'A wide chart makes the page wider')}
+        ${field('xoColor', 'Group header colour', sel('xoColor', [['blue', 'Blue'], ['orange', 'Orange'], ['alt', 'Alternate']], XO.color))}
+        ${field('xoWire', 'Line colour', sel('xoWire', [['#A9BFE3', 'Light blue'], ['#0D47A1', 'Navy'], ['#F26522', 'Orange'], ['#9AA5B5', 'Grey']], XO.wire))}
+      </div>
+      <div class="f"><label>Show on each person</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
+          ${chk('pos', 'Position')}${chk('sg', 'Salary grade')}${chk('item', 'Item number')}${chk('kind', 'Permanent / CoS tag')}${chk('from', 'Office, e.g. "(EPD)"')}
+        </div></div>
+      <div class="f"><label>Other</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 16px">
+          ${chk('date', 'Generation date')}${chk('hd', 'Full-size photos (sharper, slower)')}
+        </div></div>
+      <div class="formErr" id="xoErr" hidden></div>
+    </div>
+    <footer><span class="muted" style="font-size:.85rem" id="xoNote">Uses the same settings as the org chart.</span><div class="actions"><button type="button" class="btn" data-act="close">Cancel</button><button type="button" class="btn primary" id="xoGo" data-act="cmDlGo" data-id="${esc(id)}">${ICON.dl} Download</button></div></footer>`);
+}
+async function cmDownloadGo(id) {
+  const btn = $('#xoGo'), err = $('#xoErr'), note = $('#xoNote');
+  if (!btn || btn.disabled || !IX.cmo[id]) return;
+  xoRead(); XC.fmt = $('#xcFmt').value; XC.orient = $('#xcOrient').value;
+  try { localStorage.setItem('boe.cmDl', JSON.stringify(XC)); } catch (e) { /* private window */ }
+  err.hidden = true; btn.disabled = true;
+  const bar = note && note.closest('footer');
+  try {
+    const step = (t, f) => {
+      if (note) note.textContent = t + (f !== undefined ? '  ' + Math.round(f * 100) + '%' : '');
+      if (bar) { bar.classList.add('xoBusy'); if (f !== undefined) bar.style.setProperty('--xoP', (f * 100).toFixed(1) + '%'); }
+    };
+    const cv = await xoCanvas(step, X => cmXoBuild(Object.assign(X, { cm: id })));
+    step('Saving the file…', 0.95);
+    const o = IX.cmo[id], now = new Date(), p = n => String(n).padStart(2, '0');
+    const name = 'BOE-Committee-' + sv(o['Committee']).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') + '_' + (CM_SHORT[o['Order Type']] || 'Order') + sv(o['Order No.']) + '-' + sv(o['Year']) + '_' + now.getFullYear() + '-' + p(now.getMonth() + 1) + '-' + p(now.getDate());
+    const jpeg = cv.toDataURL('image/jpeg', 0.93);
+    if (XC.fmt === 'pdf') {
+      const bin = atob(jpeg.split(',')[1]), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      download(name + '.pdf', 'application/pdf', xoPdf(bytes, cv.width, cv.height, XC.orient));
+    } else {
+      const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.93));
+      if (!blob) throw new Error('The chart is too big to save as one picture.');
+      download(name + '.jpg', 'image/jpeg', blob);
+    }
+    step('Done', 1); await new Promise(r => setTimeout(r, 350));
+    closeModal();
+  } catch (e) {
+    if (bar) { bar.classList.remove('xoBusy'); bar.style.removeProperty('--xoP'); }
+    if ((e.printView || /SecurityError|insecure|tainted/i.test(String(e.name) + ' ' + String(e.message))) && XO_LAST) { closeModal(); xoPrintView(); return toast('This phone cannot save the picture directly. Use Print, then Save as PDF.'); }
+    err.textContent = e.message || 'The chart could not be made.'; err.hidden = false; btn.disabled = false; if (note) note.textContent = '';
+  }
 }
 /* On a person's record: the committees they sit on today (the order in force only) */
 function committeesPanel(id) {
@@ -6503,6 +6630,9 @@ document.addEventListener('click', ev => {
   if (act === 'editEntry') return formEditEntry(a.dataset.entry);
   if (act === 'deleteEntry') return formDeleteEntry(a.dataset.entry);
   if (act === 'rmOrderFile') return formRemoveOrderFile(a.dataset.entry);
+  if (act === 'cmLook') return formOrgDownload(true);
+  if (act === 'cmDl') return formCmDownload(id);
+  if (act === 'cmDlGo') return cmDownloadGo(id);
   if (act === 'cmPick') { S.cmt = id; S.cmtOrder = ''; render(); return window.scrollTo(0, 0); }
   if (act === 'cmOrder') { ev.preventDefault(); S.cmtOrder = id; render(); return window.scrollTo(0, 0); }
   if (act === 'cmOpen') { S.cmt = id; S.cmtOrder = ''; return go('committees'); }
