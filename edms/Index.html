@@ -179,6 +179,8 @@ main{max-width:1640px;margin:0 auto;padding:28px 32px 80px;display:grid;gap:22px
 .pill.bad{background:var(--bad-soft);color:var(--bad)}
 .pill.warn{background:var(--warn-soft);color:var(--warn)}
 .pill.saving{background:var(--warn-soft);color:var(--warn)}
+.pill.saving{animation:savePulse 1.8s ease-in-out infinite}
+@keyframes savePulse{50%{opacity:.55}}
 .tag{font:600 .8rem var(--cond);letter-spacing:.06em;padding:1px 8px;border:1px solid var(--line);background:var(--soft);color:var(--head);border-radius:6px;white-space:nowrap}
 
 /* Avatars */
@@ -1807,26 +1809,37 @@ function denied(d) {
 /* The screen shows BASE (the last data from Google) plus every change still on its way.
    Each change is applied on screen at once, then sent to Google one at a time, in order. */
 let BASE = null, SYNCING = false, REFRESHING = false, SAVED_FLASH = null;
-const PENDING = [], PENDING_ENTRIES = new Set(), ID_MAP = {}, WAITERS = [];
+const PENDING = [], PENDING_ENTRIES = new Set(), PENDING_UPLOADS = new Set(), ID_MAP = {}, WAITERS = [];
+const savingPill = (id, style) => '<span class="pill saving"' + (style ? ' style="' + style + '"' : '') + '>' + (PENDING_UPLOADS.has(id) ? 'Uploading scan…' : 'Saving…') + '</span>';
 const clone = o => JSON.parse(JSON.stringify(o));
 const SAVE_LABEL = { saveNewHire: 'the new hire', saveJobChange: 'the change', saveNameChange: 'the name change', savePersonal: 'the details',
-  saveUser: 'the user', savePhoto: 'the photo', separateEmployee: 'the removal', saveSettings: 'the branding' };
+  saveUser: 'the user', savePhoto: 'the photo', separateEmployee: 'the removal', saveSettings: 'the branding', saveOrderFile: 'the scanned order',
+  updateEntry: 'the entry', deleteEntry: 'the deletion', deleteEmployee: 'the deletion', removeOrderFile: 'the file removal', saveLicense: 'the license',
+  removeLicense: 'the license removal', saveCommitteeOrder: 'the committee order', removeCommitteeOrder: 'the committee removal', saveSeat: 'the new seat',
+  saveOffice: 'the office', deleteOffice: 'the office removal' };
+/* What goes to the server: everything except keys that start with "_" (a picked file's local preview link, the change it belongs to) */
+const wire = p => { if (!p || typeof p !== 'object' || Array.isArray(p)) return p; const o = {}; Object.keys(p).forEach(k => { if (k[0] !== '_') o[k] = p[k]; }); return o; };
+const hasBytes = p => !!(p && p.bytes);
 
 function rebuild() {
   const d = clone(BASE), keep = [], dropped = [];
-  PENDING_ENTRIES.clear();
+  PENDING_ENTRIES.clear(); PENDING_UPLOADS.clear();
   PENDING.forEach(op => {
-    try { const r = LOCAL[op.fn](d, op.payload, op.hint) || {}; op.hint = { id: r.id }; (r.entries || []).forEach(x => PENDING_ENTRIES.add(x)); keep.push(op); }
-    catch (e) { dropped.push([op, e]); }
+    try { const r = LOCAL[op.fn](d, op.payload, op.hint) || {}; op.hint = { id: r.id, entries: r.entries || [] }; (r.entries || []).forEach(x => { PENDING_ENTRIES.add(x); if (op.fn === 'saveOrderFile') PENDING_UPLOADS.add(x); }); keep.push(op); }
+    catch (e) { if (!(op.payload && op.payload._parent && op.payload._parent.failed)) dropped.push([op, e]); }
   });
   PENDING.length = 0; keep.forEach(op => PENDING.push(op));
   D = d; IX = index(D);
   dropped.forEach(([op, e]) => toast('Couldn\'t keep ' + op.label + ': ' + e.message, 'err', 7000));
 }
 /* Called by forms: apply now, save in the background. Throws if the change breaks a rule, so the form can show it. */
-function queueSave(fn, payload) {
+function queueSave(fn, payload, file) {
   const r = LOCAL[fn](clone(D), payload, null) || {};
-  PENDING.push({ fn: fn, payload: payload, label: SAVE_LABEL[fn] || 'the change', hint: { id: r.id } });
+  const op = { fn: fn, payload: payload, label: SAVE_LABEL[fn] || 'the change', hint: { id: r.id, entries: r.entries || [] } };
+  PENDING.push(op);
+  // A scanned order for a service-history entry follows its change: it shows at once and uploads right after the change is saved
+  if (file) PENDING.push({ fn: 'saveOrderFile', label: SAVE_LABEL.saveOrderFile, hint: {},
+    payload: Object.assign({ entryId: fn === 'updateEntry' ? payload.entryId : '', _parent: op }, file) });
   rebuild(); chrome(); badge(); pump();
   return r;
 }
@@ -1843,15 +1856,25 @@ async function pump() {
   SYNCING = true; badge();
   const op = PENDING[0];
   let res = null, err = null;
-  try { res = await callRetry(op.fn, remap(op.payload)); } catch (e) { err = e; }
+  try { res = await callRetry(op.fn, wire(remap(op.payload))); } catch (e) { err = e; }
   PENDING.shift();
+  const kids = PENDING.filter(x => x.payload && x.payload._parent === op);
   if (res) {
     if (op.fn === 'saveNewHire' && op.hint && res.id && op.hint.id !== res.id) { ID_MAP[op.hint.id] = res.id; if (S.id === op.hint.id) S.id = res.id; }
     if (op.fn === 'savePhoto') PHOTO[remapId(op.payload.employeeId)] = op.payload.photo || '';
+    if (kids.length) {
+      // the entry the server made: the one of this person that wasn't there before
+      const had = new Set(((BASE && BASE.hist) || []).map(h => h['Entry ID']));
+      const made = (res.data.hist || []).find(h => !had.has(h['Entry ID']) && h['Employee Number'] === res.id);
+      kids.forEach(k => { if (!k.payload.entryId && made) k.payload.entryId = made['Entry ID']; k.payload._parent = null; });
+    }
     BASE = res.data; saveCache();
     if (!PENDING.length) { clearTimeout(SAVED_FLASH); SAVED_FLASH = setTimeout(() => { SAVED_FLASH = null; badge(); }, 2600); }
+  } else if (op.fn === 'saveOrderFile') {
+    toast('The change was saved, but the scanned file did not upload: ' + err.message + ' Attach it again with the edit button.', 'err', 9000);
   } else {
-    toast('Couldn\'t save ' + op.label + ': ' + err.message + ' The change was undone on screen.', 'err', 8000);
+    op.failed = true;
+    toast('Couldn\'t save ' + op.label + (kids.length ? ' or its scanned file' : '') + ': ' + err.message + ' The change was undone on screen.', 'err', 8000);
   }
   rebuild(); chrome(); softRender();
   SYNCING = false;
@@ -1861,13 +1884,13 @@ async function pump() {
 const drain = () => new Promise(r => { if (!SYNCING && !REFRESHING && !PENDING.length) r(); else WAITERS.push(r); });
 function badge() {
   const b = $('#sync'); if (!b) return;
-  const n = PENDING.length;
-  if (n) { b.className = 'sync'; b.innerHTML = '<i></i>Saving' + (n > 1 ? ' ' + n : '') + '…'; b.hidden = false; }
+  const n = PENDING.length, up = PENDING.some(op => hasBytes(op.payload));
+  if (n) { b.className = 'sync'; b.innerHTML = '<i></i>' + (up ? 'Uploading' : 'Saving') + (n > 1 ? ' ' + n : '') + '…'; b.title = 'Your changes already show. They are being saved to the masterlist; keep this tab open until this goes away.'; b.hidden = false; }
   else if (REFRESHING) { b.className = 'sync'; b.innerHTML = '<i></i>Updating…'; b.hidden = false; }
   else if (SAVED_FLASH) { b.className = 'sync ok'; b.innerHTML = '<i>✓</i>All saved'; b.hidden = false; }
   else b.hidden = true;
 }
-window.addEventListener('beforeunload', ev => { if (PENDING.length) { ev.preventDefault(); ev.returnValue = ''; } });
+window.addEventListener('beforeunload', ev => { if (PENDING.length || SYNCING) { ev.preventDefault(); ev.returnValue = 'Your changes are still being saved. If you leave now, the ones not yet saved will be lost.'; return ev.returnValue; } });
 
 /* ── last-loaded data, kept in this browser so the app opens instantly ── */
 const CACHE_KEY = 'boe-employee-cache-v1';
@@ -1981,7 +2004,7 @@ const LOCAL = {
     needL(P.last, 'Last name'); needL(P.first, 'First name'); needL(p.job && p.job.date, 'Effective date');
     const used = new Set(d.employees.map(e => e['Employee Number']));
     const eid = hint && hint.id && !used.has(hint.id) ? hint.id : nextIn(d.employees, 'Employee Number', '', 4);
-    const entry = addJobL(d, eid, p.job, true);
+    const entry = addJobL(d, eid, seatFromFormL(d, p.job), true);
     d.employees.push({ 'Employee Number': eid, 'Old Record ID': '', 'Last Name': upv(P.last), 'First Name': upv(P.first), 'Middle Name': upv(P.middle), 'Suffix': upv(P.suffix),
       'Sex': P.sex || '', 'Birthday': P.birthday || '', 'TIN': sv(P.tin), 'Photo Link': '' });
     extrasL(d, eid, p);
@@ -1990,7 +2013,7 @@ const LOCAL = {
   },
   saveJobChange(d, p) {
     needL(p.date, 'Effective date'); needL(p.changeType, 'Change type'); empL(d, p.employeeId);
-    const entry = addJobL(d, p.employeeId, p, false);
+    const entry = addJobL(d, p.employeeId, seatFromFormL(d, p), false);
     logL(d, 'Job change', p.employeeId, p.changeType + ' on ' + p.date + ' → ' + entry);
     return { id: p.employeeId, entries: [entry] };
   },
@@ -2056,6 +2079,196 @@ const LOCAL = {
     return { id: '' };
   }
 };
+
+/* ── the rest of the server's rules, so every change shows at once (the server still checks the master password) ── */
+const levelL = r => ['Division', 'Section', 'Unit'].includes(sv(r && r['Level'])) ? sv(r['Level']) : 'Division';
+const histL = (d, entryId) => { const h = d.hist.find(x => x['Entry ID'] === entryId); if (!h) throw new Error('Entry ' + entryId + ' was not found.'); return h; };
+const upsertL = (arr, key, val, row) => { const r = arr.find(x => sv(x[key]) === sv(val)); if (r) Object.assign(r, row); else arr.push(row); return r || row; };
+const fileTypeL = p => { if (p.bytes && ORDER_TYPES.indexOf(String(p.mimeType || '').toLowerCase()) < 0) throw new Error('Attach a PDF, JPG or PNG.'); };
+function createSeatL(d, seat, np) {
+  const item = upv(seat.item).replace(/\s+/g, '');
+  needL(item, 'Item number of the new seat'); needL(seat.office, 'Office of the new seat');
+  if (d.seats.some(r => upv(r['Item Number']) === item)) throw new Error('Item ' + item + ' already exists. Pick it from the list instead.');
+  let title = sv(seat.position);
+  if (np) {
+    title = sv(np.title); needL(title, 'Title of the new position');
+    const sg = Number(np.sg);
+    if (!(sg >= 1 && sg <= 33) || Math.round(sg) !== sg) throw new Error('Salary grade must be a whole number from 1 to 33.');
+    if (d.pos.some(r => sv(r['Position Title']).toLowerCase() === title.toLowerCase())) throw new Error('Position "' + title + '" already exists. Pick it from the list instead.');
+    d.pos.push({ 'Position Title': title, 'Salary Grade': sg, 'Level': np.level ? Number(np.level) : '', 'Occupational Group': sv(np.group) });
+  } else {
+    needL(title, 'Position of the new seat');
+    if (!d.pos.some(r => r['Position Title'] === title)) throw new Error('Position "' + title + '" is not in Positions.');
+  }
+  const o = d.off.find(r => sv(r['Office Code']) === sv(seat.office));
+  if (!o) throw new Error('Office "' + seat.office + '" was not found in the Offices tab.');
+  if (levelL(o) !== 'Division') throw new Error('A plantilla seat belongs to a division. "' + seat.office + '" is a ' + levelL(o).toLowerCase() + '.');
+  d.seats.push({ 'Item Number': item, 'Position Title': title, 'Office Code': o['Office Code'], 'Functional Title': sv(seat.functional), 'Authorized Monthly (PHP)': sv(seat.auth) === '' ? '' : Number(seat.auth) });
+  return item;
+}
+function seatFromFormL(d, j) {
+  if (!j || !j.newSeat) return j;
+  const step = Number(j.step); if (!(step >= 1 && step <= 8)) throw new Error('Salary step must be a number from 1 to 8.');
+  return Object.assign({}, j, { item: createSeatL(d, j.newSeat, j.newPosition) });
+}
+Object.assign(LOCAL, {
+  saveOrderFile(d, p) {
+    const par = p._parent;
+    if (par && par.failed) throw new Error('The change it belongs to was not saved.');
+    const id = p.entryId || (par && par.hint && (par.hint.entries || [])[0]);
+    if (!id) throw new Error('There was no entry to attach the scan to.');
+    const h = histL(d, id);
+    h['Order File'] = p._url || h['Order File'] || '';
+    return { id: h['Employee Number'], entries: [id] };
+  },
+  removeOrderFile(d, p) {
+    const h = histL(d, p.entryId);
+    if (!sv(h['Order File'])) throw new Error('That entry has no order file.');
+    h['Order File'] = '';
+    logL(d, 'Order file removed', p.entryId, 'Moved to the Drive bin');
+    return { id: h['Employee Number'] };
+  },
+  updateEntry(d, p) {
+    const h = histL(d, p.entryId), eid = h['Employee Number'];
+    if (p.position && !d.pos.some(r => r['Position Title'] === p.position)) throw new Error('Position "' + p.position + '" is not in Positions.');
+    let code = '';
+    if (sv(p.office)) { const o = d.off.find(x => sv(x['Office Code']) === sv(p.office)); if (!o) throw new Error('Office "' + p.office + '" was not found in the Offices tab.'); code = o['Office Code']; }
+    Object.assign(h, { 'Effective Date': p.date || '', 'Change Type': sv(p.changeType) || h['Change Type'], 'Appointment Status': sv(p.status), 'Office Code': code,
+      'Position Title': sv(p.position), 'Order / Reference': sv(p.order), 'Remarks': sv(p.remarks) });
+    if (p.item !== undefined && sv(p.item)) {
+      const item = upv(p.item).replace(/\s+/g, '');
+      if (!d.seats.some(r => upv(r['Item Number']) === item)) {
+        needL(p.position, 'Position (needed to add the new item ' + item + ')');
+        d.seats.push({ 'Item Number': item, 'Position Title': sv(p.position), 'Office Code': code, 'Functional Title': '', 'Authorized Monthly (PHP)': '' });
+      }
+      const step = Number(p.step); if (!(step >= 1 && step <= 8)) throw new Error('Salary step must be a number from 1 to 8.');
+      upsertL(d.pd, 'Entry ID', p.entryId, { 'Entry ID': p.entryId, 'Item Number': item, 'Salary Step': step });
+    }
+    if (p.daily !== undefined && sv(p.daily)) {
+      if (!(Number(p.daily) > 0)) throw new Error('Daily rate must be more than zero.');
+      upsertL(d.cd, 'Entry ID', p.entryId, { 'Entry ID': p.entryId, 'Daily Rate (PHP)': Number(p.daily), 'Nature of Work': sv(p.work), 'Source of Fund': sv(p.fund), 'Technical / Non-Technical': sv(p.tech) });
+    }
+    if (p.cause !== undefined) upsertL(d.sepd = d.sepd || [], 'Entry ID', p.entryId, { 'Entry ID': p.entryId, 'Cause': sv(p.cause), 'Notes': sv(p.notes) });
+    logL(d, 'History entry edited', p.entryId, [p.date, h['Change Type'], p.position, p.office].join(' · '));
+    return { id: eid, entries: [p.entryId] };
+  },
+  deleteEntry(d, p) {
+    const h = histL(d, p.entryId), drop = arr => (arr || []).filter(r => r['Entry ID'] !== p.entryId);
+    d.pd = drop(d.pd); d.cd = drop(d.cd); d.sepd = drop(d.sepd); d.hist = drop(d.hist);
+    logL(d, 'History entry deleted', p.entryId, h['Change Type'] + ' · ' + (h['Position Title'] || ''));
+    return { id: h['Employee Number'] };
+  },
+  deleteEmployee(d, p) {
+    if (d.me.role !== 'Admin') throw new Error('Only an Admin can delete a person permanently.');
+    const e = empL(d, p.employeeId), eid = e['Employee Number'];
+    const entries = new Set(d.hist.filter(r => r['Employee Number'] === eid).map(r => r['Entry ID']));
+    ['pd', 'cd', 'sepd'].forEach(k => { if (d[k]) d[k] = d[k].filter(r => !entries.has(r['Entry ID'])); });
+    ['hist', 'ids', 'emails', 'elig', 'edu', 'pwd', 'names', 'employees'].forEach(k => { if (d[k]) d[k] = d[k].filter(r => r['Employee Number'] !== eid); });
+    if (d.thumbs) delete d.thumbs[eid];
+    logL(d, 'Employee deleted permanently', eid, e['Last Name'] + ', ' + e['First Name']);
+    return { id: '' };
+  },
+  saveLicense(d, p) {
+    empL(d, p.employeeId); needL(p.profession, 'Profession / license'); fileTypeL(p);
+    d.lic = d.lic || [];
+    const id = sv(p.licenseId) || nextIn(d.lic, 'License ID', 'LIC', 5);
+    if (sv(p.licenseId) && !d.lic.some(r => sv(r['License ID']) === id)) throw new Error('That license row was not found.');
+    const row = { 'License ID': id, 'Employee Number': p.employeeId, 'Profession / License': sv(p.profession), 'License Number': sv(p.number),
+      'Registration Date': p.regDate || '', 'Valid Until': p.validUntil || '', 'Remarks': sv(p.remarks) };
+    if (p.bytes) row['License File'] = p._url || '';
+    upsertL(d.lic, 'License ID', id, row);
+    logL(d, sv(p.licenseId) ? 'License updated' : 'License added', id, sv(p.profession) + ' → ' + p.employeeId);
+    return { id: p.employeeId };
+  },
+  removeLicense(d, p) {
+    const r = (d.lic || []).find(x => sv(x['License ID']) === sv(p.licenseId));
+    if (!r) throw new Error('That license row was not found.');
+    d.lic = d.lic.filter(x => x !== r);
+    logL(d, 'License removed', p.licenseId, sv(r['Profession / License']));
+    return { id: sv(r['Employee Number']) };
+  },
+  saveCommitteeOrder(d, p) {
+    needL(p.committee, 'Committee name'); needL(p.orderNo, 'Order number'); needL(p.year, 'Year'); fileTypeL(p);
+    if (!/^\d{4}$/.test(sv(p.year))) throw new Error('Year must be four digits, like 2024.');
+    d.cmo = d.cmo || []; d.cmm = d.cmm || [];
+    const isNew = !sv(p.assignmentId), id = isNew ? nextIn(d.cmo, 'Assignment No.', 'CA', 4) : sv(p.assignmentId);
+    if (!isNew && !d.cmo.some(r => sv(r['Assignment No.']) === id)) throw new Error('Assignment ' + id + ' was not found.');
+    const sup = sv(p.supersedes);
+    if (sup) {
+      if (sup === id) throw new Error('An order cannot supersede itself.');
+      if (!d.cmo.some(r => sv(r['Assignment No.']) === sup)) throw new Error('The superseded order ' + sup + ' was not found.');
+      const other = d.cmo.find(r => sv(r['Supersedes']) === sup && sv(r['Assignment No.']) !== id);
+      if (other) throw new Error(sup + ' is already superseded by ' + sv(other['Assignment No.']) + '. Supersede that one instead.');
+    }
+    const row = { 'Assignment No.': id, 'Committee': sv(p.committee), 'Order Type': sv(p.orderType), 'Order No.': sv(p.orderNo), 'Year': sv(p.year),
+      'Date Issued': p.dateIssued || '', 'Subject': sv(p.subject), 'Supersedes': sup, 'Remarks': sv(p.remarks) };
+    if (p.bytes) row['Order File'] = p._url || ''; else if (p.removeFile) row['Order File'] = '';
+    upsertL(d.cmo, 'Assignment No.', id, row);
+    if (Array.isArray(p.members)) {
+      const mine = d.cmm.filter(r => sv(r['Assignment No.']) === id);
+      let next = Number((nextIn(d.cmm, 'Membership No.', 'CM', 5).match(/\d+/) || ['1'])[0]);
+      const rows = p.members.map((m, i) => {
+        const eid = sv(m.employeeId), e = eid ? d.employees.find(x => x['Employee Number'] === eid) : null;
+        if (eid && !e) throw new Error('Member ' + (i + 1) + ': employee ' + eid + ' is not in the masterlist.');
+        const nm = sv(m.name) || (e ? [sv(e['First Name']), sv(e['Middle Name']) ? sv(e['Middle Name'])[0] + '.' : '', sv(e['Last Name']), sv(e['Suffix'])].filter(Boolean).join(' ') : '');
+        if (!nm) throw new Error('Member ' + (i + 1) + ' has no name.');
+        return { 'Membership No.': mine[i] ? mine[i]['Membership No.'] : 'CM' + String(next++).padStart(5, '0'), 'Assignment No.': id, 'Employee Number': eid,
+          'Name on Order': nm, 'Group': sv(m.group), 'Role': sv(m.role) || 'Member', 'Sort': i + 1, 'Remarks': sv(m.remarks) };
+      });
+      d.cmm = d.cmm.filter(r => sv(r['Assignment No.']) !== id).concat(rows);
+    }
+    logL(d, isNew ? 'Committee order added' : 'Committee order updated', id, sv(p.committee));
+    return { id: id };
+  },
+  removeCommitteeOrder(d, p) {
+    const id = sv(p.assignmentId), row = (d.cmo || []).find(r => sv(r['Assignment No.']) === id);
+    if (!row) throw new Error('Assignment ' + id + ' was not found.');
+    d.cmo.forEach(r => { if (sv(r['Supersedes']) === id) r['Supersedes'] = sv(row['Supersedes']); });
+    d.cmo = d.cmo.filter(r => r !== row); d.cmm = (d.cmm || []).filter(r => sv(r['Assignment No.']) !== id);
+    logL(d, 'Committee order removed', id, sv(row['Committee']));
+    return { id: id };
+  },
+  saveSeat(d, p) {
+    const item = createSeatL(d, p.seat || {}, p.newPosition);
+    logL(d, 'Seat created', item, 'New plantilla seat ' + item);
+    return { id: item };
+  },
+  saveOffice(d, p) {
+    const code = upv(p.code).replace(/\s+/g, ''), name = sv(p.name), level = sv(p.level), parent = upv(p.parent).replace(/\s+/g, '');
+    needL(code, 'Code'); needL(name, 'Name');
+    if (!/^[A-Z0-9][A-Z0-9-]*$/.test(code)) throw new Error('A code can use letters, numbers and dashes only, like FED-PPS. Got: ' + code);
+    if (!['Division', 'Section', 'Unit'].includes(level)) throw new Error('Level must be Division, Section or Unit.');
+    const mine = d.off.find(r => upv(r['Office Code']) === code);
+    if (level === 'Division') { if (parent) throw new Error('A division is the top level, so it has no parent office.'); }
+    else {
+      needL(parent, 'Parent office');
+      if (parent === code) throw new Error('An office cannot sit under itself.');
+      const pr = d.off.find(r => upv(r['Office Code']) === parent);
+      if (!pr) throw new Error('Parent office "' + parent + '" was not found in the Offices tab.');
+      const want = level === 'Section' ? 'Division' : 'Section';
+      if (levelL(pr) !== want) throw new Error('A ' + level.toLowerCase() + ' sits under a ' + want.toLowerCase() + ', but "' + parent + '" is a ' + levelL(pr).toLowerCase() + '.');
+    }
+    const kids = d.off.filter(r => upv(r['Parent Code']) === code);
+    if (mine && kids.length && level === 'Unit') throw new Error(code + ' has ' + kids.length + ' office(s) under it, so it can\'t become a unit. Move or remove them first.');
+    if (mine) Object.assign(mine, { 'Office Name': name, 'Parent Code': parent, 'Level': level });
+    else d.off.push({ 'Office Code': code, 'Office Name': name, 'Old Org Code': '', 'Parent Code': parent, 'Level': level });
+    logL(d, mine ? 'Office edited' : 'Office added', code, name);
+    return { id: code };
+  },
+  deleteOffice(d, p) {
+    const code = upv(p.code), mine = d.off.find(r => upv(r['Office Code']) === code);
+    if (!mine) throw new Error('Office "' + code + '" was not found.');
+    const kids = d.off.filter(r => upv(r['Parent Code']) === code);
+    if (kids.length) throw new Error(code + ' still has ' + kids.length + ' office(s) under it: ' + kids.map(r => sv(r['Office Code'])).join(', ') + '.');
+    const used = d.hist.filter(r => upv(r['Office Code']) === code).length;
+    if (used) throw new Error(code + ' is used by ' + used + ' service history row(s). Move those people to another office first.');
+    const seats = d.seats.filter(r => upv(r['Office Code']) === code).length;
+    if (seats) throw new Error(code + ' still holds ' + seats + ' plantilla seat(s). Move them to another office first.');
+    d.off = d.off.filter(r => r !== mine);
+    logL(d, 'Office removed', code, sv(mine['Office Name']));
+    return { id: code };
+  }
+});
 
 /* ═══════════════════════ routing ═══════════════════════ */
 function go(view, id) {
@@ -2466,7 +2679,7 @@ function histItem(x, isNow) {
   if (c) detail.push(peso(c['Daily Rate (PHP)']) + '/day' + (c['Nature of Work'] ? ' · ' + c['Nature of Work'] : ''));
   const sp = IX.sepd[x['Entry ID']];
   if (sp && sp['Cause']) detail.unshift(sp['Cause'] + (sp['Notes'] ? ' · ' + sp['Notes'] : ''));
-  const tools = PENDING_ENTRIES.has(x['Entry ID']) ? '<span class="pill saving" style="margin-left:auto">Saving…</span>' : canEdit() ? `<span class="evTools"><button class="iconBtn" data-act="editEntry" data-entry="${esc(x['Entry ID'])}" aria-label="Edit entry ${esc(x['Entry ID'])}" title="Edit (master password)">${ICON.pen}</button><button class="iconBtn del" data-act="deleteEntry" data-entry="${esc(x['Entry ID'])}" aria-label="Delete entry ${esc(x['Entry ID'])}" title="Delete (master password)">${ICON.trash}</button></span>` : '';
+  const tools = PENDING_ENTRIES.has(x['Entry ID']) ? savingPill(x['Entry ID'], 'margin-left:auto') : canEdit() ? `<span class="evTools"><button class="iconBtn" data-act="editEntry" data-entry="${esc(x['Entry ID'])}" aria-label="Edit entry ${esc(x['Entry ID'])}" title="Edit (master password)">${ICON.pen}</button><button class="iconBtn del" data-act="deleteEntry" data-entry="${esc(x['Entry ID'])}" aria-label="Delete entry ${esc(x['Entry ID'])}" title="Delete (master password)">${ICON.trash}</button></span>` : '';
   return `<div class="ev${isNow ? ' now' : ''}"><div class="when">${esc(x['Effective Date'] ? fmtDate(x['Effective Date']) : 'no date')}</div><div class="dot"></div>
     <div class="what"><div class="head"><b>${esc(x['Change Type'] || 'Entry')}</b>${isNow ? '<span class="pill filled">Current</span>' : ''}<span class="tag">${esc(x['Entry ID'])}</span>${tools}</div>
       ${x['Position Title'] || off || x['Change Type'] !== 'Separation' ? `<span>${esc(x['Position Title'] || '—')}${off ? ' · ' + esc(offLetterName(x['Office Code'])) : ''}</span>` : ''}
@@ -2557,7 +2770,7 @@ function mvGroupOf(x) {
 function mvRow(x) {
   const id = sv(x['Employee Number']), e = IX.emp[id], file = sv(x['Order File']), ref = sv(x['Order / Reference']);
   const off = IX.off[sv(x['Office Code'])], t = mvTime(x), d = t ? new Date(t) : null, eid = sv(x['Entry ID']);
-  const tools = PENDING_ENTRIES.has(eid) ? '<span class="pill saving">Saving…</span>' : canEdit() ? `<span class="mvTools">
+  const tools = PENDING_ENTRIES.has(eid) ? savingPill(eid) : canEdit() ? `<span class="mvTools">
     <button class="iconBtn" data-act="editEntry" data-entry="${esc(eid)}" aria-label="Edit entry ${esc(eid)}" title="Edit">${ICON.pen}</button>
     <button class="iconBtn" data-act="deleteEntry" data-entry="${esc(eid)}" aria-label="Delete entry ${esc(eid)}" title="Delete">${ICON.trash}</button></span>` : '';
   return `<article class="mvRow${file ? ' hasDoc' : ''}${S.mvOn === eid ? ' on' : ''}" data-entry="${esc(eid)}"${file ? ` data-act="mvRow" data-file="${esc(file)}" data-ref="${esc(ref || 'Scanned order')}"` : ''}>
@@ -3809,7 +4022,8 @@ function readFilePick(id) {
   if (!file) return Promise.resolve(null);
   return new Promise((resolve, reject) => {
     const r = new FileReader();
-    r.onload = () => resolve({ name: file.name, mimeType: file.type, bytes: String(r.result).split(',')[1] || '' });
+    r.onload = () => { let url = ''; try { url = URL.createObjectURL(file); } catch (e) { /* no preview link */ }
+      resolve({ name: file.name, mimeType: file.type, bytes: String(r.result).split(',')[1] || '', _url: url }); };
     r.onerror = () => reject(new Error('That file could not be read. Try choosing it again.'));
     r.readAsDataURL(file);
   });
@@ -4509,9 +4723,9 @@ function openForm(title, sub, inner, onSave, saveLabel, wide) {
     let run = onSave();
     if (run && typeof run.then === 'function') { try { run = await run; } catch (e) { err.textContent = e.message; err.hidden = false; return; } }
     if (!run) return;
-    if (LOCAL[run.fn] && !run.wait) {
+    if (LOCAL[run.fn]) {
       let r;
-      try { r = queueSave(run.fn, run.payload); } catch (e) { err.textContent = e.message; err.hidden = false; return; }
+      try { r = queueSave(run.fn, run.payload, run.file || null); } catch (e) { err.textContent = e.message; err.hidden = false; return; }
       closeModal(); toast(run.done || 'Saved'); if (run.go) go(run.go); else goAfterSave(r.id);
       return;
     }
@@ -4534,7 +4748,7 @@ function openForm(title, sub, inner, onSave, saveLabel, wide) {
   const first = $('#theForm input, #theForm select'); if (first) first.focus();
 }
 function formNewHire(preItem) {
-  openForm('New hire', 'Add a person and their first job', personFields() + jobFields('first', null, preItem), () => {
+  openForm('New hire', 'Add a person and their first job', personFields() + jobFields('first', null, preItem), async () => {
     const ok = checkRequired([['pLast', 'Enter a last name'], ['pFirst', 'Enter a first name'], ['jDate', 'Pick the effective date'],
       ['jItem', 'Enter or pick an item number'], ['jOffice', 'Pick an office'], ['jPosition', 'Pick a position'], ['jDaily', 'Enter a daily rate above zero', x => Number(x) > 0],
       ['pTin', 'Use the 123-456-789 format', x => !x || /^\d{3}-\d{3}-\d{3}(-\d{3,5})?$/.test(x)]].concat(emailChecks(), newSeatChecks()));
@@ -4542,20 +4756,20 @@ function formNewHire(preItem) {
     const p = readPerson(), r = readJob(window.__kindOf), pw = r.j.password;
     delete r.j.password;
     return { fn: 'saveNewHire', payload: Object.assign(p, { job: r.j }, pw !== undefined ? { password: pw } : {}), done: 'New hire saved',
-      wait: !!r.j.newSeat || hasFile('jFile'), after: hasFile('jFile') ? afterOrderFile('jFile') : null };
+      file: await readFilePick('jFile') };
   }, 'Save new hire');
   window.__kindOf = wireJob();
   wireEdu();
 }
 function formJobChange(id, preset) {
   const e = IX.emp[id], cur = IX.cur[id];
-  openForm(preset ? preset : cur.separated ? 'Change · bring back' : 'Change', fullName(e) + ' · ' + id, jobFields('change', cur), () => {
+  openForm(preset ? preset : cur.separated ? 'Change · bring back' : 'Change', fullName(e) + ' · ' + id, jobFields('change', cur), async () => {
     const ok = checkRequired([['jDate', 'Pick the effective date'], ['jItem', 'Enter or pick an item number'], ['jOffice', 'Pick an office'], ['jPosition', 'Pick a position'],
       ['jDaily', 'Enter a daily rate above zero', x => Number(x) > 0]].concat(newSeatChecks()));
     if (!ok) return null;
     const r = readJob(window.__kindOf);
     return { fn: 'saveJobChange', payload: Object.assign({ employeeId: id }, r.j), done: r.j.changeType + ' recorded',
-      wait: !!r.j.newSeat || hasFile('jFile'), after: hasFile('jFile') ? afterOrderFile('jFile') : null };
+      file: await readFilePick('jFile') };
   }, preset ? 'Save ' + preset.toLowerCase() : 'Save change');
   window.__kindOf = wireJob();
   const jt = $('#jType');
@@ -4804,7 +5018,7 @@ function formEditEntry(entryId) {
         <button type="button" class="subtle danger" data-act="rmOrderFile" data-entry="${esc(entryId)}">Remove it</button></div>` : '') + filePick('eFile'), 'span2',
         x['Order File'] ? 'Choosing a file replaces the one already there. The old file stays in Drive.' : 'PDF, JPG or PNG up to 10 MB.')}
       ${field('eRemarks', 'Remarks', txt('eRemarks', x['Remarks']), 'span2')}
-    </div>`, () => {
+    </div>`, async () => {
     if (!checkRequired([['mPw', 'Enter the master password']])) return null;
     const v = k => ($('#' + k) ? dv(k) : undefined);
     const payload = { password: $('#mPw').value, entryId: entryId, date: v('eDate'), changeType: v('eType'), status: v('eStatus'), office: v('eOffice'),
@@ -4812,14 +5026,7 @@ function formEditEntry(entryId) {
     if (p) Object.assign(payload, { item: v('eItem'), step: v('eStep') });
     if (c) Object.assign(payload, { daily: v('eDaily'), work: v('eWork'), fund: v('eFund'), tech: v('eTech') });
     if (x['Change Type'] === 'Separation') Object.assign(payload, { cause: v('eCause'), notes: v('eNotes') });
-    return { fn: 'updateEntry', payload: payload, done: 'Entry updated',
-      after: hasFile('eFile') ? async () => {
-        const file = await readFilePick('eFile');
-        if (!file) return '';
-        const r = await callRetry('saveOrderFile', Object.assign({ entryId: entryId }, file));
-        load(r.data); saveCache();
-        return '';
-      } : null };
+    return { fn: 'updateEntry', payload: payload, done: 'Entry updated', file: await readFilePick('eFile') };
   }, 'Save entry');
   wireFilePick('eFile');
 }
